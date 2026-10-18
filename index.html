@@ -491,7 +491,7 @@ footer strong { color: var(--gold); }
       <a href="#directory">AI Directory</a>
     </nav>
 
-    <a class="nav-button" href="#all-tools">Explore Tools ↗</a>
+    <button class="nav-button" id="openAuthButton" type="button">Sign In</button>
     <button class="menu-button" id="menuButton" aria-label="Open menu">☰</button>
   </div>
 </header>
@@ -754,6 +754,46 @@ footer strong { color: var(--gold); }
     </section>
   </div>
 </main>
+  <!-- NOVATOOLS AUTHENTICATION MODAL -->
+<div id="authModal" style="display:none;">
+  <div class="auth-overlay" id="authOverlay"></div>
+
+  <div class="auth-box">
+    <button type="button" id="closeAuthButton" class="auth-close" aria-label="Close">×</button>
+
+    <div class="auth-logo">✦ Nova<span>Tools</span></div>
+
+    <h2 id="authTitle">Welcome Back</h2>
+    <p id="authSubtitle">Sign in to your NovaTools account.</p>
+
+    <button type="button" id="googleSignInButton" class="google-auth-button">
+      <span>G</span> Continue with Google
+    </button>
+
+    <div class="auth-divider"><span>OR CONTINUE WITH EMAIL</span></div>
+
+    <form id="authForm">
+      <label for="authEmail">Email Address</label>
+      <input id="authEmail" type="email" placeholder="you@example.com" required autocomplete="email">
+
+      <label for="authPassword">Password</label>
+      <input id="authPassword" type="password" placeholder="Enter your password" required minlength="6" autocomplete="current-password">
+
+      <button type="submit" id="authSubmitButton" class="primary-button">Sign In</button>
+    </form>
+
+    <button type="button" id="forgotPasswordButton" class="auth-text-button">
+      Forgot password?
+    </button>
+
+    <p id="authMessage" role="status" aria-live="polite"></p>
+
+    <div class="auth-switch">
+      <span id="authSwitchText">Don't have an account?</span>
+      <button type="button" id="authSwitchButton">Create Account</button>
+    </div>
+  </div>
+</div>
 
 <footer>
   <div class="container footer-inner">
