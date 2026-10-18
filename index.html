@@ -472,6 +472,182 @@ footer strong { color: var(--gold); }
   section { padding: 43px 0; }
   .tool-panel { padding: 18px; }
 }
+  /* NOVATOOLS AUTHENTICATION */
+#authModal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  overflow-y: auto;
+}
+
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(8px);
+}
+
+.auth-box {
+  position: relative;
+  z-index: 1;
+  width: min(430px, 100%);
+  margin: auto;
+  padding: 32px;
+  background: #141824;
+  border: 1px solid #292D3A;
+  border-radius: 22px;
+  box-shadow: 0 25px 80px #0009;
+}
+
+.auth-close {
+  position: absolute;
+  top: 13px;
+  right: 15px;
+  background: transparent;
+  border: 0;
+  color: #A1A1AA;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.auth-close:hover {
+  color: white;
+}
+
+.auth-logo {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 22px;
+}
+
+.auth-logo span {
+  color: #D6B87A;
+}
+
+.auth-box h2 {
+  font-size: 27px;
+  margin: 0 0 5px;
+  letter-spacing: -0.7px;
+}
+
+.auth-box > p {
+  color: #A1A1AA;
+  font-size: 13px;
+}
+
+.google-auth-button {
+  width: 100%;
+  margin-top: 18px;
+  padding: 12px;
+  background: #F8FAFC;
+  color: #171923;
+  border: 0;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.google-auth-button span {
+  margin-right: 9px;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.google-auth-button:hover {
+  background: #E5E7EB;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 23px 0;
+  color: #A1A1AA;
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #292D3A;
+}
+
+.auth-box label {
+  display: block;
+  margin: 14px 0 7px;
+  color: #D4D4D8;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.auth-box input {
+  width: 100%;
+  padding: 12px;
+  color: white;
+  background: #0B0D12;
+  border: 1px solid #292D3A;
+  border-radius: 10px;
+  outline: none;
+}
+
+.auth-box input:focus {
+  border-color: #8B5CF6;
+}
+
+.auth-box #authSubmitButton {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.auth-text-button,
+#authSwitchButton {
+  background: transparent;
+  border: 0;
+  color: #B59AFF;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.auth-text-button {
+  display: block;
+  margin: 15px auto;
+}
+
+.auth-switch {
+  border-top: 1px solid #292D3A;
+  margin-top: 22px;
+  padding-top: 18px;
+  text-align: center;
+  color: #A1A1AA;
+  font-size: 12px;
+}
+
+#authSwitchButton {
+  font-weight: 700;
+}
+
+#authMessage {
+  overflow-wrap: anywhere;
+  font-size: 12px;
+  color: #D6B87A;
+  text-align: center;
+}
+
+#authMessage:empty {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .auth-box {
+    padding: 25px 20px;
+  }
+}
 </style>
 </head>
 
@@ -1102,6 +1278,225 @@ $("#globalSearch").addEventListener("input", event => {
     card.style.display = content.includes(query) ? "" : "none";
   });
 });
+  /* NOVATOOLS AUTHENTICATION */
+
+let authMode = "signin";
+
+const authModal = document.getElementById("authModal");
+const authForm = document.getElementById("authForm");
+const authMessage = document.getElementById("authMessage");
+const authTitle = document.getElementById("authTitle");
+const authSubtitle = document.getElementById("authSubtitle");
+const authSubmitButton = document.getElementById("authSubmitButton");
+const authSwitchButton = document.getElementById("authSwitchButton");
+const authSwitchText = document.getElementById("authSwitchText");
+const forgotPasswordButton = document.getElementById("forgotPasswordButton");
+const openAuthButton = document.getElementById("openAuthButton");
+
+function showAuthMessage(message) {
+  authMessage.textContent = message;
+}
+
+function openAuthModal() {
+  authModal.style.display = "flex";
+  document.body.style.overflow = "hidden";
+  showAuthMessage("");
+}
+
+function closeAuthModal() {
+  authModal.style.display = "none";
+  document.body.style.overflow = "";
+  showAuthMessage("");
+}
+
+function setAuthMode(mode) {
+  authMode = mode;
+
+  const isSignup = mode === "signup";
+
+  authTitle.textContent = isSignup ? "Create Your Account" : "Welcome Back";
+
+  authSubtitle.textContent = isSignup
+    ? "Create your free NovaTools account."
+    : "Sign in to your NovaTools account.";
+
+  authSubmitButton.textContent = isSignup
+    ? "Create Account"
+    : "Sign In";
+
+  authSwitchText.textContent = isSignup
+    ? "Already have an account?"
+    : "Don't have an account?";
+
+  authSwitchButton.textContent = isSignup
+    ? "Sign In"
+    : "Create Account";
+
+  forgotPasswordButton.style.display = isSignup ? "none" : "block";
+
+  document.getElementById("authPassword").autocomplete =
+    isSignup ? "new-password" : "current-password";
+
+  showAuthMessage("");
+}
+
+openAuthButton.addEventListener("click", async () => {
+  const { data, error } = await supabaseClient.auth.getSession();
+
+  if (error) {
+    openAuthModal();
+    showAuthMessage("Unable to check your session. Please try again.");
+    return;
+  }
+
+  if (data.session) {
+    const confirmed = confirm("Would you like to sign out of NovaTools?");
+
+    if (confirmed) {
+      const { error: signOutError } =
+        await supabaseClient.auth.signOut();
+
+      if (signOutError) {
+        alert("Sign out failed. Please try again.");
+      } else {
+        openAuthButton.textContent = "Sign In";
+        alert("You have signed out successfully.");
+      }
+    }
+
+    return;
+  }
+
+  setAuthMode("signin");
+  openAuthModal();
+});
+
+document.getElementById("closeAuthButton")
+  .addEventListener("click", closeAuthModal);
+
+document.getElementById("authOverlay")
+  .addEventListener("click", closeAuthModal);
+
+authSwitchButton.addEventListener("click", () => {
+  setAuthMode(authMode === "signin" ? "signup" : "signin");
+});
+
+document.getElementById("googleSignInButton")
+  .addEventListener("click", async () => {
+    showAuthMessage("Connecting to Google...");
+
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin + window.location.pathname
+      }
+    });
+
+    if (error) {
+      showAuthMessage(error.message);
+    }
+  });
+
+authForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value;
+
+  authSubmitButton.disabled = true;
+  showAuthMessage("Please wait...");
+
+  try {
+    if (authMode === "signup") {
+      const { data, error } = await supabaseClient.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo:
+            window.location.origin + window.location.pathname
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.session) {
+        showAuthMessage("Your account has been created successfully!");
+        authForm.reset();
+        await refreshAuthState();
+      } else {
+        showAuthMessage(
+          "Account request submitted! Check your email for a confirmation link before signing in."
+        );
+      }
+    } else {
+      const { data, error } =
+        await supabaseClient.auth.signInWithPassword({
+          email,
+          password
+        });
+
+      if (error) throw error;
+
+      if (data.session) {
+        showAuthMessage("Signed in successfully!");
+        authForm.reset();
+        await refreshAuthState();
+
+        setTimeout(closeAuthModal, 1000);
+      }
+    }
+  } catch (error) {
+    showAuthMessage(error.message || "Something went wrong. Please try again.");
+  } finally {
+    authSubmitButton.disabled = false;
+  }
+});
+
+forgotPasswordButton.addEventListener("click", async () => {
+  const email = document.getElementById("authEmail").value.trim();
+
+  if (!email) {
+    showAuthMessage("Enter your email address first.");
+    document.getElementById("authEmail").focus();
+    return;
+  }
+
+  showAuthMessage("Sending password reset instructions...");
+
+  const { error } = await supabaseClient.auth.resetPasswordForEmail(
+    email,
+    {
+      redirectTo: window.location.origin + window.location.pathname
+    }
+  );
+
+  if (error) {
+    showAuthMessage(error.message);
+  } else {
+    showAuthMessage(
+      "If your account is registered, password reset instructions will be sent to your email."
+    );
+  }
+});
+
+async function refreshAuthState() {
+  const { data, error } = await supabaseClient.auth.getSession();
+
+  if (error) {
+    openAuthButton.textContent = "Sign In";
+    return;
+  }
+
+  openAuthButton.textContent = data.session
+    ? "Sign Out"
+    : "Sign In";
+}
+
+supabaseClient.auth.onAuthStateChange((event, session) => {
+  openAuthButton.textContent = session ? "Sign Out" : "Sign In";
+});
+
+refreshAuthState();
 </script>
 
 </body>
