@@ -3,30 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0B0D12">
-<meta name="description" content="NovaTools brings AI tools, PDF utilities and productivity tools together in one place.">
+<meta name="theme-color" content="#F8F7FF">
+<meta name="description" content="NovaTools brings useful AI tools, PDF utilities and productivity tools together in one place.">
 <title>NovaTools — Everything You Need</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
 :root {
-  --bg: #0B0D12;
-  --panel: #141824;
-  --panel2: #191E2D;
-  --purple: #8B5CF6;
-  --indigo: #6366F1;
-  --gold: #D6B87A;
-  --text: #F8FAFC;
-  --muted: #A1A1AA;
-  --border: #292D3A;
+  --bg: #F8F7FF;
+  --white: #FFFFFF;
+  --panel: #FFFFFF;
+  --panel2: #F0EDFF;
+  --purple: #6D42E8;
+  --purple-dark: #5428C9;
+  --indigo: #5549E8;
+  --lavender: #EEE9FF;
+  --lavender-light: #F5F2FF;
+  --text: #201746;
+  --muted: #746D91;
+  --border: #E5DFF8;
+  --gold: #C49A42;
+  --success: #16835B;
+  --danger: #C43D55;
   --radius: 18px;
+  --shadow: 0 8px 30px rgba(75, 48, 145, .07);
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 110px;
+}
 
 body {
   margin: 0;
@@ -36,25 +49,40 @@ body {
   line-height: 1.6;
 }
 
-button, input, textarea, select { font: inherit; }
+body.modal-open {
+  overflow: hidden;
+}
 
-button, a { -webkit-tap-highlight-color: transparent; }
+button, input, textarea, select {
+  font: inherit;
+}
 
-a { color: inherit; text-decoration: none; }
+button, a {
+  -webkit-tap-highlight-color: transparent;
+}
 
-button { cursor: pointer; }
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
 
 .container {
   width: min(1160px, 92%);
   margin: auto;
 }
 
+/* NAVIGATION */
+
 header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(11,13,18,.92);
-  backdrop-filter: blur(16px);
+  background: rgba(255,255,255,.94);
+  backdrop-filter: blur(18px);
   border-bottom: 1px solid var(--border);
 }
 
@@ -63,110 +91,189 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 22px;
 }
 
 .logo {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 11px;
+  gap: 10px;
   font-size: 23px;
   font-weight: 800;
   letter-spacing: -.8px;
+  white-space: nowrap;
 }
 
 .logo-icon {
-  width: 39px;
-  height: 39px;
+  width: 40px;
+  height: 40px;
   display: grid;
   place-items: center;
-  border-radius: 12px;
+  border-radius: 13px;
   background: linear-gradient(135deg, var(--purple), var(--indigo));
-  box-shadow: 0 0 22px #8b5cf633;
+  box-shadow: 0 5px 15px rgba(109,66,232,.23);
   color: white;
+  font-size: 22px;
 }
 
-.logo span { color: var(--gold); }
+.logo > span:last-child {
+  color: var(--purple);
+  margin-left: -10px;
+}
 
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 27px;
+  gap: 7px;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 600;
 }
 
-.nav-links a:hover { color: var(--gold); }
+.nav-links a {
+  padding: 10px 13px;
+  border-radius: 10px;
+  transition: .2s ease;
+}
 
-.nav-button, .primary-button {
+.nav-links a:hover,
+.nav-links a.active {
+  background: var(--lavender);
+  color: var(--purple);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-button,
+.primary-button {
   border: 0;
   border-radius: 11px;
   background: linear-gradient(135deg, var(--purple), var(--indigo));
   color: white;
   font-weight: 700;
   padding: 12px 19px;
-  transition: .2s;
+  box-shadow: 0 4px 12px rgba(109,66,232,.12);
+  transition: .2s ease;
 }
 
-.nav-button:hover, .primary-button:hover {
+.nav-button:hover,
+.primary-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px #8b5cf633;
+  box-shadow: 0 9px 22px rgba(109,66,232,.24);
 }
 
 .menu-button {
   display: none;
-  background: var(--panel);
-  color: white;
+  background: white;
+  color: var(--purple);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 9px 12px;
+  padding: 8px 12px;
+  font-size: 20px;
 }
 
+/* QUICK ACCESS */
+
+.quick-access {
+  background: white;
+  border-bottom: 1px solid var(--border);
+}
+
+.quick-access-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.quick-label {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .7px;
+  color: var(--muted);
+  margin-right: 5px;
+}
+
+.quick-link {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 13px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  background: white;
+  font-size: 12px;
+  font-weight: 700;
+  transition: .2s ease;
+}
+
+.quick-link:hover {
+  background: var(--lavender);
+  color: var(--purple);
+  border-color: #CFC2FF;
+  transform: translateY(-1px);
+}
+
+/* HERO */
+
 .hero {
-  padding: 92px 0 65px;
+  padding: 85px 0 60px;
   text-align: center;
   position: relative;
   overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(195,177,255,.28), transparent 56%),
+    linear-gradient(180deg, #FCFBFF 0%, var(--bg) 100%);
 }
 
 .hero:before {
   content: "";
   position: absolute;
-  width: 500px;
-  height: 350px;
+  width: 430px;
+  height: 330px;
   border-radius: 50%;
-  background: #7548e51b;
-  filter: blur(100px);
-  top: -130px;
-  left: calc(50% - 250px);
+  background: rgba(137,104,245,.12);
+  filter: blur(95px);
+  top: -150px;
+  left: calc(50% - 215px);
   pointer-events: none;
 }
 
 .badge {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 13px;
-  border: 1px solid #d6b87a50;
+  padding: 7px 14px;
+  border: 1px solid #DCD2FF;
   border-radius: 50px;
-  color: var(--gold);
-  background: #d6b87a0b;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .5px;
+  color: var(--purple);
+  background: rgba(255,255,255,.8);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .7px;
 }
 
 .hero h1 {
   position: relative;
-  font-size: clamp(39px, 7vw, 72px);
-  line-height: 1.08;
+  font-size: clamp(38px, 6vw, 69px);
+  line-height: 1.12;
   letter-spacing: -3px;
-  margin: 25px auto 20px;
-  max-width: 850px;
+  margin: 24px auto 20px;
+  max-width: 880px;
 }
 
 .gradient-text {
-  background: linear-gradient(100deg, #b59aff, #8b5cf6, var(--gold));
+  background: linear-gradient(100deg, #7546EB, #5549E8 60%, #A16BEF);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -175,8 +282,8 @@ header {
 .hero p {
   color: var(--muted);
   max-width: 640px;
-  margin: 0 auto 29px;
-  font-size: 16px;
+  margin: 0 auto 28px;
+  font-size: 15px;
 }
 
 .hero-actions {
@@ -191,50 +298,77 @@ header {
   border: 1px solid var(--border);
   border-radius: 11px;
   padding: 11px 19px;
-  background: var(--panel);
+  background: white;
   color: var(--text);
-  font-weight: 600;
+  font-weight: 700;
+  transition: .2s ease;
 }
 
-.secondary-button:hover { border-color: var(--gold); }
+.secondary-button:hover {
+  border-color: var(--purple);
+  color: var(--purple);
+  background: var(--lavender-light);
+}
 
 .search-wrap {
-  max-width: 600px;
-  margin: 42px auto 0;
+  max-width: 610px;
+  margin: 36px auto 0;
   position: relative;
 }
 
 .search-wrap span {
   position: absolute;
-  top: 14px;
+  top: 11px;
   left: 17px;
-  font-size: 18px;
+  font-size: 21px;
+  color: var(--purple);
 }
 
 .search-wrap input {
   width: 100%;
-  padding: 16px 18px 16px 49px;
+  padding: 15px 18px 15px 49px;
   border-radius: 14px;
   border: 1px solid var(--border);
-  background: var(--panel);
-  color: white;
+  background: white;
+  color: var(--text);
   outline: none;
+  box-shadow: 0 5px 20px rgba(75,48,145,.045);
+  transition: .2s;
 }
 
-.search-wrap input:focus { border-color: var(--purple); }
+.search-wrap input:focus {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 4px rgba(109,66,232,.09);
+}
+
+.search-wrap input::placeholder {
+  color: #A39BB9;
+}
 
 .stats {
   display: flex;
   justify-content: center;
-  gap: 42px;
-  margin-top: 32px;
+  gap: 45px;
+  margin-top: 30px;
   flex-wrap: wrap;
 }
 
-.stat strong { display: block; font-size: 20px; }
-.stat small { color: var(--muted); }
+.stat strong {
+  display: block;
+  font-size: 21px;
+  color: var(--purple);
+}
 
-section { padding: 60px 0; }
+.stat small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+/* SECTIONS */
+
+section {
+  padding: 58px 0;
+}
 
 .section-heading {
   display: flex;
@@ -245,128 +379,202 @@ section { padding: 60px 0; }
 }
 
 .eyebrow {
-  color: var(--gold);
-  font-size: 11px;
+  color: var(--purple);
+  font-size: 10px;
   font-weight: 800;
-  letter-spacing: 1.7px;
+  letter-spacing: 1.6px;
   text-transform: uppercase;
 }
 
 .section-heading h2 {
-  font-size: clamp(27px, 4vw, 38px);
+  font-size: clamp(26px, 4vw, 37px);
   letter-spacing: -1.2px;
+  line-height: 1.25;
   margin: 5px 0;
 }
 
 .section-heading p {
   color: var(--muted);
   margin: 0;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .text-link {
-  color: var(--gold);
-  font-size: 13px;
-  font-weight: 700;
+  color: var(--purple);
+  font-size: 12px;
+  font-weight: 800;
   white-space: nowrap;
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 17px;
+  gap: 18px;
 }
 
 .card {
-  background: linear-gradient(145deg, var(--panel), #10131c);
+  background: white;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 23px;
-  transition: .25s;
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
   min-width: 0;
+  box-shadow: 0 3px 14px rgba(66,43,128,.025);
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  border-color: #8b5cf680;
-  box-shadow: 0 12px 35px #00000025;
+  transform: translateY(-5px);
+  border-color: #CFC0FF;
+  box-shadow: 0 14px 32px rgba(77,47,157,.09);
 }
 
 .card-icon {
-  width: 48px;
-  height: 48px;
+  width: 49px;
+  height: 49px;
   display: grid;
   place-items: center;
-  border-radius: 14px;
-  background: #8b5cf61b;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #F0EAFF, #E9E9FF);
+  color: var(--purple);
   font-size: 23px;
   margin-bottom: 16px;
 }
 
-.card h3 { margin: 0 0 8px; font-size: 17px; }
-.card p { color: var(--muted); font-size: 13px; margin: 0 0 18px; }
+.card h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  letter-spacing: -.2px;
+}
+
+.card p {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 0 0 19px;
+  line-height: 1.8;
+}
 
 .card-button {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text);
+  display: inline-block;
+  background: white;
+  border: 1px solid #DCD3F5;
+  color: var(--purple);
   padding: 9px 13px;
   border-radius: 9px;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 800;
+  transition: .2s ease;
 }
 
 .card-button:hover {
-  border-color: var(--gold);
-  color: var(--gold);
+  background: var(--purple);
+  border-color: var(--purple);
+  color: white;
 }
 
-.gold-icon { background: #d6b87a17; }
+.gold-icon {
+  background: #FFF5DF;
+  color: #AA7B1E;
+}
 
-.pdf-section { background: #10131b; border-top: 1px solid #202432; border-bottom: 1px solid #202432; }
+.blue-icon {
+  background: #E8F2FF;
+  color: #376FD0;
+}
+
+.green-icon {
+  background: #E4F8EF;
+  color: #16835B;
+}
+
+/* PDF SECTION */
+
+.pdf-section {
+  background: linear-gradient(180deg, #F1EDFF, #F7F5FF);
+  border-top: 1px solid #E7DFFF;
+  border-bottom: 1px solid #E7DFFF;
+}
 
 .tool-panel {
   display: none;
   margin-top: 28px;
-  padding: 26px;
-  border: 1px solid #8b5cf655;
+  padding: 28px;
+  border: 1px solid #D9CFFF;
   border-radius: var(--radius);
-  background: var(--panel);
-  scroll-margin-top: 100px;
+  background: white;
+  box-shadow: var(--shadow);
+  scroll-margin-top: 115px;
+  animation: panelIn .25s ease;
 }
 
-.tool-panel.active { display: block; }
+.tool-panel.active {
+  display: block;
+}
 
-.tool-panel h3 { margin-top: 0; }
+@keyframes panelIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tool-panel h3 {
+  margin-top: 0;
+  font-size: 22px;
+}
 
 .tool-panel label {
   display: block;
   margin: 15px 0 7px;
-  color: var(--muted);
-  font-size: 13px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
 }
 
-.tool-panel textarea, .tool-panel input, .tool-panel select {
+.tool-panel textarea,
+.tool-panel input,
+.tool-panel select {
   width: 100%;
   border: 1px solid var(--border);
-  background: #0B0D12;
-  color: white;
+  background: #FCFBFF;
+  color: var(--text);
   border-radius: 10px;
   padding: 12px;
   outline: none;
+  transition: .2s;
 }
 
-.tool-panel textarea { min-height: 130px; resize: vertical; }
+.tool-panel textarea {
+  min-height: 130px;
+  resize: vertical;
+}
 
-.tool-panel textarea:focus, .tool-panel input:focus {
+.tool-panel textarea:focus,
+.tool-panel input:focus,
+.tool-panel select:focus {
   border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(109,66,232,.08);
 }
 
-.tool-panel .primary-button { margin-top: 15px; }
+.tool-panel textarea::placeholder,
+.tool-panel input::placeholder {
+  color: #A39BB9;
+}
+
+.tool-panel .primary-button {
+  margin-top: 15px;
+}
+
+.tool-panel .secondary-button {
+  margin-top: 15px;
+}
 
 .tool-message {
-  color: var(--gold);
-  font-size: 13px;
+  color: var(--purple);
+  font-size: 12px;
   margin-top: 12px;
   overflow-wrap: anywhere;
 }
@@ -375,11 +583,13 @@ section { padding: 60px 0; }
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   margin-top: 17px;
-  padding: 15px;
-  background: #0B0D12;
+  padding: 16px;
+  background: #F8F6FF;
   border: 1px solid var(--border);
   border-radius: 10px;
   display: none;
+  color: var(--text);
+  font-size: 13px;
 }
 
 .filter-row {
@@ -390,38 +600,62 @@ section { padding: 60px 0; }
 }
 
 .filter-button {
-  background: var(--panel);
+  background: white;
   color: var(--muted);
   border: 1px solid var(--border);
   border-radius: 30px;
   padding: 8px 15px;
-  font-size: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  transition: .2s;
 }
 
+.filter-button:hover,
 .filter-button.active {
-  background: #8b5cf620;
-  color: white;
-  border-color: var(--purple);
+  background: var(--lavender);
+  color: var(--purple);
+  border-color: #CFC0FF;
 }
 
-.directory-card { display: flex; flex-direction: column; }
-.directory-card .card-button { align-self: flex-start; margin-top: auto; }
+.directory-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.directory-card .card-button {
+  align-self: flex-start;
+  margin-top: auto;
+}
 
 .notice {
-  border: 1px solid #d6b87a45;
-  background: #d6b87a0b;
-  border-radius: 13px;
+  border: 1px solid #E4DAFF;
+  background: #F8F5FF;
+  border-radius: 12px;
   padding: 15px;
   margin-top: 20px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 11px;
 }
+
+.empty-state {
+  display: none;
+  padding: 25px;
+  text-align: center;
+  color: var(--muted);
+  background: white;
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  grid-column: 1 / -1;
+}
+
+/* FOOTER */
 
 footer {
   padding: 35px 0;
   border-top: 1px solid var(--border);
+  background: white;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .footer-inner {
@@ -432,51 +666,17 @@ footer {
   flex-wrap: wrap;
 }
 
-footer strong { color: var(--gold); }
-
-.empty-state {
-  display: none;
-  padding: 25px;
-  text-align: center;
-  color: var(--muted);
-  border: 1px dashed var(--border);
-  border-radius: 14px;
-  grid-column: 1/-1;
+footer strong {
+  color: var(--purple);
 }
 
-@media (max-width: 800px) {
-  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .nav-links {
-    display: none;
-    position: absolute;
-    top: 76px;
-    left: 0;
-    right: 0;
-    padding: 20px 5%;
-    background: var(--bg);
-    border-bottom: 1px solid var(--border);
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .nav-links.open { display: flex; }
-  .menu-button { display: block; }
-  .nav-button { display: none; }
-}
+/* AUTHENTICATION */
 
-@media (max-width: 520px) {
-  .hero { padding: 65px 0 40px; }
-  .hero h1 { letter-spacing: -1.8px; }
-  .grid { grid-template-columns: 1fr; }
-  .section-heading { align-items: start; flex-direction: column; }
-  .stats { gap: 23px; }
-  section { padding: 43px 0; }
-  .tool-panel { padding: 18px; }
-}
-  /* NOVATOOLS AUTHENTICATION */
 #authModal {
   position: fixed;
   inset: 0;
   z-index: 1000;
+  display: none;
   align-items: center;
   justify-content: center;
   padding: 18px;
@@ -486,88 +686,100 @@ footer strong { color: var(--gold); }
 .auth-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.78);
+  background: rgba(39,25,82,.42);
   backdrop-filter: blur(8px);
 }
 
 .auth-box {
   position: relative;
   z-index: 1;
-  width: min(430px, 100%);
+  width: min(440px, 100%);
+  max-height: calc(100vh - 36px);
+  overflow-y: auto;
   margin: auto;
   padding: 32px;
-  background: #141824;
-  border: 1px solid #292D3A;
+  background: white;
+  border: 1px solid #E2D9FF;
   border-radius: 22px;
-  box-shadow: 0 25px 80px #0009;
+  box-shadow: 0 25px 80px rgba(39,25,82,.22);
+  animation: panelIn .22s ease;
 }
 
 .auth-close {
   position: absolute;
-  top: 13px;
+  top: 12px;
   right: 15px;
-  background: transparent;
+  width: 35px;
+  height: 35px;
+  background: #F5F2FF;
   border: 0;
-  color: #A1A1AA;
-  font-size: 28px;
-  cursor: pointer;
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 25px;
 }
 
 .auth-close:hover {
-  color: white;
+  background: var(--lavender);
+  color: var(--purple);
 }
 
 .auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 22px;
   font-weight: 800;
-  margin-bottom: 22px;
+  margin-bottom: 23px;
 }
 
 .auth-logo span {
-  color: #D6B87A;
+  color: var(--purple);
 }
 
 .auth-box h2 {
   font-size: 27px;
   margin: 0 0 5px;
-  letter-spacing: -0.7px;
+  letter-spacing: -.8px;
 }
 
 .auth-box > p {
-  color: #A1A1AA;
-  font-size: 13px;
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .google-auth-button {
   width: 100%;
   margin-top: 18px;
   padding: 12px;
-  background: #F8FAFC;
-  color: #171923;
-  border: 0;
+  background: white;
+  color: var(--text);
+  border: 1px solid var(--border);
   border-radius: 10px;
   font-weight: 700;
-  cursor: pointer;
+  transition: .2s;
+}
+
+.google-auth-button:hover {
+  background: #F8F6FF;
+  border-color: #CFC0FF;
 }
 
 .google-auth-button span {
   margin-right: 9px;
   font-size: 17px;
   font-weight: 800;
-}
-
-.google-auth-button:hover {
-  background: #E5E7EB;
+  color: #4285F4;
 }
 
 .auth-divider {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 23px 0;
-  color: #A1A1AA;
+  margin: 22px 0;
+  color: #9991B0;
   font-size: 9px;
-  letter-spacing: 1px;
+  font-weight: 700;
+  letter-spacing: .8px;
 }
 
 .auth-divider::before,
@@ -575,43 +787,44 @@ footer strong { color: var(--gold); }
   content: "";
   flex: 1;
   height: 1px;
-  background: #292D3A;
+  background: var(--border);
 }
 
 .auth-box label {
   display: block;
   margin: 14px 0 7px;
-  color: #D4D4D8;
-  font-size: 12px;
-  font-weight: 600;
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .auth-box input {
   width: 100%;
   padding: 12px;
-  color: white;
-  background: #0B0D12;
-  border: 1px solid #292D3A;
+  color: var(--text);
+  background: #FCFBFF;
+  border: 1px solid var(--border);
   border-radius: 10px;
   outline: none;
 }
 
 .auth-box input:focus {
-  border-color: #8B5CF6;
+  border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(109,66,232,.08);
 }
 
 .auth-box #authSubmitButton {
   width: 100%;
-  margin-top: 20px;
+  margin-top: 19px;
 }
 
 .auth-text-button,
 #authSwitchButton {
   background: transparent;
   border: 0;
-  color: #B59AFF;
-  font-size: 12px;
-  cursor: pointer;
+  color: var(--purple);
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .auth-text-button {
@@ -620,32 +833,182 @@ footer strong { color: var(--gold); }
 }
 
 .auth-switch {
-  border-top: 1px solid #292D3A;
-  margin-top: 22px;
-  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  margin-top: 20px;
+  padding-top: 17px;
   text-align: center;
-  color: #A1A1AA;
-  font-size: 12px;
-}
-
-#authSwitchButton {
-  font-weight: 700;
+  color: var(--muted);
+  font-size: 11px;
 }
 
 #authMessage {
   overflow-wrap: anywhere;
-  font-size: 12px;
-  color: #D6B87A;
+  font-size: 11px;
+  color: var(--purple);
   text-align: center;
+  margin: 10px 0;
 }
 
 #authMessage:empty {
   display: none;
 }
 
-@media (max-width: 480px) {
+.auth-box button:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 920px) {
+  .nav {
+    gap: 12px;
+  }
+
+  .nav-links {
+    gap: 2px;
+  }
+
+  .nav-links a {
+    padding: 9px 8px;
+    font-size: 12px;
+  }
+
+  .logo {
+    font-size: 20px;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .nav-button {
+    padding: 10px 13px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 760px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .nav {
+    min-height: 68px;
+  }
+
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 68px;
+    left: 0;
+    right: 0;
+    padding: 14px 4% 18px;
+    background: white;
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 12px 25px rgba(45,29,90,.08);
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+
+  .nav-links a {
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+
+  .menu-button {
+    display: block;
+  }
+
+  .quick-access-inner {
+    gap: 8px;
+  }
+
+  .quick-label {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .container {
+    width: 91%;
+  }
+
+  .hero {
+    padding: 60px 0 40px;
+  }
+
+  .hero h1 {
+    letter-spacing: -1.7px;
+  }
+
+  .hero p {
+    font-size: 13px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 13px;
+  }
+
+  .section-heading {
+    align-items: start;
+    flex-direction: column;
+  }
+
+  .stats {
+    gap: 23px;
+  }
+
+  section {
+    padding: 43px 0;
+  }
+
+  .tool-panel {
+    padding: 18px;
+  }
+
+  .card {
+    padding: 21px;
+  }
+
   .auth-box {
-    padding: 25px 20px;
+    padding: 26px 21px;
+  }
+
+  .nav-actions {
+    gap: 7px;
+  }
+
+  .logo {
+    font-size: 19px;
+  }
+
+  .logo-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .nav-button {
+    padding: 9px 11px;
+  }
+
+  .footer-inner {
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
   }
 }
 </style>
@@ -655,31 +1018,54 @@ footer strong { color: var(--gold); }
 
 <header>
   <div class="container nav">
+
     <a class="logo" href="#home" aria-label="NovaTools home">
       <span class="logo-icon">✦</span>
       Nova<span>Tools</span>
     </a>
 
-    <nav class="nav-links" id="navLinks">
+    <nav class="nav-links" id="navLinks" aria-label="Main navigation">
       <a href="#home">Home</a>
+      <a href="#all-tools">Explore Tools</a>
       <a href="#ai-tools">AI Tools</a>
       <a href="#pdf-tools">PDF Tools</a>
       <a href="#directory">AI Directory</a>
     </nav>
 
-    <button class="nav-button" id="openAuthButton" type="button">Sign In</button>
-    <button class="menu-button" id="menuButton" aria-label="Open menu">☰</button>
+    <div class="nav-actions">
+      <button class="nav-button" id="openAuthButton" type="button">Sign In</button>
+      <button class="menu-button" id="menuButton" type="button" aria-label="Open menu" aria-expanded="false">☰</button>
+    </div>
+
   </div>
 </header>
 
+<div class="quick-access">
+  <div class="container quick-access-inner">
+    <span class="quick-label">QUICK ACCESS</span>
+    <a class="quick-link" href="#ai-tools">✧ AI Tools</a>
+    <a class="quick-link" href="#pdf-tools">▤ PDF Tools</a>
+    <a class="quick-link" href="#directory">⌘ AI Directory</a>
+    <a class="quick-link" href="#all-tools">▦ All Tools</a>
+    <a class="quick-link" href="#footer">☆ About</a>
+  </div>
+</div>
+
 <main>
-  <div class="container">
-    <section class="hero" id="home">
+
+  <section class="hero" id="home">
+    <div class="container">
+
       <div class="badge">✦ YOUR DIGITAL TOOLKIT</div>
-      <h1>Everything you need.<br><span class="gradient-text">One powerful platform.</span></h1>
+
+      <h1>
+        Everything you need.<br>
+        <span class="gradient-text">One powerful platform.</span>
+      </h1>
+
       <p>
         Discover useful AI tools, create and organise PDFs, and simplify
-        everyday digital tasks—all from one place.
+        everyday digital tasks—all from one convenient place.
       </p>
 
       <div class="hero-actions">
@@ -688,18 +1074,36 @@ footer strong { color: var(--gold); }
       </div>
 
       <div class="search-wrap">
-        <span>⌕</span>
-        <input id="globalSearch" type="search" placeholder="Search AI tools, PDF tools and utilities..." aria-label="Search tools">
+        <span aria-hidden="true">⌕</span>
+        <input
+          id="globalSearch"
+          type="search"
+          placeholder="Search AI tools, PDF tools and utilities..."
+          aria-label="Search tools"
+        >
       </div>
 
       <div class="stats">
-        <div class="stat"><strong>AI</strong><small>Smart assistants</small></div>
-        <div class="stat"><strong>PDF</strong><small>Document tools</small></div>
-        <div class="stat"><strong>Free*</strong><small>Core browser tools</small></div>
+        <div class="stat">
+          <strong>AI</strong>
+          <small>Smart productivity</small>
+        </div>
+        <div class="stat">
+          <strong>PDF</strong>
+          <small>Document tools</small>
+        </div>
+        <div class="stat">
+          <strong>Free*</strong>
+          <small>Browser-based tools</small>
+        </div>
       </div>
-    </section>
 
-    <section id="all-tools">
+    </div>
+  </section>
+
+  <section id="all-tools">
+    <div class="container">
+
       <div class="section-heading">
         <div>
           <div class="eyebrow">YOUR WORKSPACE</div>
@@ -708,166 +1112,183 @@ footer strong { color: var(--gold); }
         </div>
       </div>
 
-      <div class="grid">
-        <article class="card searchable" data-search="ai writing assistant summarizer grammar email notes quiz">
+      <div class="grid" id="workspaceGrid">
+
+        <article class="card searchable" data-search="ai writing assistant summarizer grammar email notes quiz productivity">
           <div class="card-icon">✧</div>
           <h3>AI Productivity</h3>
-          <p>Work with writing, summaries, grammar and study helpers.</p>
+          <p>Work with writing, summaries, text improvement, emails and study helpers.</p>
           <a class="card-button" href="#ai-tools">Explore AI Tools →</a>
         </article>
 
-        <article class="card searchable" data-search="pdf create maker merge split rotate">
+        <article class="card searchable" data-search="pdf create maker merge combine documents files">
           <div class="card-icon gold-icon">▤</div>
           <h3>PDF Workspace</h3>
-          <p>Create a PDF from text or combine existing PDF files.</p>
+          <p>Create PDFs from text and combine multiple PDF documents directly in your browser.</p>
           <a class="card-button" href="#pdf-tools">Open PDF Tools →</a>
         </article>
 
-        <article class="card searchable" data-search="directory external websites ai tools">
-          <div class="card-icon">⌘</div>
+        <article class="card searchable" data-search="directory external websites ai platforms">
+          <div class="card-icon blue-icon">⌘</div>
           <h3>AI Tools Directory</h3>
-          <p>Discover popular AI platforms and useful websites.</p>
+          <p>Discover useful external AI platforms for writing, research, design and productivity.</p>
           <a class="card-button" href="#directory">Browse Directory →</a>
         </article>
-      </div>
-    </section>
 
-    <section id="ai-tools">
+      </div>
+
+    </div>
+  </section>
+
+  <section id="ai-tools">
+    <div class="container">
+
       <div class="section-heading">
         <div>
           <div class="eyebrow">WORK SMARTER</div>
           <h2>AI productivity tools</h2>
-          <p>Simple writing and study helpers that work directly in your browser.</p>
+          <p>Simple text-processing and productivity helpers available in your browser.</p>
         </div>
       </div>
 
       <div class="grid">
-        <article class="card searchable" data-search="writing generator paragraph article story">
+
+        <article class="card searchable" data-search="writing generator paragraph article story writing assistant">
           <div class="card-icon">✍️</div>
           <h3>Writing Assistant</h3>
-          <p>Organise your ideas into a clearer piece of writing.</p>
-          <button class="card-button" data-tool="writing">Open Tool →</button>
+          <p>Organise your ideas into clearer, more readable text.</p>
+          <button class="card-button" type="button" data-tool="writing">Open Tool →</button>
         </article>
 
-        <article class="card searchable" data-search="summarizer summary shorten text">
-          <div class="card-icon">📝</div>
+        <article class="card searchable" data-search="summarizer summary shorten text passage">
+          <div class="card-icon blue-icon">📝</div>
           <h3>Text Summariser</h3>
-          <p>Make long text shorter by extracting key sentences.</p>
-          <button class="card-button" data-tool="summary">Open Tool →</button>
+          <p>Shorten long text by selecting key sentences.</p>
+          <button class="card-button" type="button" data-tool="summary">Open Tool →</button>
         </article>
 
         <article class="card searchable" data-search="grammar improve proofreading punctuation">
-          <div class="card-icon">✓</div>
+          <div class="card-icon green-icon">✓</div>
           <h3>Text Improver</h3>
-          <p>Check common spelling, spacing and punctuation issues.</p>
-          <button class="card-button" data-tool="improve">Open Tool →</button>
+          <p>Clean up spacing and common punctuation issues.</p>
+          <button class="card-button" type="button" data-tool="improve">Open Tool →</button>
         </article>
 
-        <article class="card searchable" data-search="email generator message">
+        <article class="card searchable" data-search="email generator message professional email">
           <div class="card-icon">✉️</div>
           <h3>Email Helper</h3>
-          <p>Build a simple email draft from your topic and details.</p>
-          <button class="card-button" data-tool="email">Open Tool →</button>
+          <p>Create a basic email draft from your topic and details.</p>
+          <button class="card-button" type="button" data-tool="email">Open Tool →</button>
         </article>
 
-        <article class="card searchable" data-search="study notes revision learning">
-          <div class="card-icon">📚</div>
+        <article class="card searchable" data-search="study notes revision learning outline">
+          <div class="card-icon gold-icon">📚</div>
           <h3>Study Notes</h3>
-          <p>Turn a topic or passage into a basic study outline.</p>
-          <button class="card-button" data-tool="notes">Open Tool →</button>
+          <p>Turn provided text into a numbered study outline.</p>
+          <button class="card-button" type="button" data-tool="notes">Open Tool →</button>
         </article>
 
-        <article class="card searchable" data-search="quiz questions practice">
-          <div class="card-icon">❔</div>
+        <article class="card searchable" data-search="quiz questions practice learning">
+          <div class="card-icon blue-icon">❔</div>
           <h3>Quiz Planner</h3>
-          <p>Create a set of practice questions from a topic.</p>
-          <button class="card-button" data-tool="quiz">Open Tool →</button>
+          <p>Prepare practice prompts to help you revise a topic.</p>
+          <button class="card-button" type="button" data-tool="quiz">Open Tool →</button>
         </article>
+
       </div>
 
       <div class="tool-panel" id="aiPanel">
         <h3 id="aiPanelTitle">Writing Assistant</h3>
-        <p style="color:var(--muted);font-size:13px" id="aiPanelDescription">
+        <p id="aiPanelDescription" style="color:var(--muted);font-size:12px">
           Enter your text below to get started.
         </p>
 
         <label for="aiInput">Your text or topic</label>
         <textarea id="aiInput" placeholder="Type or paste your text here..."></textarea>
 
-        <button class="primary-button" id="runAiTool">Process Text</button>
-        <button class="secondary-button" id="copyOutput" style="margin-left:6px">Copy Result</button>
+        <button class="primary-button" id="runAiTool" type="button">Process Text</button>
+        <button class="secondary-button" id="copyOutput" type="button" style="margin-left:6px">Copy Result</button>
 
-        <div class="output" id="aiOutput"></div>
+        <div class="output" id="aiOutput" aria-live="polite"></div>
 
         <div class="notice">
           These starter tools use simple browser-based text processing, not a connected AI model.
-          Real AI-generated responses will require an AI service integration.
+          Real AI-generated responses require an AI service integration.
         </div>
       </div>
-    </section>
 
-    <section class="pdf-section" id="pdf-tools">
-      <div class="container">
-        <div class="section-heading">
-          <div>
-            <div class="eyebrow">DOCUMENT WORKSPACE</div>
-            <h2>PDF tools</h2>
-            <p>Create a PDF from text or combine PDF documents in your browser.</p>
-          </div>
-        </div>
+    </div>
+  </section>
 
-        <div class="grid">
-          <article class="card searchable" data-search="create make generate pdf text document">
-            <div class="card-icon gold-icon">＋</div>
-            <h3>Text to PDF</h3>
-            <p>Write or paste text and download it as a PDF document.</p>
-            <button class="card-button" data-tool="create-pdf">Create PDF →</button>
-          </article>
+  <section class="pdf-section" id="pdf-tools">
+    <div class="container">
 
-          <article class="card searchable" data-search="merge combine join multiple pdf files">
-            <div class="card-icon">⇄</div>
-            <h3>Merge PDFs</h3>
-            <p>Combine multiple PDF files into a single document.</p>
-            <button class="card-button" data-tool="merge-pdf">Merge PDFs →</button>
-          </article>
-
-          <article class="card searchable" data-search="pdf tools files privacy">
-            <div class="card-icon">🔒</div>
-            <h3>Browser Processing</h3>
-            <p>Your selected documents are processed in this browser by these tools.</p>
-            <a class="card-button" href="#pdf-tools">Learn More ↓</a>
-          </article>
-        </div>
-
-        <div class="tool-panel" id="pdfPanel">
-          <h3 id="pdfPanelTitle">PDF Tool</h3>
-          <p id="pdfPanelDescription" style="color:var(--muted);font-size:13px"></p>
-
-          <div id="createPdfFields">
-            <label for="pdfTitle">Document title</label>
-            <input id="pdfTitle" type="text" placeholder="My Document">
-
-            <label for="pdfText">Document content</label>
-            <textarea id="pdfText" placeholder="Write or paste your document here..."></textarea>
-
-            <button class="primary-button" id="downloadPdf">Download PDF</button>
-          </div>
-
-          <div id="mergePdfFields" style="display:none">
-            <label for="pdfFiles">Choose two or more PDF files</label>
-            <input id="pdfFiles" type="file" accept="application/pdf,.pdf" multiple>
-            <button class="primary-button" id="mergePdf">Merge and Download</button>
-          </div>
-
-          <div class="tool-message" id="pdfMessage"></div>
-          <div class="notice">
-            PDF processing happens in your browser with the required libraries. Keep a backup of important documents.
-          </div>
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">DOCUMENT WORKSPACE</div>
+          <h2>PDF tools</h2>
+          <p>Create a PDF from text or combine PDF documents in your browser.</p>
         </div>
       </div>
-    </section>
 
-    <section id="directory">
+      <div class="grid">
+
+        <article class="card searchable" data-search="create make generate pdf text document download">
+          <div class="card-icon gold-icon">＋</div>
+          <h3>Text to PDF</h3>
+          <p>Write or paste text and download it as a PDF document.</p>
+          <button class="card-button" type="button" data-tool="create-pdf">Create PDF →</button>
+        </article>
+
+        <article class="card searchable" data-search="merge combine join multiple pdf files">
+          <div class="card-icon">⇄</div>
+          <h3>Merge PDFs</h3>
+          <p>Combine multiple PDF files into a single document.</p>
+          <button class="card-button" type="button" data-tool="merge-pdf">Merge PDFs →</button>
+        </article>
+
+        <article class="card searchable" data-search="pdf files browser privacy local processing">
+          <div class="card-icon green-icon">🔒</div>
+          <h3>Browser Processing</h3>
+          <p>These PDF operations run locally in your browser using the selected files.</p>
+          <a class="card-button" href="#pdf-tools">Learn More ↓</a>
+        </article>
+
+      </div>
+
+      <div class="tool-panel" id="pdfPanel">
+        <h3 id="pdfPanelTitle">PDF Tool</h3>
+        <p id="pdfPanelDescription" style="color:var(--muted);font-size:12px"></p>
+
+        <div id="createPdfFields">
+          <label for="pdfTitle">Document title</label>
+          <input id="pdfTitle" type="text" placeholder="My Document">
+
+          <label for="pdfText">Document content</label>
+          <textarea id="pdfText" placeholder="Write or paste your document here..."></textarea>
+
+          <button class="primary-button" id="downloadPdf" type="button">Download PDF</button>
+        </div>
+
+        <div id="mergePdfFields" style="display:none">
+          <label for="pdfFiles">Choose two or more PDF files</label>
+          <input id="pdfFiles" type="file" accept="application/pdf,.pdf" multiple>
+          <button class="primary-button" id="mergePdf" type="button">Merge and Download</button>
+        </div>
+
+        <div class="tool-message" id="pdfMessage" role="status" aria-live="polite"></div>
+
+        <div class="notice">
+          PDF processing happens in your browser using the required libraries. Keep a backup of important documents.
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="directory">
+    <div class="container">
+
       <div class="section-heading">
         <div>
           <div class="eyebrow">DISCOVER MORE</div>
@@ -876,15 +1297,16 @@ footer strong { color: var(--gold); }
         </div>
       </div>
 
-      <div class="filter-row">
-        <button class="filter-button active" data-filter="all">All Tools</button>
-        <button class="filter-button" data-filter="writing">Writing</button>
-        <button class="filter-button" data-filter="research">Research</button>
-        <button class="filter-button" data-filter="design">Design</button>
-        <button class="filter-button" data-filter="productivity">Productivity</button>
+      <div class="filter-row" aria-label="Filter AI tools">
+        <button class="filter-button active" type="button" data-filter="all">All Tools</button>
+        <button class="filter-button" type="button" data-filter="writing">Writing</button>
+        <button class="filter-button" type="button" data-filter="research">Research</button>
+        <button class="filter-button" type="button" data-filter="design">Design</button>
+        <button class="filter-button" type="button" data-filter="productivity">Productivity</button>
       </div>
 
       <div class="grid" id="directoryGrid">
+
         <article class="card directory-card searchable" data-category="writing" data-search="chatgpt writing assistant chatbot">
           <div class="card-icon">✧</div>
           <h3>ChatGPT</h3>
@@ -893,7 +1315,7 @@ footer strong { color: var(--gold); }
         </article>
 
         <article class="card directory-card searchable" data-category="research" data-search="perplexity research search answers">
-          <div class="card-icon">⌕</div>
+          <div class="card-icon blue-icon">⌕</div>
           <h3>Perplexity</h3>
           <p>AI-powered search and research with linked sources.</p>
           <a class="card-button" href="https://www.perplexity.ai/" target="_blank" rel="noopener noreferrer">Visit Website ↗</a>
@@ -902,19 +1324,19 @@ footer strong { color: var(--gold); }
         <article class="card directory-card searchable" data-category="design" data-search="canva design presentations graphics">
           <div class="card-icon">◈</div>
           <h3>Canva</h3>
-          <p>Create designs, presentations, posters and other visual content.</p>
+          <p>Create designs, presentations, posters and visual content.</p>
           <a class="card-button" href="https://www.canva.com/" target="_blank" rel="noopener noreferrer">Visit Website ↗</a>
         </article>
 
         <article class="card directory-card searchable" data-category="productivity" data-search="notion workspace notes organisation">
-          <div class="card-icon">▣</div>
+          <div class="card-icon gold-icon">▣</div>
           <h3>Notion</h3>
           <p>Organise notes, projects, tasks and personal workspaces.</p>
           <a class="card-button" href="https://www.notion.so/" target="_blank" rel="noopener noreferrer">Visit Website ↗</a>
         </article>
 
         <article class="card directory-card searchable" data-category="writing" data-search="grammarly grammar writing">
-          <div class="card-icon">✓</div>
+          <div class="card-icon green-icon">✓</div>
           <h3>Grammarly</h3>
           <p>Writing support for clarity, spelling and grammar.</p>
           <a class="card-button" href="https://www.grammarly.com/" target="_blank" rel="noopener noreferrer">Visit Website ↗</a>
@@ -926,18 +1348,30 @@ footer strong { color: var(--gold); }
           <p>Design graphics and visual content using online creative tools.</p>
           <a class="card-button" href="https://www.adobe.com/express/" target="_blank" rel="noopener noreferrer">Visit Website ↗</a>
         </article>
+
       </div>
-    </section>
-  </div>
+
+      <div class="empty-state" id="searchEmpty">
+        No matching tools found. Try a different search.
+      </div>
+
+    </div>
+  </section>
+
 </main>
-  <!-- NOVATOOLS AUTHENTICATION MODAL -->
-<div id="authModal" style="display:none;">
+
+<!-- AUTHENTICATION MODAL -->
+
+<div id="authModal" aria-hidden="true">
   <div class="auth-overlay" id="authOverlay"></div>
 
-  <div class="auth-box">
+  <div class="auth-box" role="dialog" aria-modal="true" aria-labelledby="authTitle">
     <button type="button" id="closeAuthButton" class="auth-close" aria-label="Close">×</button>
 
-    <div class="auth-logo">✦ Nova<span>Tools</span></div>
+    <div class="auth-logo">
+      <span class="logo-icon">✦</span>
+      Nova<span>Tools</span>
+    </div>
 
     <h2 id="authTitle">Welcome Back</h2>
     <p id="authSubtitle">Sign in to your NovaTools account.</p>
@@ -971,67 +1405,128 @@ footer strong { color: var(--gold); }
   </div>
 </div>
 
-<footer>
+<footer id="footer">
   <div class="container footer-inner">
-    <a class="logo" href="#home"><span class="logo-icon">✦</span>Nova<span>Tools</span></a>
+
+    <a class="logo" href="#home">
+      <span class="logo-icon">✦</span>
+      Nova<span>Tools</span>
+    </a>
+
     <div>Everything You Need. One Platform.</div>
     <div>© <span id="year"></span> NovaTools</div>
+
   </div>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-  // NOVATOOLS — SUPABASE CONNECTION
+"use strict";
+
+/* =========================================
+   SUPABASE CONNECTION
+   Keep your existing project configuration.
+========================================= */
+
 const SUPABASE_URL = "https://ttcixcmajpqrlgqeplbq.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_mdxOM-Shb7Bp8EWXoiwbDQ_4mJLsSeK";
 
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_PUBLISHABLE_KEY
-);
-const $ = (selector) => document.querySelector(selector);
-const $$ = (selector) => document.querySelectorAll(selector);
+if (!window.supabase) {
+  alert("NovaTools could not load its authentication library. Please refresh the page.");
+}
+
+const supabaseClient = window.supabase
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY)
+  : null;
+
+const $ = selector => document.querySelector(selector);
+const $$ = selector => document.querySelectorAll(selector);
 
 $("#year").textContent = new Date().getFullYear();
 
+/* =========================================
+   MOBILE NAVIGATION
+========================================= */
+
 $("#menuButton").addEventListener("click", () => {
-  $("#navLinks").classList.toggle("open");
+  const isOpen = $("#navLinks").classList.toggle("open");
+
+  $("#menuButton").setAttribute("aria-expanded", String(isOpen));
+  $("#menuButton").setAttribute("aria-label", isOpen ? "Close menu" : "Open menu");
+  $("#menuButton").textContent = isOpen ? "×" : "☰";
 });
 
 $$(".nav-links a").forEach(link => {
-  link.addEventListener("click", () => $("#navLinks").classList.remove("open"));
+  link.addEventListener("click", () => {
+    $("#navLinks").classList.remove("open");
+    $("#menuButton").setAttribute("aria-expanded", "false");
+    $("#menuButton").setAttribute("aria-label", "Open menu");
+    $("#menuButton").textContent = "☰";
+  });
 });
 
-/* AI TOOL PANELS */
+/* Highlight current navigation section */
+
+const navSections = $$(".nav-links a[href^='#']");
+
+if ("IntersectionObserver" in window) {
+  const sectionObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navSections.forEach(link => {
+          const active = link.getAttribute("href") === "#" + entry.target.id;
+          link.classList.toggle("active", active);
+        });
+      }
+    });
+  }, {
+    rootMargin: "-25% 0px -65% 0px"
+  });
+
+  navSections.forEach(link => {
+    const section = $(link.getAttribute("href"));
+    if (section) sectionObserver.observe(section);
+  });
+}
+
+/* =========================================
+   AI TEXT TOOLS
+========================================= */
+
 const toolInfo = {
   writing: {
     title: "Writing Assistant",
-    description: "Organise your ideas into a clearer paragraph. This starter tool formats your text; it does not generate new AI content.",
+    description: "Organise your ideas into clearer text. This starter tool formats your text; it does not generate new AI content.",
     placeholder: "Enter your ideas here..."
   },
+
   summary: {
     title: "Text Summariser",
     description: "Extract some of the most important sentences from a longer passage.",
     placeholder: "Paste the passage you want to summarise..."
   },
+
   improve: {
     title: "Text Improver",
-    description: "Fixes common spacing and punctuation issues. It is not a complete grammar checker.",
+    description: "Fix common spacing and punctuation issues. This is not a complete grammar checker.",
     placeholder: "Paste your text here..."
   },
+
   email: {
     title: "Email Helper",
     description: "Enter the topic and details for a basic email draft.",
     placeholder: "Example: Write to my teacher asking about tomorrow's homework."
   },
+
   notes: {
     title: "Study Notes",
-    description: "Create a basic outline using the text you provide.",
+    description: "Create a basic outline from the text you provide.",
     placeholder: "Paste your lesson or enter your topic..."
   },
+
   quiz: {
     title: "Quiz Planner",
     description: "Create simple practice prompts based on your topic or passage.",
@@ -1042,15 +1537,25 @@ const toolInfo = {
 let activeAiTool = "writing";
 
 function openAiTool(name) {
-  activeAiTool = name;
   const info = toolInfo[name];
+  if (!info) return;
+
+  activeAiTool = name;
+
   $("#aiPanelTitle").textContent = info.title;
   $("#aiPanelDescription").textContent = info.description;
   $("#aiInput").placeholder = info.placeholder;
   $("#aiInput").value = "";
+  $("#aiOutput").textContent = "";
   $("#aiOutput").style.display = "none";
+
   $("#aiPanel").classList.add("active");
-  $("#aiPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+  $("#aiPanel").scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+
+  setTimeout(() => $("#aiInput").focus({ preventScroll: true }), 350);
 }
 
 $$("[data-tool]").forEach(button => {
@@ -1072,6 +1577,7 @@ $("#runAiTool").addEventListener("click", () => {
 
   if (!text) {
     alert("Please enter some text first.");
+    $("#aiInput").focus();
     return;
   }
 
@@ -1086,6 +1592,7 @@ $("#runAiTool").addEventListener("click", () => {
   if (activeAiTool === "summary") {
     const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [text];
     const count = Math.max(1, Math.ceil(sentences.length / 3));
+
     result = sentences.slice(0, count).join(" ").trim();
   }
 
@@ -1099,20 +1606,25 @@ $("#runAiTool").addEventListener("click", () => {
   }
 
   if (activeAiTool === "email") {
-    result = "Subject: " + text.slice(0, 55) +
-      "\n\nDear [Recipient's Name],\n\n" + text +
+    result =
+      "Subject: " + text.slice(0, 55) +
+      "\n\nDear [Recipient's Name],\n\n" +
+      text +
       "\n\nThank you for your time.\n\nBest regards,\n[Your Name]";
   }
 
   if (activeAiTool === "notes") {
     const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [text];
+
     result = "STUDY NOTES\n\n" +
-      sentences.map((sentence, i) => (i + 1) + ". " + sentence.trim())
-      .join("\n\n");
+      sentences.map((sentence, index) =>
+        (index + 1) + ". " + sentence.trim()
+      ).join("\n\n");
   }
 
   if (activeAiTool === "quiz") {
-    result = "PRACTICE QUESTIONS\n\n" +
+    result =
+      "PRACTICE QUESTIONS\n\n" +
       "1. What is the main idea of this topic?\n" +
       "2. Explain one important point in your own words.\n" +
       "3. Which key terms should you remember?\n" +
@@ -1135,29 +1647,40 @@ $("#copyOutput").addEventListener("click", async () => {
 
   try {
     await navigator.clipboard.writeText(result);
+
     $("#copyOutput").textContent = "Copied!";
-    setTimeout(() => $("#copyOutput").textContent = "Copy Result", 1500);
+
+    setTimeout(() => {
+      $("#copyOutput").textContent = "Copy Result";
+    }, 1500);
   } catch {
-    alert("Copy is unavailable in this browser context. You can select and copy the result manually.");
+    alert("Copy is unavailable here. You can select and copy the result manually.");
   }
 });
 
-/* PDF TOOLS */
+/* =========================================
+   PDF TOOLS
+========================================= */
+
 function openPdfTool(type) {
+  const create = type === "create";
+
   $("#pdfPanel").classList.add("active");
   $("#pdfMessage").textContent = "";
-
-  const create = type === "create";
 
   $("#createPdfFields").style.display = create ? "block" : "none";
   $("#mergePdfFields").style.display = create ? "none" : "block";
 
   $("#pdfPanelTitle").textContent = create ? "Create a PDF" : "Merge PDF Files";
+
   $("#pdfPanelDescription").textContent = create
     ? "Enter a title and content, then download your PDF."
     : "Select multiple PDF documents to combine them into one file.";
 
-  $("#pdfPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+  $("#pdfPanel").scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
 }
 
 $("#downloadPdf").addEventListener("click", () => {
@@ -1170,13 +1693,15 @@ $("#downloadPdf").addEventListener("click", () => {
   }
 
   if (!window.jspdf || !window.jspdf.jsPDF) {
-    $("#pdfMessage").textContent = "The PDF library could not load. Check your internet connection and try again.";
+    $("#pdfMessage").textContent =
+      "The PDF library could not load. Check your internet connection and try again.";
     return;
   }
 
   try {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
+
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 18;
@@ -1184,6 +1709,7 @@ $("#downloadPdf").addEventListener("click", () => {
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
+
     const titleLines = doc.splitTextToSize(title, maxWidth);
     doc.text(titleLines, margin, 22);
 
@@ -1198,6 +1724,7 @@ $("#downloadPdf").addEventListener("click", () => {
         doc.addPage();
         y = margin;
       }
+
       doc.text(line, margin, y);
       y += 6;
     });
@@ -1205,6 +1732,7 @@ $("#downloadPdf").addEventListener("click", () => {
     doc.save("novatools-document.pdf");
     $("#pdfMessage").textContent = "Your PDF download has started.";
   } catch (error) {
+    console.error("PDF creation error:", error);
     $("#pdfMessage").textContent = "Could not create the PDF. Please try again.";
   }
 });
@@ -1219,9 +1747,14 @@ $("#mergePdf").addEventListener("click", async () => {
   }
 
   if (!window.PDFLib) {
-    $("#pdfMessage").textContent = "The PDF library could not load. Check your internet connection and try again.";
+    $("#pdfMessage").textContent =
+      "The PDF library could not load. Check your internet connection and try again.";
     return;
   }
+
+  const mergeButton = $("#mergePdf");
+  mergeButton.disabled = true;
+  mergeButton.textContent = "Merging...";
 
   try {
     const merged = await PDFLib.PDFDocument.create();
@@ -1230,6 +1763,7 @@ $("#mergePdf").addEventListener("click", async () => {
       const bytes = await file.arrayBuffer();
       const source = await PDFLib.PDFDocument.load(bytes);
       const pages = await merged.copyPages(source, source.getPageIndices());
+
       pages.forEach(page => merged.addPage(page));
     }
 
@@ -1245,67 +1779,106 @@ $("#mergePdf").addEventListener("click", async () => {
     link.remove();
 
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+
     $("#pdfMessage").textContent = "Your merged PDF download has started.";
   } catch (error) {
-    $("#pdfMessage").textContent = "Unable to merge these files. One may be password-protected or damaged.";
+    console.error("PDF merge error:", error);
+
+    $("#pdfMessage").textContent =
+      "Unable to merge these files. One may be password-protected, damaged, or unsupported.";
+  } finally {
+    mergeButton.disabled = false;
+    mergeButton.textContent = "Merge and Download";
   }
 });
 
-/* DIRECTORY FILTERS */
+/* =========================================
+   AI DIRECTORY FILTERS
+========================================= */
+
+let activeDirectoryFilter = "all";
+
 $$(".filter-button").forEach(button => {
   button.addEventListener("click", () => {
     $$(".filter-button").forEach(item => item.classList.remove("active"));
+
     button.classList.add("active");
+    activeDirectoryFilter = button.dataset.filter;
 
-    const filter = button.dataset.filter;
-
-    $$("#directoryGrid .directory-card").forEach(card => {
-      card.style.display =
-        filter === "all" || card.dataset.category === filter ? "" : "none";
-    });
+    updateSearch();
   });
 });
 
-/* GLOBAL SEARCH */
-$("#globalSearch").addEventListener("input", event => {
-  const query = event.target.value.toLowerCase().trim();
+/* =========================================
+   GLOBAL SEARCH
+========================================= */
+
+function updateSearch() {
+  const query = $("#globalSearch").value.toLowerCase().trim();
+  let totalVisible = 0;
 
   $$(".searchable").forEach(card => {
     const content = (
       (card.dataset.search || "") + " " + card.textContent
     ).toLowerCase();
 
-    card.style.display = content.includes(query) ? "" : "none";
+    const matchesSearch = !query || content.includes(query);
+
+    const isDirectoryCard = card.classList.contains("directory-card");
+
+    const matchesFilter =
+      !isDirectoryCard ||
+      activeDirectoryFilter === "all" ||
+      card.dataset.category === activeDirectoryFilter;
+
+    const visible = matchesSearch && matchesFilter;
+
+    card.style.display = visible ? "" : "none";
+
+    if (visible) totalVisible++;
   });
-});
-  /* NOVATOOLS AUTHENTICATION */
+
+  $("#searchEmpty").style.display =
+    query && totalVisible === 0 ? "block" : "none";
+}
+
+$("#globalSearch").addEventListener("input", updateSearch);
+
+/* =========================================
+   AUTHENTICATION
+========================================= */
 
 let authMode = "signin";
 
-const authModal = document.getElementById("authModal");
-const authForm = document.getElementById("authForm");
-const authMessage = document.getElementById("authMessage");
-const authTitle = document.getElementById("authTitle");
-const authSubtitle = document.getElementById("authSubtitle");
-const authSubmitButton = document.getElementById("authSubmitButton");
-const authSwitchButton = document.getElementById("authSwitchButton");
-const authSwitchText = document.getElementById("authSwitchText");
-const forgotPasswordButton = document.getElementById("forgotPasswordButton");
-const openAuthButton = document.getElementById("openAuthButton");
+const authModal = $("#authModal");
+const authForm = $("#authForm");
+const authMessage = $("#authMessage");
+const authTitle = $("#authTitle");
+const authSubtitle = $("#authSubtitle");
+const authSubmitButton = $("#authSubmitButton");
+const authSwitchButton = $("#authSwitchButton");
+const authSwitchText = $("#authSwitchText");
+const forgotPasswordButton = $("#forgotPasswordButton");
+const openAuthButton = $("#openAuthButton");
 
-function showAuthMessage(message) {
+function showAuthMessage(message, isError = false) {
   authMessage.textContent = message;
+  authMessage.style.color = isError ? "var(--danger)" : "var(--purple)";
 }
 
 function openAuthModal() {
   authModal.style.display = "flex";
-  document.body.style.overflow = "hidden";
+  authModal.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
   showAuthMessage("");
+
+  setTimeout(() => $("#authEmail").focus(), 100);
 }
 
 function closeAuthModal() {
   authModal.style.display = "none";
-  document.body.style.overflow = "";
+  authModal.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("modal-open");
   showAuthMessage("");
 }
 
@@ -1317,7 +1890,7 @@ function setAuthMode(mode) {
   authTitle.textContent = isSignup ? "Create Your Account" : "Welcome Back";
 
   authSubtitle.textContent = isSignup
-    ? "Create your free NovaTools account."
+    ? "Create your NovaTools account."
     : "Sign in to your NovaTools account.";
 
   authSubmitButton.textContent = isSignup
@@ -1334,34 +1907,40 @@ function setAuthMode(mode) {
 
   forgotPasswordButton.style.display = isSignup ? "none" : "block";
 
-  document.getElementById("authPassword").autocomplete =
-    isSignup ? "new-password" : "current-password";
+  $("#authPassword").autocomplete = isSignup
+    ? "new-password"
+    : "current-password";
 
   showAuthMessage("");
 }
 
 openAuthButton.addEventListener("click", async () => {
+  if (!supabaseClient) {
+    openAuthModal();
+    showAuthMessage("Authentication could not load. Refresh and try again.", true);
+    return;
+  }
+
   const { data, error } = await supabaseClient.auth.getSession();
 
   if (error) {
     openAuthModal();
-    showAuthMessage("Unable to check your session. Please try again.");
+    showAuthMessage("Unable to check your session. Please try again.", true);
     return;
   }
 
   if (data.session) {
     const confirmed = confirm("Would you like to sign out of NovaTools?");
 
-    if (confirmed) {
-      const { error: signOutError } =
-        await supabaseClient.auth.signOut();
+    if (!confirmed) return;
 
-      if (signOutError) {
-        alert("Sign out failed. Please try again.");
-      } else {
-        openAuthButton.textContent = "Sign In";
-        alert("You have signed out successfully.");
-      }
+    const { error: signOutError } = await supabaseClient.auth.signOut();
+
+    if (signOutError) {
+      alert("Sign out failed. Please try again.");
+    } else {
+      openAuthButton.textContent = "Sign In";
+      alert("You have signed out successfully.");
     }
 
     return;
@@ -1371,20 +1950,31 @@ openAuthButton.addEventListener("click", async () => {
   openAuthModal();
 });
 
-document.getElementById("closeAuthButton")
-  .addEventListener("click", closeAuthModal);
+$("#closeAuthButton").addEventListener("click", closeAuthModal);
+$("#authOverlay").addEventListener("click", closeAuthModal);
 
-document.getElementById("authOverlay")
-  .addEventListener("click", closeAuthModal);
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && authModal.style.display === "flex") {
+    closeAuthModal();
+  }
+});
 
 authSwitchButton.addEventListener("click", () => {
   setAuthMode(authMode === "signin" ? "signup" : "signin");
 });
 
-document.getElementById("googleSignInButton")
-  .addEventListener("click", async () => {
-    showAuthMessage("Connecting to Google...");
+$("#googleSignInButton").addEventListener("click", async () => {
+  if (!supabaseClient) {
+    showAuthMessage("Authentication could not load. Refresh and try again.", true);
+    return;
+  }
 
+  const googleButton = $("#googleSignInButton");
+
+  googleButton.disabled = true;
+  showAuthMessage("Connecting to Google...");
+
+  try {
     const { error } = await supabaseClient.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -1392,16 +1982,23 @@ document.getElementById("googleSignInButton")
       }
     });
 
-    if (error) {
-      showAuthMessage(error.message);
-    }
-  });
+    if (error) throw error;
+  } catch (error) {
+    showAuthMessage(error.message || "Google sign-in failed.", true);
+    googleButton.disabled = false;
+  }
+});
 
-authForm.addEventListener("submit", async (event) => {
+authForm.addEventListener("submit", async event => {
   event.preventDefault();
 
-  const email = document.getElementById("authEmail").value.trim();
-  const password = document.getElementById("authPassword").value;
+  if (!supabaseClient) {
+    showAuthMessage("Authentication could not load. Refresh and try again.", true);
+    return;
+  }
+
+  const email = $("#authEmail").value.trim();
+  const password = $("#authPassword").value;
 
   authSubmitButton.disabled = true;
   showAuthMessage("Please wait...");
@@ -1412,8 +2009,7 @@ authForm.addEventListener("submit", async (event) => {
         email,
         password,
         options: {
-          emailRedirectTo:
-            window.location.origin + window.location.pathname
+          emailRedirectTo: window.location.origin + window.location.pathname
         }
       });
 
@@ -1429,11 +2025,10 @@ authForm.addEventListener("submit", async (event) => {
         );
       }
     } else {
-      const { data, error } =
-        await supabaseClient.auth.signInWithPassword({
-          email,
-          password
-        });
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
 
       if (error) throw error;
 
@@ -1446,40 +2041,52 @@ authForm.addEventListener("submit", async (event) => {
       }
     }
   } catch (error) {
-    showAuthMessage(error.message || "Something went wrong. Please try again.");
+    showAuthMessage(
+      error.message || "Something went wrong. Please try again.",
+      true
+    );
   } finally {
     authSubmitButton.disabled = false;
   }
 });
 
 forgotPasswordButton.addEventListener("click", async () => {
-  const email = document.getElementById("authEmail").value.trim();
+  if (!supabaseClient) {
+    showAuthMessage("Authentication could not load. Refresh and try again.", true);
+    return;
+  }
+
+  const email = $("#authEmail").value.trim();
 
   if (!email) {
-    showAuthMessage("Enter your email address first.");
-    document.getElementById("authEmail").focus();
+    showAuthMessage("Enter your email address first.", true);
+    $("#authEmail").focus();
     return;
   }
 
   showAuthMessage("Sending password reset instructions...");
 
-  const { error } = await supabaseClient.auth.resetPasswordForEmail(
-    email,
-    {
+  try {
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin + window.location.pathname
-    }
-  );
+    });
 
-  if (error) {
-    showAuthMessage(error.message);
-  } else {
+    if (error) throw error;
+
     showAuthMessage(
       "If your account is registered, password reset instructions will be sent to your email."
     );
+  } catch (error) {
+    showAuthMessage(error.message || "Unable to send reset instructions.", true);
   }
 });
 
 async function refreshAuthState() {
+  if (!supabaseClient) {
+    openAuthButton.textContent = "Sign In";
+    return;
+  }
+
   const { data, error } = await supabaseClient.auth.getSession();
 
   if (error) {
@@ -1487,16 +2094,16 @@ async function refreshAuthState() {
     return;
   }
 
-  openAuthButton.textContent = data.session
-    ? "Sign Out"
-    : "Sign In";
+  openAuthButton.textContent = data.session ? "Sign Out" : "Sign In";
 }
 
-supabaseClient.auth.onAuthStateChange((event, session) => {
-  openAuthButton.textContent = session ? "Sign Out" : "Sign In";
-});
+if (supabaseClient) {
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    openAuthButton.textContent = session ? "Sign Out" : "Sign In";
+  });
 
-refreshAuthState();
+  refreshAuthState();
+}
 </script>
 
 </body>
