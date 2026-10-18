@@ -768,6 +768,14 @@ footer strong { color: var(--gold); }
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+  // NOVATOOLS — SUPABASE CONNECTION
+const SUPABASE_URL = "https://ttcixcmajpqrlgqeplbq.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_mdxOM-Shb7Bp8EWXoiwbDQ_4mJLsSeK";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => document.querySelectorAll(selector);
 
