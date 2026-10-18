@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0B0D12">
+<meta name="description" content="NovaTools brings AI tools, PDF utilities and productivity tools together in one place.">
+<title>NovaTools — Everything You Need</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #0B0D12;
+  --panel: #141824;
+  --panel2: #191E2D;
+  --purple: #8B5CF6;
+  --indigo: #6366F1;
+  --gold: #D6B87A;
+  --text: #F8FAFC;
+  --muted: #A1A1AA;
+  --border: #292D3A;
+  --radius: 18px;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, sans-serif;
+  line-height: 1.6;
+}
+
+button, input, textarea, select { font: inherit; }
+
+button, a { -webkit-tap-highlight-color: transparent; }
+
+a { color: inherit; text-decoration: none; }
+
+button { cursor: pointer; }
+
+.container {
+  width: min(1160px, 92%);
+  margin: auto;
+}
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(11,13,18,.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav {
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-size: 23px;
+  font-weight: 800;
+  letter-spacing: -.8px;
+}
+
+.logo-icon {
+  width: 39px;
+  height: 39px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--purple), var(--indigo));
+  box-shadow: 0 0 22px #8b5cf633;
+  color: white;
+}
+
+.logo span { color: var(--gold); }
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 27px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.nav-links a:hover { color: var(--gold); }
+
+.nav-button, .primary-button {
+  border: 0;
+  border-radius: 11px;
+  background: linear-gradient(135deg, var(--purple), var(--indigo));
+  color: white;
+  font-weight: 700;
+  padding: 12px 19px;
+  transition: .2s;
+}
+
+.nav-button:hover, .primary-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px #8b5cf633;
+}
+
+.menu-button {
+  display: none;
+  background: var(--panel);
+  color: white;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 12px;
+}
+
+.hero {
+  padding: 92px 0 65px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero:before {
+  content: "";
+  position: absolute;
+  width: 500px;
+  height: 350px;
+  border-radius: 50%;
+  background: #7548e51b;
+  filter: blur(100px);
+  top: -130px;
+  left: calc(50% - 250px);
+  pointer-events: none;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 13px;
+  border: 1px solid #d6b87a50;
+  border-radius: 50px;
+  color: var(--gold);
+  background: #d6b87a0b;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .5px;
+}
+
+.hero h1 {
+  position: relative;
+  font-size: clamp(39px, 7vw, 72px);
+  line-height: 1.08;
+  letter-spacing: -3px;
+  margin: 25px auto 20px;
+  max-width: 850px;
+}
+
+.gradient-text {
+  background: linear-gradient(100deg, #b59aff, #8b5cf6, var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero p {
+  color: var(--muted);
+  max-width: 640px;
+  margin: 0 auto 29px;
+  font-size: 16px;
+}
+
+.hero-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.secondary-button {
+  display: inline-block;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  padding: 11px 19px;
+  background: var(--panel);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.secondary-button:hover { border-color: var(--gold); }
+
+.search-wrap {
+  max-width: 600px;
+  margin: 42px auto 0;
+  position: relative;
+}
+
+.search-wrap span {
+  position: absolute;
+  top: 14px;
+  left: 17px;
+  font-size: 18px;
+}
+
+.search-wrap input {
+  width: 100%;
+  padding: 16px 18px 16px 49px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: white;
+  outline: none;
+}
+
+.search-wrap input:focus { border-color: var(--purple); }
+
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 42px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+
+.stat strong { display: block; font-size: 20px; }
+.stat small { color: var(--muted); }
+
+section { padding: 60px 0; }
+
+.section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 27px;
+}
+
+.eyebrow {
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.7px;
+  text-transform: uppercase;
+}
+
+.section-heading h2 {
+  font-size: clamp(27px, 4vw, 38px);
+  letter-spacing: -1.2px;
+  margin: 5px 0;
+}
+
+.section-heading p {
+  color: var(--muted);
+  margin: 0;
+  font-size: 14px;
+}
+
+.text-link {
+  color: var(--gold);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 17px;
+}
+
+.card {
+  background: linear-gradient(145deg, var(--panel), #10131c);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 23px;
+  transition: .25s;
+  min-width: 0;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: #8b5cf680;
+  box-shadow: 0 12px 35px #00000025;
+}
+
+.card-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #8b5cf61b;
+  font-size: 23px;
+  margin-bottom: 16px;
+}
+
+.card h3 { margin: 0 0 8px; font-size: 17px; }
+.card p { color: var(--muted); font-size: 13px; margin: 0 0 18px; }
+
+.card-button {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 9px 13px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.card-button:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.gold-icon { background: #d6b87a17; }
+
+.pdf-section { background: #10131b; border-top: 1px solid #202432; border-bottom: 1px solid #202432; }
+
+.tool-panel {
+  display: none;
+  margin-top: 28px;
+  padding: 26px;
+  border: 1px solid #8b5cf655;
+  border-radius: var(--radius);
+  background: var(--panel);
+  scroll-margin-top: 100px;
+}
+
+.tool-panel.active { display: block; }
+
+.tool-panel h3 { margin-top: 0; }
+
+.tool-panel label {
+  display: block;
+  margin: 15px 0 7px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.tool-panel textarea, .tool-panel input, .tool-panel select {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: #0B0D12;
+  color: white;
+  border-radius: 10px;
+  padding: 12px;
+  outline: none;
+}
+
+.tool-panel textarea { min-height: 130px; resize: vertical; }
+
+.tool-panel textarea:focus, .tool-panel input:focus {
+  border-color: var(--purple);
+}
+
+.tool-panel .primary-button { margin-top: 15px; }
+
+.tool-message {
+  color: var(--gold);
+  font-size: 13px;
+  margin-top: 12px;
+  overflow-wrap: anywhere;
+}
+
+.output {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin-top: 17px;
+  padding: 15px;
+  background: #0B0D12;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: none;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-bottom: 22px;
+}
+
+.filter-button {
+  background: var(--panel);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 30px;
+  padding: 8px 15px;
+  font-size: 12px;
+}
+
+.filter-button.active {
+  background: #8b5cf620;
+  color: white;
+  border-color: var(--purple);
+}
+
+.directory-card { display: flex; flex-direction: column; }
+.directory-card .card-button { align-self: flex-start; margin-top: auto; }
+
+.notice {
+  border: 1px solid #d6b87a45;
+  background: #d6b87a0b;
+  border-radius: 13px;
+  padding: 15px;
+  margin-top: 20px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+footer {
+  padding: 35px 0;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.footer-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+footer strong { color: var(--gold); }
+
+.empty-state {
+  display: none;
+  padding: 25px;
+  text-align: center;
+  color: var(--muted);
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  grid-column: 1/-1;
+}
+
+@media (max-width: 800px) {
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 76px;
+    left: 0;
+    right: 0;
+    padding: 20px 5%;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .nav-links.open { display: flex; }
+  .menu-button { display: block; }
+  .nav-button { display: none; }
+}
+
+@media (max-width: 520px) {
+  .hero { padding: 65px 0 40px; }
+  .hero h1 { letter-spacing: -1.8px; }
+  .grid { grid-template-columns: 1fr; }
+  .section-heading { align-items: start; flex-direction: column; }
+  .stats { gap: 23px; }
+  section { padding: 43px 0; }
+  .tool-panel { padding: 18px; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="container nav">
+    <a class="logo" href="#home" aria-label="NovaTools home">
+      <span class="logo-icon">✦</span>
+      Nova<span>Tools</span>
+    </a>
+
+    <nav class="nav-links" id="navLinks">
+      <a href="#home">Home</a>
+      <a href="#ai-tools">AI Tools</a>
+      <a href="#pdf-tools">PDF Tools</a>
+      <a href="#directory">AI Directory</a>
+    </nav>
+
+    <a class="nav-button" href="#all-tools">Explore Tools ↗</a>
+    <button class="menu-button" id="menuButton" aria-label="Open menu">☰</button>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+    <section class="hero" id="home">
+      <div class="badge">✦ YOUR DIGITAL TOOLKIT</div>
+      <h1>Everything you need.<br><span class="gradient-text">One powerful platform.</span></h1>
+      <p>
+        Discover useful AI tools, create and organise PDFs, and simplify
+        everyday digital tasks—all from one place.
+      </p>
+
+      <div class="hero-actions">
+        <a class="primary-button" href="#all-tools">Explore All Tools →</a>
+        <a class="secondary-button" href="#directory">Discover AI Tools</a>
+      </div>
+
+      <div class="search-wrap">
+        <span>⌕</span>
+        <input id="globalSearch" type="search" placeholder="Search AI tools, PDF tools and utilities..." aria-label="Search tools">
+      </div>
+
+      <div class="stats">
+        <div class="stat"><strong>AI</strong><small>Smart assistants</small></div>
+        <div class="stat"><strong>PDF</strong><small>Document tools</small></div>
+        <div class="stat"><strong>Free*</strong><small>Core browser tools</small></div>
+      </div>
+    </section>
+
+    <section id="all-tools">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">YOUR WORKSPACE</div>
+          <h2>Explore your tools</h2>
+          <p>Choose a category and get started.</p>
+        </div>
+      </div>
+
+      <div class="grid">
+        <article class="card searchable" data-search="ai writing assistant summarizer grammar email notes quiz">
+          <div class="card-icon">✧</div>
+          <h3>AI Productivity</h3>
+          <p>Work with writing, summaries, grammar and study helpers.</p>
+          <a class="card-button" href="#ai-tools">Explore AI Tools →</a>
+        </article>
+
+        <article class="card searchable" data-search="pdf create maker merge split rotate">
+          <div class="card-icon gold-icon">▤</div>
+          <h3>PDF Workspace</h3>
+          <p>Create a PDF from text or combine existing PDF files.</p>
+          <a class="card-button" href="#pdf-tools">Open PDF Tools →</a>
+        </article>
+
+        <article class="card searchable" data-search="directory external websites ai tools">
+          <div class="card-icon">⌘</div>
+          <h3>AI Tools Directory</h3>
+          <p>Discover popular AI platforms and useful websites.</p>
+          <a class="card-button" href="#directory">Browse Directory →</a>
+        </article>
+      </div>
+    </section>
+
+    <section id="ai-tools">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">WORK SMARTER</div>
+          <h2>AI productivity tools</h2>
+          <p>Simple writing and study helpers that work directly in your browser.</p>
+        </div>
+      </div>
+
+      <div class="grid">
+        <article class="card searchable" data-search="writing generator paragraph article story">
+          <div class="card-icon">✍️</div>
+          <h3>Writing Assistant</h3>
+          <p>Organise your ideas into a clearer piece of writing.</p>
+          <button class="card-button" data-tool="writing">Open Tool →</button>
+        </article>
+
+        <article class="card searchable" data-search="summarizer summary shorten text">
+          <div class="card-icon">📝</div>
+          <h3>Text Summariser</h3>
+          <p>Make long text shorter by extracting key sentences.</p>
+          <button class="card-button" data-tool="summary">Open Tool →</button>
+        </article>
+
+        <article class="card searchable" data-search="grammar improve proofreading punctuation">
+          <div class="card-icon">✓</div>
+          <h3>Text Improver</h3>
+          <p>Check common spelling, spacing and punctuation issues.</p>
+          <button class="card-button" data-tool="improve">Open Tool →</button>
+        </article>
+
+        <article class="card searchable" data-search="email generator message">
+          <div class="card-icon">✉️</div>
+          <h3>Email Helper</h3>
+          <p>Build a simple email draft from your topic and details.</p>
+          <button class="card-button" data-tool="email">Open Tool →</button>
+        </article>
+
+        <article class="card searchable" data-search="study notes revision learning">
+          <div class="card-icon">📚</div>
+          <h3>Study Notes</h3>
+          <p>Turn a topic or passage into a basic study outline.</p>
+          <button class="card-button" data-tool="notes">Open Tool →</button>
+        </article>
+
+        <article class="card searchable" data-search="quiz questions practice">
+          <div class="card-icon">❔</div>
+          <h3>Quiz Planner</h3>
+          <p>Create a set of practice questions from a topic.</p>
+          <button class="card-button" data-tool="quiz">Open Tool →</button>
+        </article>
+      </div>
+
+      <div class="tool-panel" id="aiPanel">
+        <h3 id="aiPanelTitle">Writing Assistant</h3>
+        <p style="color:var(--muted);font-size:13px" id="aiPanelDescription">
+          Enter your text below to get started.
+        </p>
+
+        <label for="aiInput">Your text or topic</label>
+        <textarea id="aiInput" placeholder="Type or paste your text here..."></textarea>
+
+        <button class="primary-button" id="runAiTool">Process Text</button>
+        <button class="secondary-button" id="copyOutput" style="margin-left:6px">Copy Result</button>
+
+        <div class="output" id="aiOutput"></div>
+
+        <div class="notice">
+          These starter tools use simple browser-based text processing, not a connected AI model.
+          Real AI-generated responses will require an AI service integration.
+        </div>
+      </div>
+    </section>
+
+    <section class="pdf-section" id="pdf-tools">
+      <div class="container">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">DOCUMENT WORKSPACE</div>
+            <h2>PDF tools</h2>
+            <p>Create a PDF from text or combine PDF documents in your browser.</p>
+          </div>
+        </div>
+
+        <div class="grid">
+          <article class="card searchable" data-search="create make generate pdf text document">
+            <div class="card-icon gold-icon">＋</div>
+            <h3>Text to PDF</h3>
+            <p>Write or paste text and download it as a PDF document.</p>
+            <button class="card-button" data-tool="create-pdf">Create PDF →</button>
+          </article>
+
+          <article class="card searchable" data-search="merge combine join multiple pdf files">
+            <div class="card-icon">⇄</div>
+            <h3>Merge PDFs</h3>
+            <p>Combine multiple PDF files into a single document.</p>
+            <button class="card-button" data-tool="merge-pdf">Merge PDFs →</button>
+          </article>
+
+          <article class="card searchable" data-search="pdf tools files privacy">
+            <div class="card-icon">🔒</div>
+            <h3>Browser Processing</h3>
+            <p>Your selected documents are processed in this browser by these tools.</p>
+            <a class="card-button" href="#pdf-tools">Learn More ↓</a>
+          </article>
+        </div>
+
+        <div class="tool-panel" id="pdfPanel">
+          <h3 id="pdfPanelTitle">PDF Tool</h3>
+          <p id="pdfPanelDescription" style="color:var(--muted);font-size:13px"></p>
+
+          <div id="createPdfFields">
+            <label for="pdfTitle">Document title</label>
+            <input id="pdfTitle" type="text" placeholder="My Document">
+
+            <label for="pdfText">Document content</label>
+            <textarea id="pdfText" placeholder="Write or paste your document here..."></textarea>
+
+            <button class="primary-button" id="downloadPdf">Download PDF</button>
+          </div>
+
+          <div id="mergePdfFields" style="display:none">
+            <label for="pdfFiles">Choose two or more PDF files</label>
+            <input id="pdfFiles" type="file" accept="application/pdf,.pdf" multiple>
+            <button class="primary-button" id="mergePdf">Merge and Download</button>
+          </div>
+
+          <div class="tool-message" id="pdfMessage"></div>
+          <div class="notice">
+            PDF processing happens in your browser with the required libraries. Keep a backup of important documents.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="directory">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow">DISCOVER MORE</div>
+          <h2>AI tools directory</h2>
+          <p>Explore external AI platforms. Their features and free plans may change.</p>
+        </div>
+      </div>
+
+      <div class="filter-row">
+        <button class="filter-button active" data-filter="all">All Tools</button>
+        <button class="filter-button" data-filter="writing">Writing</button>
+        <button class="filter-button" data-filter="research">Research</button>
+        <button class="filter-button" data-filter="design">Design</button>
+        <button class="filter-button" data-filter="productivity">Productivity</button>
+      </div>
+
+      <div class="grid" id="directoryGrid">
+        <article class="card directory-card searchable" data-category="writing" data-search="chatgpt writing assistant chatbot">
+          <div class="card-icon">✧</div>
+          <h3>ChatGPT</h3>
+          <p>AI assistant for writing, learning, brainstorming and problem-solving.</p>
+          <a class="card-button" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">Visit Website ↗</a>
+        </article>
+
+        <article class="card directory-card searchable" data-category="research" data-search="perplexity research search answers">
+          <div class="card-icon">⌕</div>
+          <h3>Perplexity</h3>
+          <p>AI-powered search and research with linked sources.</p>
+          <a class="card-button" href="https://www.perplexity.ai/" target="_blank" rel="noopener noreferrer">Visit Website ↗</a>
+        </article>
+
+        <article class="card directory-card searchable" data-category="design" data-search="canva design presentations graphics">
+          <div class="card-icon">◈</div>
+          <h3>Canva</h3>
+          <p>Create designs, presentations, posters and other visual content.</p>
+          <a class="card-button" href="https://www.canva.com/" target="_blank" rel="noopener noreferrer">Visit Website ↗</a>
+        </article>
+
+        <article class="card directory-card searchable" data-category="productivity" data-search="notion workspace notes organisation">
+          <div class="card-icon">▣</div>
+          <h3>Notion</h3>
+          <p>Organise notes, projects, tasks and personal workspaces.</p>
+          <a class="card-button" href="https://www.notion.so/" target="_blank" rel="noopener noreferrer">Visit Website ↗</a>
+        </article>
+
+        <article class="card directory-card searchable" data-category="writing" data-search="grammarly grammar writing">
+          <div class="card-icon">✓</div>
+          <h3>Grammarly</h3>
+          <p>Writing support for clarity, spelling and grammar.</p>
+          <a class="card-button" href="https://www.grammarly.com/" target="_blank" rel="noopener noreferrer">Visit Website ↗</a>
+        </article>
+
+        <article class="card directory-card searchable" data-category="design" data-search="adobe express design images">
+          <div class="card-icon">✦</div>
+          <h3>Adobe Express</h3>
+          <p>Design graphics and visual content using online creative tools.</p>
+          <a class="card-button" href="https://www.adobe.com/express/" target="_blank" rel="noopener noreferrer">Visit Website ↗</a>
+        </article>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="container footer-inner">
+    <a class="logo" href="#home"><span class="logo-icon">✦</span>Nova<span>Tools</span></a>
+    <div>Everything You Need. One Platform.</div>
+    <div>© <span id="year"></span> NovaTools</div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+
+<script>
+const $ = (selector) => document.querySelector(selector);
+const $$ = (selector) => document.querySelectorAll(selector);
+
+$("#year").textContent = new Date().getFullYear();
+
+$("#menuButton").addEventListener("click", () => {
+  $("#navLinks").classList.toggle("open");
+});
+
+$$(".nav-links a").forEach(link => {
+  link.addEventListener("click", () => $("#navLinks").classList.remove("open"));
+});
+
+/* AI TOOL PANELS */
+const toolInfo = {
+  writing: {
+    title: "Writing Assistant",
+    description: "Organise your ideas into a clearer paragraph. This starter tool formats your text; it does not generate new AI content.",
+    placeholder: "Enter your ideas here..."
+  },
+  summary: {
+    title: "Text Summariser",
+    description: "Extract some of the most important sentences from a longer passage.",
+    placeholder: "Paste the passage you want to summarise..."
+  },
+  improve: {
+    title: "Text Improver",
+    description: "Fixes common spacing and punctuation issues. It is not a complete grammar checker.",
+    placeholder: "Paste your text here..."
+  },
+  email: {
+    title: "Email Helper",
+    description: "Enter the topic and details for a basic email draft.",
+    placeholder: "Example: Write to my teacher asking about tomorrow's homework."
+  },
+  notes: {
+    title: "Study Notes",
+    description: "Create a basic outline using the text you provide.",
+    placeholder: "Paste your lesson or enter your topic..."
+  },
+  quiz: {
+    title: "Quiz Planner",
+    description: "Create simple practice prompts based on your topic or passage.",
+    placeholder: "Enter a topic or paste your study material..."
+  }
+};
+
+let activeAiTool = "writing";
+
+function openAiTool(name) {
+  activeAiTool = name;
+  const info = toolInfo[name];
+  $("#aiPanelTitle").textContent = info.title;
+  $("#aiPanelDescription").textContent = info.description;
+  $("#aiInput").placeholder = info.placeholder;
+  $("#aiInput").value = "";
+  $("#aiOutput").style.display = "none";
+  $("#aiPanel").classList.add("active");
+  $("#aiPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+$$("[data-tool]").forEach(button => {
+  button.addEventListener("click", () => {
+    const name = button.dataset.tool;
+
+    if (toolInfo[name]) {
+      openAiTool(name);
+    } else if (name === "create-pdf") {
+      openPdfTool("create");
+    } else if (name === "merge-pdf") {
+      openPdfTool("merge");
+    }
+  });
+});
+
+$("#runAiTool").addEventListener("click", () => {
+  const text = $("#aiInput").value.trim();
+
+  if (!text) {
+    alert("Please enter some text first.");
+    return;
+  }
+
+  let result = "";
+
+  if (activeAiTool === "writing") {
+    result = text
+      .replace(/\s+/g, " ")
+      .replace(/(^\s*\w|[.!?]\s+\w)/g, match => match.toUpperCase());
+  }
+
+  if (activeAiTool === "summary") {
+    const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [text];
+    const count = Math.max(1, Math.ceil(sentences.length / 3));
+    result = sentences.slice(0, count).join(" ").trim();
+  }
+
+  if (activeAiTool === "improve") {
+    result = text
+      .replace(/[ \t]+/g, " ")
+      .replace(/\s+([,.!?;:])/g, "$1")
+      .replace(/([.!?])([A-Za-z])/g, "$1 $2")
+      .replace(/(^\s*\w|[.!?]\s+\w)/g, match => match.toUpperCase())
+      .trim();
+  }
+
+  if (activeAiTool === "email") {
+    result = "Subject: " + text.slice(0, 55) +
+      "\n\nDear [Recipient's Name],\n\n" + text +
+      "\n\nThank you for your time.\n\nBest regards,\n[Your Name]";
+  }
+
+  if (activeAiTool === "notes") {
+    const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [text];
+    result = "STUDY NOTES\n\n" +
+      sentences.map((sentence, i) => (i + 1) + ". " + sentence.trim())
+      .join("\n\n");
+  }
+
+  if (activeAiTool === "quiz") {
+    result = "PRACTICE QUESTIONS\n\n" +
+      "1. What is the main idea of this topic?\n" +
+      "2. Explain one important point in your own words.\n" +
+      "3. Which key terms should you remember?\n" +
+      "4. Give an example related to the topic.\n" +
+      "5. Write a short summary of what you learned.\n\n" +
+      "Study material provided:\n" + text;
+  }
+
+  $("#aiOutput").textContent = result;
+  $("#aiOutput").style.display = "block";
+});
+
+$("#copyOutput").addEventListener("click", async () => {
+  const result = $("#aiOutput").textContent;
+
+  if (!result) {
+    alert("Generate a result first.");
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(result);
+    $("#copyOutput").textContent = "Copied!";
+    setTimeout(() => $("#copyOutput").textContent = "Copy Result", 1500);
+  } catch {
+    alert("Copy is unavailable in this browser context. You can select and copy the result manually.");
+  }
+});
+
+/* PDF TOOLS */
+function openPdfTool(type) {
+  $("#pdfPanel").classList.add("active");
+  $("#pdfMessage").textContent = "";
+
+  const create = type === "create";
+
+  $("#createPdfFields").style.display = create ? "block" : "none";
+  $("#mergePdfFields").style.display = create ? "none" : "block";
+
+  $("#pdfPanelTitle").textContent = create ? "Create a PDF" : "Merge PDF Files";
+  $("#pdfPanelDescription").textContent = create
+    ? "Enter a title and content, then download your PDF."
+    : "Select multiple PDF documents to combine them into one file.";
+
+  $("#pdfPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+$("#downloadPdf").addEventListener("click", () => {
+  const title = $("#pdfTitle").value.trim() || "My Document";
+  const content = $("#pdfText").value.trim();
+
+  if (!content) {
+    $("#pdfMessage").textContent = "Please enter some document content.";
+    return;
+  }
+
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    $("#pdfMessage").textContent = "The PDF library could not load. Check your internet connection and try again.";
+    return;
+  }
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 18;
+    const maxWidth = pageWidth - margin * 2;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    const titleLines = doc.splitTextToSize(title, maxWidth);
+    doc.text(titleLines, margin, 22);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+
+    const bodyLines = doc.splitTextToSize(content, maxWidth);
+    let y = 32 + (titleLines.length - 1) * 8;
+
+    bodyLines.forEach(line => {
+      if (y > pageHeight - margin) {
+        doc.addPage();
+        y = margin;
+      }
+      doc.text(line, margin, y);
+      y += 6;
+    });
+
+    doc.save("novatools-document.pdf");
+    $("#pdfMessage").textContent = "Your PDF download has started.";
+  } catch (error) {
+    $("#pdfMessage").textContent = "Could not create the PDF. Please try again.";
+  }
+});
+
+$("#mergePdf").addEventListener("click", async () => {
+  const files = Array.from($("#pdfFiles").files || []);
+  $("#pdfMessage").textContent = "";
+
+  if (files.length < 2) {
+    $("#pdfMessage").textContent = "Please select at least two PDF files.";
+    return;
+  }
+
+  if (!window.PDFLib) {
+    $("#pdfMessage").textContent = "The PDF library could not load. Check your internet connection and try again.";
+    return;
+  }
+
+  try {
+    const merged = await PDFLib.PDFDocument.create();
+
+    for (const file of files) {
+      const bytes = await file.arrayBuffer();
+      const source = await PDFLib.PDFDocument.load(bytes);
+      const pages = await merged.copyPages(source, source.getPageIndices());
+      pages.forEach(page => merged.addPage(page));
+    }
+
+    const outputBytes = await merged.save();
+    const blob = new Blob([outputBytes], { type: "application/pdf" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "novatools-merged.pdf";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    $("#pdfMessage").textContent = "Your merged PDF download has started.";
+  } catch (error) {
+    $("#pdfMessage").textContent = "Unable to merge these files. One may be password-protected or damaged.";
+  }
+});
+
+/* DIRECTORY FILTERS */
+$$(".filter-button").forEach(button => {
+  button.addEventListener("click", () => {
+    $$(".filter-button").forEach(item => item.classList.remove("active"));
+    button.classList.add("active");
+
+    const filter = button.dataset.filter;
+
+    $$("#directoryGrid .directory-card").forEach(card => {
+      card.style.display =
+        filter === "all" || card.dataset.category === filter ? "" : "none";
+    });
+  });
+});
+
+/* GLOBAL SEARCH */
+$("#globalSearch").addEventListener("input", event => {
+  const query = event.target.value.toLowerCase().trim();
+
+  $$(".searchable").forEach(card => {
+    const content = (
+      (card.dataset.search || "") + " " + card.textContent
+    ).toLowerCase();
+
+    card.style.display = content.includes(query) ? "" : "none";
+  });
+});
+</script>
+
+</body>
+</html>
