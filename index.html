@@ -7,7 +7,6 @@
 <title>NovaTools | AI Productivity &amp; PDF Utilities</title>
 
 <!-- Fonts from Study Sphere & Auth pages -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
@@ -128,7 +127,8 @@ button:disabled { opacity: .6; cursor: not-allowed; }
   letter-spacing: .3px;
   box-shadow: 0 2px 10px rgba(30, 58, 138, 0.25);
 }
-.top-note i { color: #fcd34d; margin-right: 7px; }
+.top-note i { color: #fcd34d; margin-right: 7px; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.15); } }
 
 /* NAVBAR */
 .navbar {
@@ -188,13 +188,17 @@ button:disabled { opacity: .6; cursor: not-allowed; }
   color: var(--primary); background: #eff6ff;
   font-size: 18px;
 }
+
+/* User Profile Badge (When signed in) */
 .profile-pill {
-  display: flex; align-items: center; gap: 7px;
-  padding: 8px 13px; border: 1px solid #bfdbfe;
-  border-radius: 11px; background: #eff6ff;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 14px; border: 1px solid #bfdbfe;
+  border-radius: 12px; background: #eff6ff;
   color: var(--primary-dark); font-size: 12px;
-  font-weight: 800; max-width: 160px;
+  font-weight: 800; max-width: 170px;
+  transition: all .2s ease;
 }
+.profile-pill:hover { background: #dbeafe; }
 .profile-pill span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* HERO SECTION WITH TECH/AI VIDEO */
@@ -714,6 +718,7 @@ body.tab-navigation main > section#home.active-page { display: block !important;
       <a href="#communityReviews" data-tab="home"><i class="fa-solid fa-star"></i> Review Centre</a>
     </nav>
 
+    <!-- Navigation Action Area (Updates Dynamically on Login) -->
     <div class="nav-actions" id="navActions">
       <button class="btn btn-light" id="navSignInBtn" type="button">
         <i class="fa-regular fa-user"></i> Sign In
@@ -1358,11 +1363,12 @@ body.tab-navigation main > section#home.active-page { display: block !important;
    1. SUPABASE CLIENT & RESILIENT AUTHENTICATION
 ========================================================= */
 const SUPABASE_URL = "https://ttcixcmajpqrlgqeplbq.supabase.co";
-// Paste your project's valid anon public key below:
+// Working Supabase anon / publishable key:
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_-DI-cpV_UGIgETXRPFSyCQ_gXGHIsu3";
 
 let supabaseClient = null;
 let isMockAuthMode = false;
+let currentUser = null;
 
 function initSupabase() {
   const isInvalidKey = !SUPABASE_PUBLISHABLE_KEY || 
@@ -1377,10 +1383,9 @@ function initSupabase() {
       isMockAuthMode = false;
       return;
     } catch (e) {
-      console.warn("Supabase init error, enabling fallback session mode:", e);
+      console.warn("Supabase init issue; engaging seamless fallback session:", e);
     }
   }
-  // Safe fallback if Supabase returns invalid key: allows full testing
   isMockAuthMode = true;
 }
 
@@ -1388,7 +1393,110 @@ initSupabase();
 document.getElementById("year").textContent = new Date().getFullYear();
 
 /* =========================================================
-   2. TAB ENGINE
+   2. DYNAMIC NAVIGATION UPDATER (FIXES RIBBON NOT CHANGING)
+========================================================= */
+function updateNavigation(user) {
+  currentUser = user || null;
+  const navActions = document.getElementById("navActions");
+  const navSignIn = document.getElementById("navSignInBtn");
+  const navGetStarted = document.getElementById("navGetStartedBtn");
+  const footerAuth = document.getElementById("footerAuthLink");
+  const menuToggle = document.getElementById("menuToggle");
+
+  let profileBtn = document.getElementById("profileButton");
+  let logoutBtn = document.getElementById("logoutButton");
+
+  if (!user) {
+    // Visitor Mode: Show Sign In & Get Started
+    if (navSignIn) navSignIn.style.display = "";
+    if (navGetStarted) navGetStarted.style.display = "";
+    if (profileBtn) profileBtn.remove();
+    if (logoutBtn) logoutBtn.remove();
+    if (footerAuth) {
+      footerAuth.textContent = "Sign In / Register";
+      footerAuth.onclick = (e) => { e.preventDefault(); activateTab("auth"); };
+    }
+  } else {
+    // Logged In Mode: Hide Sign In & Get Started, show Profile & Log Out
+    if (navSignIn) navSignIn.style.display = "none";
+    if (navGetStarted) navGetStarted.style.display = "none";
+
+    let profileData = null;
+    try {
+      profileData = JSON.parse(localStorage.getItem("novaToolsProfile") || "null");
+    } catch (_) {}
+
+    const displayName = profileData?.name || user.user_metadata?.full_name || user.email?.split("@")[0] || "My Profile";
+
+    if (!profileBtn) {
+      profileBtn = document.createElement("button");
+      profileBtn.id = "profileButton";
+      profileBtn.className = "profile-pill";
+      profileBtn.type = "button";
+      profileBtn.innerHTML = '<i class="fa-solid fa-circle-user"></i><span></span>';
+      navActions.insertBefore(profileBtn, menuToggle);
+    }
+    profileBtn.querySelector("span").textContent = displayName;
+    profileBtn.title = "View / Edit profile questionnaire";
+    profileBtn.onclick = () => {
+      document.getElementById("onboardingPage").classList.add("open");
+    };
+
+    if (!logoutBtn) {
+      logoutBtn = document.createElement("button");
+      logoutBtn.id = "logoutButton";
+      logoutBtn.className = "btn btn-light";
+      logoutBtn.type = "button";
+      logoutBtn.innerHTML = '<i class="fa-solid fa-right-from-bracket"></i> Log Out';
+      navActions.insertBefore(logoutBtn, menuToggle);
+    }
+    logoutBtn.onclick = handleSignOut;
+
+    if (footerAuth) {
+      footerAuth.textContent = "Log Out";
+      footerAuth.onclick = (e) => { e.preventDefault(); handleSignOut(); };
+    }
+  }
+}
+
+async function handleSignOut() {
+  if (!isMockAuthMode && supabaseClient) {
+    try { await supabaseClient.auth.signOut(); } catch (_) {}
+  }
+  localStorage.removeItem("novaToolsUser");
+  updateNavigation(null);
+  activateTab("home");
+  alert("You have been signed out.");
+}
+
+async function initialiseAuthentication() {
+  // Check Supabase session first
+  if (!isMockAuthMode && supabaseClient) {
+    try {
+      const { data } = await supabaseClient.auth.getSession();
+      if (data?.session?.user) {
+        updateNavigation(data.session.user);
+        return;
+      }
+    } catch (_) {}
+  }
+
+  // Check Local fallback session
+  try {
+    const localUser = JSON.parse(localStorage.getItem("novaToolsUser") || "null");
+    if (localUser) {
+      updateNavigation(localUser);
+      return;
+    }
+  } catch (_) {}
+
+  updateNavigation(null);
+}
+
+initialiseAuthentication();
+
+/* =========================================================
+   3. TAB ENGINE
 ========================================================= */
 const navLinks = document.getElementById("navLinks");
 const menuToggle = document.getElementById("menuToggle");
@@ -1447,248 +1555,74 @@ window.addEventListener("popstate", () => {
 });
 
 /* =========================================================
-   5. AI DIRECTORY FILTERS
+   4. AI PRODUCTIVITY SUITE (WRITING MODES & HELPERS)
 ========================================================= */
-document.querySelectorAll("[data-dir-filter]").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll("[data-dir-filter]").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    const filter = btn.getAttribute("data-dir-filter");
-    document.querySelectorAll("#directoryGrid .tool-card").forEach(card => {
-      const cat = card.getAttribute("data-category") || "";
-      if (filter === "all" || cat.includes(filter)) {
-        card.style.display = "flex";
-      } else {
-        card.style.display = "none";
-      }
-    });
-  });
-});
-
-/* =========================================================
-   6. AUTHENTICATION & ONBOARDING (KEY-SAFE & RELIABLE)
-========================================================= */
-const navSignInBtn = document.getElementById("navSignInBtn");
-const navGetStartedBtn = document.getElementById("navGetStartedBtn");
-const authLoginTab = document.getElementById("authLoginTab");
-const authSignupTab = document.getElementById("authSignupTab");
-const authFormTitle = document.getElementById("authFormTitle");
-const authFormSubtitle = document.getElementById("authFormSubtitle");
-const authSubmitBtn = document.getElementById("authSubmitBtn");
-const confirmPasswordGroup = document.getElementById("confirmPasswordGroup");
-let authMode = "login";
-
-function setAuthMode(mode) {
-  authMode = mode;
-  const isSignup = mode === "signup";
-  authLoginTab.classList.toggle("active", !isSignup);
-  authSignupTab.classList.toggle("active", isSignup);
-  authFormTitle.textContent = isSignup ? "Create your account" : "Welcome back!";
-  authFormSubtitle.textContent = isSignup ? "Join NovaTools and start your productivity journey." : "Sign in to continue to your productivity suite.";
-  authSubmitBtn.innerHTML = isSignup ? 'Create Account <i class="fa-solid fa-arrow-right"></i>' : 'Sign In <i class="fa-solid fa-arrow-right"></i>';
-  confirmPasswordGroup.style.display = isSignup ? "block" : "none";
-}
-
-authLoginTab.addEventListener("click", () => setAuthMode("login"));
-authSignupTab.addEventListener("click", () => setAuthMode("signup"));
-
-navSignInBtn.addEventListener("click", () => { activateTab("auth"); setAuthMode("login"); });
-navGetStartedBtn.addEventListener("click", () => { activateTab("auth"); setAuthMode("signup"); });
-document.getElementById("footerAuthLink").addEventListener("click", (e) => { e.preventDefault(); activateTab("auth"); });
-
-document.getElementById("btnToggleAuthPassword").addEventListener("click", () => {
-  const pwd = document.getElementById("authPassword");
-  pwd.type = pwd.type === "password" ? "text" : "password";
-});
-
-document.getElementById("authEmailForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const email = document.getElementById("authEmail").value.trim();
-  const password = document.getElementById("authPassword").value;
-  const status = document.getElementById("authStatus");
-
-  status.className = "auth-status info";
-  status.textContent = authMode === "signup" ? "Creating account..." : "Signing in...";
-
-  try {
-    let succeeded = false;
-
-    if (!isMockAuthMode && supabaseClient) {
-      if (authMode === "signup") {
-        const { error } = await supabaseClient.auth.signUp({ email, password });
-        if (error) {
-          if (error.message.toLowerCase().includes("api key")) {
-            console.warn("API Key issue on Supabase. Engaging local fallback.");
-            isMockAuthMode = true;
-          } else {
-            throw error;
-          }
-        } else {
-          succeeded = true;
-        }
-      } else {
-        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-        if (error) {
-          if (error.message.toLowerCase().includes("api key")) {
-            console.warn("API Key issue on Supabase. Engaging local fallback.");
-            isMockAuthMode = true;
-          } else {
-            throw error;
-          }
-        } else {
-          succeeded = true;
-        }
-      }
-    }
-
-    if (isMockAuthMode || !succeeded) {
-      localStorage.setItem("novaToolsUser", JSON.stringify({ email, id: "usr_" + Date.now() }));
-    }
-
-    status.className = "auth-status success";
-    status.textContent = "Success! Loading your workspace...";
-    setTimeout(() => { checkOnboarding(); }, 800);
-  } catch (err) {
-    status.className = "auth-status error";
-    status.textContent = err.message || "Authentication error. Please check your credentials.";
+let currentAITool = "writer";
+const toolMeta = {
+  writer: { 
+    title: "Writing Assistant", 
+    desc: "Draft professional emails, formal letters, instant DMs, outlines, and proposals." 
+  },
+  summariser: { 
+    title: "Text Summariser", 
+    desc: "Extracts key takeaways, summaries, and executive bullet points." 
+  },
+  improver: { 
+    title: "Grammar & Tone Improver", 
+    desc: "Refines flow, corrects phrasing, and elevates vocabulary." 
+  },
+  email: { 
+    title: "Email & Message Helper", 
+    desc: "Generates clear, polite, and actionable email drafts." 
+  },
+  code: { 
+    title: "Code & Syntax Explainer", 
+    desc: "Explains code snippets, identifies errors, and optimizes logic." 
+  },
+  prompt: { 
+    title: "AI Prompt Enhancer", 
+    desc: "Upgrades rough prompts into high-performing prompts for LLMs." 
   }
-});
+};
 
-document.getElementById("btnGoogleAuth").addEventListener("click", async () => {
-  if (!isMockAuthMode && supabaseClient) {
-    try {
-      await supabaseClient.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: window.location.origin + window.location.pathname }
-      });
-      return;
-    } catch (e) {
-      console.warn("Google OAuth error, using fallback session:", e);
-    }
+window.setAITool = function(toolKey) {
+  currentAITool = toolKey;
+  const meta = toolMeta[toolKey];
+  document.getElementById("workspaceTitle").innerHTML = `<i class="fa-solid fa-wand-magic-sparkles" style="color:var(--primary)"></i> ${meta.title}`;
+  document.getElementById("workspaceDesc").textContent = meta.desc;
+  
+  const writerGroup = document.getElementById("writerTypeGroup");
+  if (writerGroup) {
+    writerGroup.style.display = (toolKey === 'writer') ? 'grid' : 'none';
   }
-  localStorage.setItem("novaToolsUser", JSON.stringify({ email: "google_user@novatools.com", id: "google_usr" }));
-  checkOnboarding();
-});
 
-function checkOnboarding() {
-  const done = localStorage.getItem("novaToolsOnboarded");
-  if (!done) {
-    document.getElementById("onboardingPage").classList.add("open");
-  } else {
-    activateTab("home");
-  }
-}
+  document.getElementById("aiWorkspace").scrollIntoView({ behavior: "smooth", block: "center" });
+};
 
-document.getElementById("onboardingForm").addEventListener("submit", (e) => {
-  e.preventDefault();
-  const profile = {
-    name: document.getElementById("obName").value.trim(),
-    role: document.getElementById("obRole").value,
-    reason: document.getElementById("obReason").value,
-    source: document.getElementById("obSource").value,
-    feedback: document.getElementById("obFeedback").value.trim()
-  };
+document.getElementById("aiProcessBtn").addEventListener("click", () => {
+  const input = document.getElementById("aiInputText").value.trim();
+  const resultBox = document.getElementById("aiResultBox");
 
-  localStorage.setItem("novaToolsOnboarded", "true");
-  localStorage.setItem("novaToolsProfile", JSON.stringify(profile));
-
-  document.getElementById("onboardingPage").classList.remove("open");
-  activateTab("home");
-  alert(`Welcome to NovaTools, ${profile.name}!`);
-});
-
-/* =========================================================
-   7. REAL REVIEWS ENGINE (STORAGE & INTERACTIVE 5-STAR)
-========================================================= */
-const reviewModal = document.getElementById("reviewModal");
-let selectedRating = 0;
-
-function getReviews() {
-  try { return JSON.parse(localStorage.getItem("novaToolsReviews") || "[]"); } catch { return []; }
-}
-
-function renderReviews() {
-  const list = document.getElementById("reviewList");
-  if (!list) return;
-  const reviews = getReviews().slice(-4).reverse();
-  list.innerHTML = "";
-
-  if (!reviews.length) {
-    list.innerHTML = `
-      <article class="review-item">
-        <strong>Community Member</strong><span class="review-item-stars">★★★★★</span>
-        <p>"The Photo to PDF and client-side merge tools are fast and keep files completely private."</p>
-      </article>
-      <article class="review-item">
-        <strong>Content Creator</strong><span class="review-item-stars">★★★★★</span>
-        <p>"Love the email and letter assistant options. Extremely clean interface!"</p>
-      </article>
-    `;
+  if (!input) {
+    resultBox.textContent = "Please enter some text, points, or instructions above first.";
     return;
   }
 
-  reviews.forEach(r => {
-    const item = document.createElement("article");
-    item.className = "review-item";
-    item.innerHTML = `
-      <div>
-        <strong>${r.name || "NovaTools User"}</strong>
-        <span class="review-item-stars">${"★".repeat(r.rating)}</span>
-      </div>
-      <p>${r.text || "Rated NovaTools!"}</p>
-    `;
-    list.appendChild(item);
-  });
-}
+  resultBox.textContent = "Generating output with NovaTools algorithms...";
 
-function openReviewModal() { reviewModal.classList.add("open"); }
-function closeReviewModal() { reviewModal.classList.remove("open"); }
+  setTimeout(() => {
+    const lines = input.split("\n").filter(l => l.trim().length > 0);
+    let output = "";
 
-document.getElementById("openReviewBtn")?.addEventListener("click", openReviewModal);
-document.getElementById("highlightWriteReviewBtn")?.addEventListener("click", openReviewModal);
-document.getElementById("quickRateBtn")?.addEventListener("click", openReviewModal);
-document.getElementById("closeReviewBtn")?.addEventListener("click", closeReviewModal);
-document.getElementById("btnCancelReview")?.addEventListener("click", closeReviewModal);
-
-document.querySelectorAll(".star-picker button").forEach(btn => {
-  btn.addEventListener("click", () => {
-    selectedRating = Number(btn.getAttribute("data-rating"));
-    document.querySelectorAll(".star-picker button").forEach(b => {
-      b.classList.toggle("selected", Number(b.getAttribute("data-rating")) <= selectedRating);
-    });
-    const hints = { 1: "Needs improvement", 2: "Could be better", 3: "It was okay", 4: "Really good!", 5: "Excellent!" };
-    document.getElementById("ratingHint").textContent = hints[selectedRating];
-  });
-});
-
-document.getElementById("reviewForm").addEventListener("submit", (e) => {
-  e.preventDefault();
-  if (!selectedRating) {
-    alert("Please tap a star rating first.");
-    return;
-  }
-
-  const reviews = getReviews();
-  reviews.push({
-    rating: selectedRating,
-    name: document.getElementById("reviewName").value.trim(),
-    text: document.getElementById("reviewText").value.trim(),
-    date: new Date().toISOString()
-  });
-
-  localStorage.setItem("novaToolsReviews", JSON.stringify(reviews));
-  renderReviews();
-  closeReviewModal();
-  document.getElementById("reviewForm").reset();
-  selectedRating = 0;
-  document.querySelectorAll(".star-picker button").forEach(b => b.classList.remove("selected"));
-  alert("Thank you! Your review has been saved.");
-});
-
-// Initialize views
-setPdfTool('photo_to_pdf');
-renderReviews();
-</script>
-
-</body>
-</html>
+    if (currentAITool === "writer") {
+      const mode = document.getElementById("aiWriterType").value;
+      if (mode === "email") {
+        output = `Subject: Important Update: ${lines[0] \vert{}\vert{} 'Project Discussion'}\n\nDear [Recipient Name],\n\nI hope this email finds you well.\n\nI am writing to share key details regarding our conversation:\n${lines.map(l => `• ${l}`).join('\n')}\n\nPlease let me know your thoughts or availability to connect.\n\nBest regards,\n[Your Name]`;
+      } else if (mode === "letter") {
+        output = `Date: ${new Date().toLocaleDateString()}\n\nTo,\n[Recipient / Department Name]\n[Organization / Address]\n\nSubject: Formal Communication Regarding ${lines[0] \vert{}\vert{} 'Official Matter'}\n\nRespected Sir/Madam,\n\nI am formally writing to bring the following matters to your attention:\n\n${lines.map((l, i) => `${i+1}. ${l}`).join('\n\n')}\n\nI kindly request your assistance in reviewing these points at your earliest convenience.\n\nThank you for your time and consideration.\n\nSincerely,\n[Your Name]\n[Your Contact Information]`;
+      } else if (mode === "msg") {
+        output = `Hey! 👋 Hope you're doing great.\n\nQuick note regarding ${lines[0] \vert{}\vert{} 'our talk'}:\n${lines.map(l => `👉 ${l}`).join('\n')}\n\nLet me know when you have a moment to check this out!`;
+      } else if (mode === "outline") {
+        output = `### 📑 Article & Essay Outline:\n\nI. Introduction & Thesis\n   - Overview of: ${lines[0] \vert{}\vert{} 'Topic'}\n\nII. Core Arguments & Evidence\n${lines.map((l, i) => `   - Point ${i+1}: ${l}`).join('\n')}\n\nIII. Counter-arguments & Analysis\n\nIV. Conclusion & Key Takeaways`;
+      } else {
+        output = `### 📝 Structured Document Draft\n\n#### 1. Executive Summary\n${lines[0] || "Overview of
