@@ -1,2184 +1,1918 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NovaTools — All-in-One AI Productivity & Document Suite</title>
-  
-  <!-- Inter & Plus Jakarta Sans Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
-  
-  <!-- Font Awesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              50: '#eef2ff',
-              100: '#e0e7ff',
-              200: '#c7d2fe',
-              300: '#a5b4fc',
-              400: '#818cf8',
-              500: '#6366f1',
-              600: '#4f46e5', /* Royal Indigo / Blue */
-              700: '#4338ca',
-              800: '#3730a3',
-              900: '#1e1b4b',
-              navy: '#0a192f'  /* Deep Midnight Navy */
-            },
-            accent: {
-              400: '#a78bfa',
-              500: '#8b5cf6',
-              600: '#7c3aed'  /* Soft Purple */
-            }
-          },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            heading: ['Plus Jakarta Sans', 'Inter', 'sans-serif']
-          }
-        }
-      }
-    }
-  </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1e3a8a">
+<title>NovaTools | AI Productivity &amp; PDF Utilities</title>
 
-  <!-- PDF-LIB for true in-browser PDF generation & merging -->
-  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.9/dist/pdf-lib.min.js"></script>
-  
-  <!-- Supabase JS Client CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Fonts from Study Sphere & Auth pages -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
-  <style>
-    /* Custom scrollbars */
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: #f8fafc; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+<!-- In-Browser Client Libraries: Supabase + pdf-lib -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.9/dist/pdf-lib.min.js"></script>
 
-    /* Nav Glassmorphism matching Study Sphere */
-    .glass-nav {
-      background: rgba(255, 255, 255, 0.94);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-    }
+<style>
+/* =========================================================
+   STUDY SPHERE COLOR PALETTE (ADAPTED FOR NOVATOOLS)
+========================================================= */
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --primary-light: #eff6ff;
+  --accent-purple: #7c3aed;
+  --accent-cyan: #06b6d4;
+  --accent-amber: #f59e0b;
+  --heading: #0f172a;
+  --text: #334155;
+  --muted: #64748b;
+  --background: #f8fafc;
+  --white: #ffffff;
+  --border: #e2e8f0;
+  --radius: 20px;
+  --shadow: 0 12px 32px rgba(37, 99, 235, 0.09);
+}
 
-    /* Hero Video Container Requirements */
-    .hero-video-wrapper {
-      position: relative;
-      overflow: hidden;
-      min-height: 600px;
-    }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 90px; }
+body {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--background);
+  color: var(--text);
+  line-height: 1.65;
+  overflow-x: hidden;
+}
 
-    .hero-bg-video {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: 1;
-      display: block;
-    }
+h1, h2, h3, h4, .brand-name {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--heading);
+}
 
-    .hero-bg-canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-      display: none;
-    }
+a { color: inherit; text-decoration: none; }
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+button:disabled { opacity: .6; cursor: not-allowed; }
+::selection { background: #c7d2fe; color: #1e1b4b; }
+:focus-visible { outline: 3px solid var(--accent-amber); outline-offset: 3px; }
 
-    .hero-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, rgba(10, 25, 47, 0.82) 0%, rgba(30, 27, 75, 0.78) 50%, rgba(79, 70, 229, 0.62) 100%);
-      z-index: 2;
-    }
+/* Study Sphere Button Hover Shine Effect */
+.btn {
+  position: relative;
+  overflow: hidden;
+  will-change: transform;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 17px;
+  border: 0;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 800;
+  transition: transform .22s ease, box-shadow .22s ease;
+}
+.btn:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 20%, rgba(255,255,255,0.4) 45%, transparent 70%);
+  transform: translateX(-130%);
+  transition: transform .55s ease;
+  pointer-events: none;
+}
+.btn:hover:after { transform: translateX(130%); }
+.btn:hover { transform: translateY(-2px); }
 
-    .hero-content {
-      position: relative;
-      z-index: 3;
-    }
+.btn-primary {
+  background: linear-gradient(115deg, #2563eb, #7c3aed 70%, #f59e0b);
+  color: white;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.28);
+}
+.btn-primary:hover {
+  box-shadow: 0 12px 26px rgba(37, 99, 235, 0.38);
+}
+.btn-light {
+  background: white;
+  color: var(--heading);
+  border: 1px solid var(--border);
+}
+.btn-light:hover { background: #f1f5f9; }
+.btn-white {
+  background: white;
+  color: var(--primary-dark);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+}
+.btn-glass {
+  background: rgba(255,255,255,0.15);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.45);
+  backdrop-filter: blur(8px);
+}
+.btn-glass:hover { background: rgba(255,255,255,0.25); }
 
-    /* Views transition */
-    .view-container {
-      display: none;
-      opacity: 0;
-      transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .view-container.active {
-      display: block;
-      opacity: 1;
-    }
+.container { width: min(1180px, 92%); margin: auto; }
 
-    /* Study Sphere card styling */
-    .study-card {
-      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-    }
-    .study-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 18px 32px -10px rgba(79, 70, 229, 0.16);
-      border-color: #c7d2fe;
-    }
+/* COLORFUL TOP ANNOUNCEMENT RIBBON */
+.top-note {
+  padding: 10px 14px;
+  background: linear-gradient(90deg, #1e1b4b 0%, #1e3a8a 35%, #7c3aed 70%, #0284c7 100%);
+  color: white;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  box-shadow: 0 2px 10px rgba(30, 58, 138, 0.25);
+}
+.top-note i { color: #fcd34d; margin-right: 7px; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.15); } }
 
-    /* Glow effect for author badge */
-    .author-glow-badge {
-      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-      box-shadow: 0 0 20px rgba(124, 58, 237, 0.4), 0 0 6px rgba(79, 70, 229, 0.6);
-      animation: badgePulse 3s ease-in-out infinite;
-    }
-    @keyframes badgePulse {
-      0%, 100% { box-shadow: 0 0 15px rgba(124, 58, 237, 0.45); }
-      50% { box-shadow: 0 0 25px rgba(99, 102, 241, 0.7); }
-    }
-  </style>
+/* NAVBAR */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  min-height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+.brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.brand-icon {
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  color: white; font-size: 21px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.28);
+}
+.brand-name {
+  font-family: 'Outfit', sans-serif;
+  font-size: 20px; font-weight: 800;
+  letter-spacing: -.6px; line-height: 1.3;
+}
+.brand-name span { color: var(--primary); }
+.brand-caption {
+  color: var(--muted); font-size: 9px;
+  letter-spacing: 1.2px; text-transform: uppercase;
+  font-weight: 800;
+}
+.nav-links { display: flex; align-items: center; gap: 10px; }
+.nav-links a {
+  font-size: 13px; font-weight: 750;
+  color: #475569; padding: 8px 12px;
+  border-radius: 10px;
+  transition: all .2s;
+}
+.nav-links a:hover { color: var(--primary); background: var(--primary-light); }
+.nav-links a.active-tab {
+  color: var(--primary);
+  background: #eff6ff;
+  font-weight: 800;
+}
+.nav-links i { color: var(--primary); margin-right: 6px; }
+
+.nav-actions { display: flex; align-items: center; gap: 9px; }
+.menu-toggle {
+  display: none; width: 42px; height: 42px;
+  border: 0; border-radius: 11px;
+  color: var(--primary); background: #eff6ff;
+  font-size: 18px;
+}
+.profile-pill {
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 13px; border: 1px solid #bfdbfe;
+  border-radius: 11px; background: #eff6ff;
+  color: var(--primary-dark); font-size: 12px;
+  font-weight: 800; max-width: 160px;
+}
+.profile-pill span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* HERO SECTION WITH BACKGROUND VIDEO */
+.hero { padding: 32px 0 42px; }
+.hero-box {
+  position: relative; isolation: isolate;
+  min-height: 470px; overflow: hidden;
+  display: flex; align-items: center;
+  padding: clamp(34px, 5vw, 64px);
+  border-radius: 28px;
+  background: #0f172a; color: white;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
+}
+.hero-video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; z-index: -2;
+  opacity: 0.65;
+}
+.hero-box:before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(90deg,
+    rgba(15, 23, 42, 0.94) 0%,
+    rgba(30, 58, 138, 0.88) 55%,
+    rgba(124, 58, 237, 0.45) 100%);
+}
+.hero-content { max-width: 680px; }
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 14px; border: 1px solid rgba(255,255,255,0.28);
+  border-radius: 30px; background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(8px);
+  color: #dbeafe; font-size: 11px; font-weight: 800;
+  letter-spacing: .5px; margin-bottom: 20px;
+}
+.eyebrow i { color: #93c5fd; }
+.hero h1 {
+  color: white; font-size: clamp(38px, 5vw, 62px);
+  line-height: 1.12; letter-spacing: -2px;
+  margin: 0 0 18px; font-weight: 800;
+}
+.hero h1 span {
+  background: linear-gradient(135deg, #60a5fa, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero p {
+  color: #e2e8f0; max-width: 540px;
+  font-size: 15px; line-height: 1.85; margin-bottom: 28px;
+}
+.hero-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
+.hero-trust {
+  display: flex; gap: 18px; flex-wrap: wrap;
+  margin-top: 30px; color: #cbd5e1; font-size: 12px; font-weight: 600;
+}
+.hero-trust i { color: #60a5fa; margin-right: 6px; }
+
+/* SECTIONS */
+.section { padding: 45px 0; }
+.section-heading {
+  display: flex; justify-content: space-between;
+  align-items: flex-end; gap: 18px; margin-bottom: 26px;
+}
+.section-kicker {
+  color: var(--primary); font-size: 11px;
+  font-weight: 800; letter-spacing: 1.6px;
+  text-transform: uppercase; margin-bottom: 7px;
+}
+.section-heading h2 {
+  font-size: clamp(26px, 3.2vw, 36px);
+  line-height: 1.25; letter-spacing: -.8px;
+  margin: 0 0 7px;
+}
+.section-heading p { color: var(--muted); font-size: 14px; margin: 0; }
+
+/* QUICK ACCESS GRID FROM STUDY SPHERE */
+.quick-access-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+.quick-link-card {
+  display: flex; align-items: center; gap: 14px;
+  min-height: 96px; padding: 18px;
+  background: white; border: 1px solid var(--border);
+  border-radius: 18px; cursor: pointer; text-align: left;
+  color: var(--heading);
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.04);
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+.quick-link-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 36px rgba(37, 99, 235, 0.12);
+  border-color: #93c5fd;
+}
+.quick-icon {
+  width: 48px; height: 48px; flex-shrink: 0;
+  display: grid; place-items: center;
+  border-radius: 14px; font-size: 20px;
+}
+.quick-link-card:nth-child(1) .quick-icon { background: #eff6ff; color: #2563eb; }
+.quick-link-card:nth-child(2) .quick-icon { background: #f5f3ff; color: #7c3aed; }
+.quick-link-card:nth-child(3) .quick-icon { background: #ecfeff; color: #0891b2; }
+.quick-link-card:nth-child(4) .quick-icon { background: #fffbeb; color: #d97706; }
+.quick-link-card strong { display: block; font-size: 14px; line-height: 1.35; }
+.quick-link-card small { display: block; color: var(--muted); font-size: 11px; margin-top: 4px; }
+
+/* TOOLS & DIRECTORY GRID */
+.grid { display: grid; gap: 18px; }
+.tools-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.tool-card {
+  background: white; border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px;
+  transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.tool-card:hover {
+  transform: translateY(-4px);
+  border-color: #93c5fd;
+  box-shadow: var(--shadow);
+}
+.tool-icon {
+  width: 48px; height: 48px; border-radius: 14px;
+  display: grid; place-items: center; font-size: 20px;
+  margin-bottom: 16px;
+}
+.tool-icon.blue { background: #eff6ff; color: #2563eb; }
+.tool-icon.purple { background: #f5f3ff; color: #7c3aed; }
+.tool-icon.cyan { background: #ecfeff; color: #0891b2; }
+.tool-icon.amber { background: #fffbeb; color: #d97706; }
+.tool-icon.emerald { background: #ecfdf5; color: #059669; }
+.tool-card h3 { font-size: 18px; margin: 0 0 8px; }
+.tool-card p { font-size: 13px; line-height: 1.7; color: var(--muted); margin: 0 0 16px; }
+.card-badge {
+  display: inline-block; padding: 4px 8px; border-radius: 6px;
+  background: #f1f5f9; color: var(--muted);
+  font-size: 10px; font-weight: 800; letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+/* INTERACTIVE TOOL WORKSPACE */
+.tool-workspace {
+  background: white; border: 1px solid var(--border);
+  border-radius: 22px; padding: 26px;
+  box-shadow: var(--shadow); margin-top: 24px;
+}
+.workspace-form { display: grid; gap: 14px; }
+.form-group { display: grid; gap: 6px; }
+.form-group label { font-size: 12px; font-weight: 800; color: var(--heading); }
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 14px;
+  background: white; color: var(--heading);
+  outline: none; transition: border .2s, box-shadow .2s;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+.form-group textarea { min-height: 120px; resize: vertical; line-height: 1.6; }
+.result-box {
+  margin-top: 18px; padding: 18px;
+  border-radius: 14px; background: #f8fafc;
+  border: 1px solid var(--border);
+  white-space: pre-wrap; font-size: 13px; line-height: 1.7;
+}
+
+/* DIRECTORY FILTERS */
+.category-filter-bar {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px;
+}
+.filter-btn {
+  padding: 8px 16px; border-radius: 12px;
+  border: 1px solid var(--border); background: white;
+  font-size: 12px; font-weight: 700; color: var(--text);
+  transition: all .2s;
+}
+.filter-btn:hover { background: #f1f5f9; color: var(--heading); }
+.filter-btn.active {
+  background: var(--primary); color: white; border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+/* REVIEWS ON HOMEPAGE */
+.review-layout {
+  display: grid;
+  grid-template-columns: .85fr 1.15fr;
+  gap: 20px;
+}
+.review-highlight {
+  padding: 34px; border-radius: 22px; color: white;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  box-shadow: var(--shadow);
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.review-big-icon {
+  width: 54px; height: 54px; border-radius: 16px;
+  display: grid; place-items: center;
+  background: rgba(255,255,255,0.2); font-size: 24px;
+}
+.review-highlight h3 { font-size: 24px; color: white; margin: 18px 0 8px; }
+.review-highlight p { font-size: 13px; color: #e0e7ff; margin: 0 0 24px; line-height: 1.7; }
+.review-panel {
+  background: white; border: 1px solid var(--border);
+  border-radius: 22px; padding: 26px;
+}
+.review-stars-display { color: #f59e0b; font-size: 24px; letter-spacing: 4px; }
+.review-panel h3 { margin: 8px 0 4px; font-size: 18px; }
+.review-panel > p { font-size: 12px; color: var(--muted); margin: 0 0 16px; }
+.review-list { display: grid; gap: 11px; }
+.review-item {
+  padding: 14px; border-radius: 14px;
+  background: #f8fafc; border: 1px solid var(--border);
+}
+.review-item strong { font-size: 13px; color: var(--heading); }
+.review-item .review-item-stars { color: #f59e0b; margin-left: 8px; }
+.review-item p { font-size: 12px; margin: 6px 0 0; color: var(--text); }
+
+/* REVIEW MODAL */
+.review-modal-backdrop {
+  display: none; position: fixed; inset: 0; z-index: 5000;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(4px);
+  align-items: center; justify-content: center; padding: 18px;
+}
+.review-modal-backdrop.open { display: flex; }
+.review-modal-card {
+  position: relative; width: min(480px, 100%);
+  padding: 32px; background: white; border-radius: 24px;
+  box-shadow: 0 25px 80px rgba(15, 23, 42, 0.35); text-align: center;
+}
+.review-close {
+  position: absolute; top: 16px; right: 16px;
+  border: 0; background: #f1f5f9; width: 36px; height: 36px;
+  border-radius: 11px; color: #475569;
+}
+.review-modal-icon {
+  width: 58px; height: 58px; display: grid; place-items: center;
+  margin: 0 auto 16px; border-radius: 18px;
+  background: #fffbeb; color: #f59e0b; font-size: 26px;
+}
+.review-modal-card h2 { font-size: 24px; margin: 0 0 8px; }
+.review-modal-card > p { font-size: 13px; color: var(--muted); margin: 0 0 16px; }
+.star-picker {
+  display: flex; justify-content: center; gap: 8px; margin: 16px 0;
+}
+.star-picker button {
+  border: 0; background: transparent; color: #cbd5e1;
+  font-size: 34px; padding: 0 4px; transition: transform .18s, color .18s;
+}
+.star-picker button:hover { transform: scale(1.2); }
+.star-picker button.selected { color: #f59e0b; }
+.rating-hint { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+
+/* =========================================================
+   STUDY SPHERE AUTH.HTML FULL-PAGE ARCHITECTURE
+========================================================= */
+.auth-page-container {
+  display: none;
+  min-height: calc(100vh - 120px);
+  padding: 24px 0 48px;
+}
+.auth-page-container.open { display: block; }
+.auth-shell {
+  width: min(1050px, 92%);
+  margin: 25px auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  border-radius: 27px;
+  background: white;
+  box-shadow: 0 22px 70px rgba(40, 33, 90, .09);
+  border: 1px solid var(--border);
+}
+.auth-visual {
+  position: relative;
+  overflow: hidden;
+  min-height: 630px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 45px;
+  color: white;
+  background:
+    radial-gradient(ellipse at 10% 10%, rgba(96, 165, 250, 0.4), transparent 45%),
+    radial-gradient(ellipse at 100% 90%, rgba(245, 158, 11, 0.35), transparent 40%),
+    linear-gradient(145deg, #0f172a, #1e3a8a 60%, #7c3aed);
+}
+.auth-visual::before,
+.auth-visual::after {
+  content: "";
+  position: absolute;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.auth-visual::before {
+  width: 360px; height: 360px;
+  right: -180px; top: 90px;
+}
+.auth-visual::after {
+  width: 270px; height: 270px;
+  right: -135px; top: 135px;
+}
+.auth-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 13px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.1);
+  border-radius: 30px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.auth-visual h1 {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(36px, 4vw, 48px);
+  line-height: 1.12;
+  letter-spacing: -1.8px;
+  margin: 25px 0 16px;
+  color: white;
+}
+.auth-visual h1 span { color: #fdba74; }
+.auth-visual p {
+  color: #e0e7ff;
+  line-height: 1.9;
+  font-size: 13px;
+  max-width: 350px;
+}
+.auth-artwork {
+  position: relative;
+  height: 195px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px 0;
+}
+.auth-art-circle {
+  width: 172px; height: 172px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #3b82f6, #f59e0b);
+  box-shadow: 0 25px 65px rgba(16, 11, 56, 0.25);
+}
+.auth-art-circle i { font-size: 75px; color: white; }
+.auth-float-card {
+  position: absolute;
+  padding: 13px 15px;
+  border: 1px solid rgba(255,255,255,0.65);
+  border-radius: 15px;
+  background: rgba(255,255,255,0.92);
+  color: #0f172a;
+  box-shadow: 0 12px 28px rgba(19, 15, 60, 0.2);
+  font-size: 12px;
+  font-weight: 750;
+  animation: authBob 4.5s ease-in-out infinite;
+}
+.auth-float-card i { color: var(--primary); margin-right: 6px; }
+.auth-float-one { top: 15px; left: 0; transform: rotate(-5deg); }
+.auth-float-two { bottom: 9px; right: 0; transform: rotate(4deg); animation-delay: -2s; }
+@keyframes authBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+
+.auth-benefits {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 12px;
+  color: #f1edff;
+  font-size: 12px;
+}
+.auth-benefits i { margin-right: 9px; color: #93c5fd; }
+
+.auth-form-side {
+  padding: 43px clamp(24px, 4vw, 54px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.auth-topline {
+  text-transform: uppercase;
+  color: var(--primary);
+  letter-spacing: 1.5px;
+  font-size: 10px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+.auth-form-side h2 {
+  font-family: 'Outfit', sans-serif;
+  font-size: 33px;
+  letter-spacing: -1px;
+  margin: 0 0 9px;
+}
+.auth-subheading {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.8;
+  margin: 0 0 25px;
+}
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 5px;
+  gap: 5px;
+  background: #eff6ff;
+  border-radius: 13px;
+  margin-bottom: 23px;
+}
+.auth-tab {
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 7px;
+  color: #64748b;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 750;
+  transition: all .2s;
+}
+.auth-tab.active {
+  background: white;
+  color: var(--primary);
+  box-shadow: 0 2px 8px rgba(44, 35, 93, 0.08);
+}
+.auth-field { margin-bottom: 16px; }
+.auth-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 750;
+  margin-bottom: 8px;
+  color: var(--heading);
+}
+.auth-input-wrap { position: relative; }
+.auth-input-wrap > i {
+  position: absolute;
+  top: 50%;
+  left: 14px;
+  transform: translateY(-50%);
+  color: #64748b;
+  font-size: 14px;
+}
+.auth-input-wrap input {
+  width: 100%;
+  height: 48px;
+  border: 1px solid var(--border);
+  outline: none;
+  border-radius: 12px;
+  padding: 0 43px 0 41px;
+  font-size: 12px;
+  color: var(--heading);
+  background: #fff;
+  transition: border .2s, box-shadow .2s;
+}
+.auth-input-wrap input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+.auth-password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  padding: 5px;
+  cursor: pointer;
+}
+.auth-submit-btn {
+  width: 100%;
+  height: 49px;
+  border: 0;
+  border-radius: 12px;
+  color: white;
+  background: linear-gradient(120deg, #2563eb, #7c3aed 70%, #f59e0b);
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+  font-size: 13px;
+  font-weight: 800;
+  transition: transform .2s;
+}
+.auth-submit-btn:hover { transform: translateY(-2px); }
+.google-btn {
+  width: 100%;
+  height: 46px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: white;
+  color: var(--heading);
+  font-size: 13px;
+  font-weight: 750;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  transition: background .2s, box-shadow .2s;
+}
+.google-btn:hover { background: #f8fafc; box-shadow: 0 3px 10px rgba(0,0,0,0.04); }
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+.auth-divider::before, .auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.auth-status {
+  display: none;
+  margin-top: 15px;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.auth-status.error { display: block; color: #a52d40; background: #fff0f2; }
+.auth-status.success { display: block; color: #176a48; background: #eaf9f1; }
+.auth-status.info { display: block; color: #1e3a8a; background: #eff6ff; }
+
+/* ONBOARDING OVERLAY FROM STUDY SPHERE */
+.onboarding-page {
+  display: none; position: fixed; inset: 0; z-index: 4500;
+  overflow-y: auto; background: #f8fafc;
+}
+.onboarding-page.open { display: flex; }
+.onboarding-shell {
+  width: 100%; min-height: 100vh;
+  display: grid; grid-template-columns: minmax(300px, .9fr) minmax(400px, 1.1fr);
+  background: white;
+}
+.onboarding-panel {
+  padding: clamp(28px, 5vw, 68px);
+  background: linear-gradient(145deg, #1e3a8a, #2563eb 55%, #7c3aed);
+  color: white; display: flex; flex-direction: column; justify-content: space-between;
+}
+.onboarding-form-panel {
+  padding: clamp(25px, 5vw, 66px);
+  display: flex; flex-direction: column; justify-content: center;
+  max-width: 720px; width: 100%; margin: auto;
+}
+
+/* TAB NAVIGATION SYSTEM */
+body.tab-navigation main > section { display: none !important; }
+body.tab-navigation main > section.active-page { display: block !important; }
+body.tab-navigation main > section.home-only { display: none !important; }
+body.tab-navigation main > section.home-only.active-home-extra { display: block !important; }
+body.tab-navigation main > section#home.active-page { display: block !important; }
+
+/* COLORFUL FOOTER AND RIBBON */
+.footer {
+  margin-top: 45px;
+  background: #0f172a;
+  color: white;
+  padding: 55px 0 25px;
+  border-top: 1px solid #1e293b;
+}
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 35px;
+}
+.footer-about { color: #94a3b8; font-size: 13px; max-width: 380px; margin-top: 16px; line-height: 1.8; }
+.footer h4 { color: white; font-size: 14px; margin: 0 0 14px; font-weight: 800; }
+.footer-links { display: grid; gap: 10px; }
+.footer-links a { font-size: 13px; color: #94a3b8; transition: color .2s; }
+.footer-links a:hover { color: white; }
+
+/* VIBRANT BOTTOM RIBBON */
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.12);
+  margin-top: 36px; padding-top: 22px;
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 14px; flex-wrap: wrap;
+  color: #94a3b8; font-size: 12px;
+}
+.creator-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 16px; border-radius: 30px;
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 50%, #f59e0b 100%);
+  color: #ffffff; font-weight: 800; font-size: 12px;
+  letter-spacing: .5px;
+  box-shadow: 0 4px 18px rgba(37, 99, 235, 0.45);
+  animation: pulseBadge 3s ease-in-out infinite alternate;
+}
+.creator-badge i { color: #fef08a; }
+@keyframes pulseBadge { 0% { transform: scale(1); box-shadow: 0 4px 18px rgba(37, 99, 235, 0.45); } 100% { transform: scale(1.03); box-shadow: 0 6px 24px rgba(124, 58, 237, 0.55); } }
+
+/* RESPONSIVE BREAKPOINTS */
+@media (max-width: 900px) {
+  .quick-access-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tools-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .auth-shell { grid-template-columns: 1fr; }
+  .auth-visual { min-height: auto; padding: 32px; }
+  .onboarding-shell { grid-template-columns: 1fr; }
+  .review-layout { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr; gap: 28px; }
+}
+@media (max-width: 760px) {
+  .menu-toggle { display: block; }
+  .nav-links {
+    display: none; position: absolute; top: 100%;
+    left: 4%; right: 4%; background: white; padding: 14px;
+    border: 1px solid var(--border); border-radius: 16px;
+    box-shadow: var(--shadow); flex-direction: column; align-items: stretch;
+  }
+  .nav-links.open { display: flex; }
+  .nav-links a { padding: 12px; border-bottom: 1px solid var(--border); }
+  .nav-actions { margin-left: auto; }
+}
+@media (max-width: 500px) {
+  .quick-access-grid { grid-template-columns: 1fr; }
+  .tools-grid { grid-template-columns: 1fr; }
+}
+</style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
 
-  <!-- ==================== GLOBAL TOAST ALERT SYSTEM ==================== -->
-  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+<body class="tab-navigation">
 
-  <!-- ==================== HEADER & NAVIGATION RIBBON ==================== -->
-  <header class="glass-nav fixed top-0 left-0 right-0 z-40 border-b border-slate-200/80 transition-all duration-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-20">
+<!-- COLORFUL TOP BANNER RIBBON -->
+<div class="top-note">
+  <i class="fa-solid fa-sparkles"></i>
+  NovaTools — All-in-one AI productivity, writing tools, and browser PDF utilities.
+</div>
+
+<!-- NAVBAR FROM STUDY SPHERE -->
+<header class="navbar">
+  <div class="container nav-inner">
+    <a href="#home" class="brand" data-tab="home">
+      <div class="brand-icon"><i class="fa-solid fa-cube"></i></div>
+      <div>
+        <div class="brand-name">Nova<span>Tools</span></div>
+        <div class="brand-caption">Smart Digital Utilities</div>
+      </div>
+    </a>
+
+    <nav class="nav-links" id="navLinks">
+      <a href="#home" class="active-tab" data-tab="home"><i class="fa-solid fa-house"></i> Home</a>
+      <a href="#ai-tools" data-tab="ai-tools"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Tools</a>
+      <a href="#pdf-tools" data-tab="pdf-tools"><i class="fa-solid fa-file-pdf"></i> PDF Tools</a>
+      <a href="#directory" data-tab="directory"><i class="fa-solid fa-compass"></i> AI Directory</a>
+      <a href="#communityReviews" data-tab="home"><i class="fa-solid fa-star"></i> Review Centre</a>
+    </nav>
+
+    <div class="nav-actions" id="navActions">
+      <button class="btn btn-light" id="navSignInBtn" type="button">
+        <i class="fa-regular fa-user"></i> Sign In
+      </button>
+      <button class="btn btn-primary" id="navGetStartedBtn" type="button">
+        Get Started <i class="fa-solid fa-arrow-right"></i>
+      </button>
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation" aria-expanded="false">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<!-- HOMEPAGE SECTION -->
+<section class="hero active-page" id="home">
+  <div class="container">
+    <div class="hero-box">
+      <!-- Background Video with Study Sphere's Source -->
+      <video class="hero-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
+        <source src="https://videos.pexels.com/video-files/5198157/5198157-hd_1920_1080_25fps.mp4" type="video/mp4">
+        <source src="https://videos.pexels.com/video-files/3129957/3129957-hd_1920_1080_30fps.mp4" type="video/mp4">
+      </video>
+
+      <div class="hero-content">
+        <div class="eyebrow"><i class="fa-solid fa-sparkles"></i> YOUR PRODUCTIVITY WORKSPACE</div>
+        <h1>Work faster.<br>Create <span>smarter.</span></h1>
+        <p>NovaTools brings AI writing assistants, instant client-side PDF tools, and a discovery directory of top AI tools together into one unified workspace.</p>
+
+        <div class="hero-buttons">
+          <button class="btn btn-white" data-tab="ai-tools"><i class="fa-solid fa-wand-magic-sparkles"></i> Explore AI Tools</button>
+          <button class="btn btn-glass" data-tab="pdf-tools"><i class="fa-solid fa-file-pdf"></i> Open PDF Suite</button>
+          <button class="btn btn-white" data-tab="directory"><i class="fa-solid fa-compass"></i> AI Directory</button>
+        </div>
+
+        <div class="hero-trust">
+          <span><i class="fa-solid fa-circle-check"></i> Private in-browser PDF tools</span>
+          <span><i class="fa-solid fa-circle-check"></i> Fast heuristic writing tools</span>
+          <span><i class="fa-solid fa-circle-check"></i> Verified AI directory</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUICK-ACCESS SECTION (DIRECTLY UNDER HERO) -->
+<section class="section home-only active-home-extra" id="quickAccess">
+  <div class="container">
+    <div class="section-heading">
+      <div>
+        <div class="section-kicker">Jump right in</div>
+        <h2>Quick access to your tools</h2>
+        <p>Choose an area to open its dedicated workspace.</p>
+      </div>
+    </div>
+
+    <div class="quick-access-grid">
+      <div class="quick-link-card" data-tab="ai-tools">
+        <span class="quick-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+        <div>
+          <strong>AI &amp; Writing Helpers</strong>
+          <small>Summarise, improve &amp; draft</small>
+        </div>
+      </div>
+
+      <div class="quick-link-card" data-tab="pdf-tools">
+        <span class="quick-icon"><i class="fa-solid fa-file-pdf"></i></span>
+        <div>
+          <strong>PDF Tools Suite</strong>
+          <small>Create &amp; merge PDFs locally</small>
+        </div>
+      </div>
+
+      <div class="quick-link-card" data-tab="directory">
+        <span class="quick-icon"><i class="fa-solid fa-compass"></i></span>
+        <div>
+          <strong>AI Directory</strong>
+          <small>Discover top AI platforms</small>
+        </div>
+      </div>
+
+      <div class="quick-link-card" id="quickRateBtn">
+        <span class="quick-icon"><i class="fa-solid fa-star"></i></span>
+        <div>
+          <strong>Review Centre</strong>
+          <small>Rate your NovaTools experience</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REAL REVIEW WALL RIGHT ON THE HOMEPAGE (ABOVE THE BOTTOM RIBBON) -->
+<section class="section home-only active-home-extra" id="communityReviews">
+  <div class="container">
+    <div class="section-heading">
+      <div>
+        <div class="section-kicker">User Feedback</div>
+        <h2>Reviews from our community</h2>
+        <p>Share your experience and help make NovaTools better.</p>
+      </div>
+      <button class="btn btn-primary" type="button" id="openReviewBtn">
+        <i class="fa-solid fa-star"></i> Write a Review
+      </button>
+    </div>
+
+    <div class="review-layout">
+      <div class="review-highlight">
+        <div class="review-big-icon"><i class="fa-solid fa-heart"></i></div>
+        <div>
+          <h3>Your feedback matters</h3>
+          <p>Tell us what is helpful and what utilities we can build next for your workflow.</p>
+        </div>
+        <button class="btn btn-white" type="button" id="highlightWriteReviewBtn">
+          <i class="fa-solid fa-pen"></i> Share Your Review
+        </button>
+      </div>
+
+      <div class="review-panel">
+        <div class="review-stars-display" aria-label="Five star rating">★★★★★</div>
+        <h3>From our community</h3>
+        <p>Reviews submitted on this device will appear below in real time.</p>
+        <div class="review-list" id="reviewList" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEDICATED AI TOOLS PAGE -->
+<section class="section" id="ai-tools">
+  <div class="container">
+    <div class="section-heading">
+      <div>
+        <div class="section-kicker">Writing &amp; Productivity Assistants</div>
+        <h2>AI Productivity Suite</h2>
+        <p>Select any tool to load its interactive generator in the workspace below.</p>
+      </div>
+      <button class="btn btn-light" data-tab="home"><i class="fa-solid fa-arrow-left"></i> Back to Home</button>
+    </div>
+
+    <div class="grid tools-grid">
+      <div class="tool-card">
+        <div>
+          <div class="tool-icon blue"><i class="fa-solid fa-pen-nib"></i></div>
+          <h3>Writing Assistant</h3>
+          <p>Draft articles, structured outlines, and proposals from raw thoughts.</p>
+        </div>
+        <button class="btn btn-primary" onclick="setAITool('writer')">Open Tool</button>
+      </div>
+
+      <div class="tool-card">
+        <div>
+          <div class="tool-icon purple"><i class="fa-solid fa-compress"></i></div>
+          <h3>Text Summariser</h3>
+          <p>Condense lengthy articles into crisp bullet points and takeaways.</p>
+        </div>
+        <button class="btn btn-primary" onclick="setAITool('summariser')">Open Tool</button>
+      </div>
+
+      <div class="tool-card">
+        <div>
+          <div class="tool-icon cyan"><i class="fa-solid fa-wand-magic"></i></div>
+          <h3>Text Improver</h3>
+          <p>Enhance vocabulary, flow, tone, and sentence structure.</p>
+        </div>
+        <button class="btn btn-primary" onclick="setAITool('improver')">Open Tool</button>
+      </div>
+
+      <div class="tool-card">
+        <div>
+          <div class="tool-icon amber"><i class="fa-solid fa-envelope"></i></div>
+          <h3>Email Helper</h3>
+          <p>Generate polite, professional emails ready to review and send.</p>
+        </div>
+        <button class="btn btn-primary" onclick="setAITool('email')">Open Tool</button>
+      </div>
+
+      <div class="tool-card">
+        <div>
+          <div class="tool-icon emerald"><i class="fa-solid fa-book-bookmark"></i></div>
+          <h3>Study Notes</h3>
+          <p>Organise information into structured headings, notes, and study flashcards.</p>
+        </div>
+        <button class="btn btn-primary" onclick="setAITool('notes')">Open Tool</button>
+      </div>
+
+      <div class="tool-card">
+        <div>
+          <div class="tool-icon purple"><i class="fa-solid fa-circle-question"></i></div>
+          <h3>Quiz Planner</h3>
+          <p>Create test questions and practice quizzes based on your provided text.</p>
+        </div>
+        <button class="btn btn-primary" onclick="setAITool('quiz')">Open Tool</button>
+      </div>
+    </div>
+
+    <!-- Active Tool Workspace -->
+    <div class="tool-workspace" id="aiWorkspace">
+      <h3 id="workspaceTitle"><i class="fa-solid fa-pen-nib" style="color:var(--primary)"></i> Writing Assistant</h3>
+      <p id="workspaceDesc" style="color:var(--muted);font-size:13px;margin:4px 0 18px">Generate a structured draft using client-side algorithms.</p>
+      
+      <div class="workspace-form">
+        <div class="form-group">
+          <label for="aiInputText">Enter your text or topic notes:</label>
+          <textarea id="aiInputText" placeholder="Paste your text or notes here..."></textarea>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-primary" id="aiProcessBtn" type="button"><i class="fa-solid fa-bolt"></i> Generate Output</button>
+          <button class="btn btn-light" id="aiCopyBtn" type="button"><i class="fa-regular fa-copy"></i> Copy Output</button>
+        </div>
+
+        <div class="result-box" id="aiResultBox">Your formatted result will appear here.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEDICATED PDF TOOLS PAGE -->
+<section class="section" id="pdf-tools">
+  <div class="container">
+    <div class="section-heading">
+      <div>
+        <div class="section-kicker">Client-Side Document Processing</div>
+        <h2>PDF Tools Suite</h2>
+        <p>100% private. All PDF operations run locally in your browser using <code>pdf-lib</code>.</p>
+      </div>
+      <button class="btn btn-light" data-tab="home"><i class="fa-solid fa-arrow-left"></i> Back to Home</button>
+    </div>
+
+    <div class="grid tools-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+      <!-- Create PDF Tool -->
+      <div class="tool-workspace" style="margin-top:0">
+        <h3><i class="fa-solid fa-file-circle-plus" style="color:var(--primary)"></i> Create PDF from Text</h3>
+        <p style="color:var(--muted);font-size:13px;margin:4px 0 16px">Enter a title and document body to generate a downloadable PDF file.</p>
         
-        <!-- Logo -->
-        <a href="#home" onclick="navigate('home')" class="flex items-center gap-3 group focus:outline-none">
-          <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-600 via-brand-500 to-accent-500 flex items-center justify-center text-white shadow-md shadow-brand-500/25 group-hover:scale-105 transition-transform duration-200">
-            <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
+        <div class="workspace-form">
+          <div class="form-group">
+            <label for="pdfDocTitle">Document Title</label>
+            <input type="text" id="pdfDocTitle" placeholder="e.g., Project Proposal">
           </div>
+          <div class="form-group">
+            <label for="pdfDocContent">Document Content</label>
+            <textarea id="pdfDocContent" placeholder="Type or paste your text here..."></textarea>
+          </div>
+          <button class="btn btn-primary" id="btnCreatePdf" type="button"><i class="fa-solid fa-download"></i> Generate &amp; Download PDF</button>
+          <div id="createPdfStatus" style="font-size:12px;font-weight:700"></div>
+        </div>
+      </div>
+
+      <!-- Merge PDF Tool -->
+      <div class="tool-workspace" style="margin-top:0">
+        <h3><i class="fa-solid fa-layer-group" style="color:var(--accent-purple)"></i> Merge PDF Files</h3>
+        <p style="color:var(--muted);font-size:13px;margin:4px 0 16px">Select 2 or more PDF files from your device to merge them together.</p>
+        
+        <div class="workspace-form">
+          <div class="form-group">
+            <label for="pdfFilesInput">Select PDF Files</label>
+            <input type="file" id="pdfFilesInput" accept="application/pdf" multiple>
+          </div>
+          <div id="selectedPdfsList" style="font-size:12px;color:var(--muted);min-height:50px">No files selected.</div>
+          <button class="btn btn-primary" id="btnMergePdf" type="button"><i class="fa-solid fa-object-ungroup"></i> Merge &amp; Download Combined PDF</button>
+          <div id="mergePdfStatus" style="font-size:12px;font-weight:700"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEDICATED AI DIRECTORY PAGE -->
+<section class="section" id="directory">
+  <div class="container">
+    <div class="section-heading">
+      <div>
+        <div class="section-kicker">Curated AI Tools</div>
+        <h2>AI Tools Directory</h2>
+        <p>Explore leading artificial intelligence platforms across writing, research, design, and productivity.</p>
+      </div>
+      <button class="btn btn-light" data-tab="home"><i class="fa-solid fa-arrow-left"></i> Back to Home</button>
+    </div>
+
+    <!-- Category Filter Bar -->
+    <div class="category-filter-bar">
+      <button class="filter-btn active" data-dir-filter="all">All Tools</button>
+      <button class="filter-btn" data-dir-filter="writing">Writing</button>
+      <button class="filter-btn" data-dir-filter="research">Research</button>
+      <button class="filter-btn" data-dir-filter="design">Design</button>
+      <button class="filter-btn" data-dir-filter="productivity">Productivity</button>
+    </div>
+
+    <!-- Filterable Cards Grid -->
+    <div class="grid tools-grid" id="directoryGrid">
+      <div class="tool-card" data-category="writing productivity">
+        <div>
+          <div class="tool-icon emerald"><i class="fa-solid fa-robot"></i></div>
+          <span class="card-badge">Writing · Productivity</span>
+          <h3 style="margin-top:10px">ChatGPT</h3>
+          <p>OpenAI's state-of-the-art conversational model for drafting, coding, and problem solving.</p>
+        </div>
+        <a class="btn btn-light" href="https://chatgpt.com" target="_blank" rel="noopener noreferrer">Visit Website <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+      </div>
+
+      <div class="tool-card" data-category="research">
+        <div>
+          <div class="tool-icon cyan"><i class="fa-solid fa-magnifying-glass"></i></div>
+          <span class="card-badge">Research</span>
+          <h3 style="margin-top:10px">Perplexity AI</h3>
+          <p>An AI-powered search engine providing cited, accurate answers in real time.</p>
+        </div>
+        <a class="btn btn-light" href="https://www.perplexity.ai" target="_blank" rel="noopener noreferrer">Visit Website <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+      </div>
+
+      <div class="tool-card" data-category="design">
+        <div>
+          <div class="tool-icon blue"><i class="fa-solid fa-palette"></i></div>
+          <span class="card-badge">Design</span>
+          <h3 style="margin-top:10px">Canva Magic Studio</h3>
+          <p>All-in-one graphic design platform with generative AI for social posts and decks.</p>
+        </div>
+        <a class="btn btn-light" href="https://www.canva.com" target="_blank" rel="noopener noreferrer">Visit Website <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+      </div>
+
+      <div class="tool-card" data-category="productivity writing">
+        <div>
+          <div class="tool-icon amber"><i class="fa-solid fa-note-sticky"></i></div>
+          <span class="card-badge">Productivity</span>
+          <h3 style="margin-top:10px">Notion AI</h3>
+          <p>Connected workspace platform with built-in AI writing and project tracking.</p>
+        </div>
+        <a class="btn btn-light" href="https://www.notion.so" target="_blank" rel="noopener noreferrer">Visit Website <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+      </div>
+
+      <div class="tool-card" data-category="writing">
+        <div>
+          <div class="tool-icon emerald"><i class="fa-solid fa-check-double"></i></div>
+          <span class="card-badge">Writing</span>
+          <h3 style="margin-top:10px">Grammarly</h3>
+          <p>Real-time grammar verification, tone adjustor, and writing refinement.</p>
+        </div>
+        <a class="btn btn-light" href="https://www.grammarly.com" target="_blank" rel="noopener noreferrer">Visit Website <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+      </div>
+
+      <div class="tool-card" data-category="design">
+        <div>
+          <div class="tool-icon purple"><i class="fa-solid fa-wand-sparkles"></i></div>
+          <span class="card-badge">Design</span>
+          <h3 style="margin-top:10px">Adobe Express</h3>
+          <p>Generative imagery, font effects, and quick video edits powered by Adobe Firefly.</p>
+        </div>
+        <a class="btn btn-light" href="https://www.adobe.com/express/" target="_blank" rel="noopener noreferrer">Visit Website <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FULL-PAGE AUTH EXPERIENCE (EXACT MATCH TO STUDY SPHERE AUTH.HTML) -->
+<div class="auth-page-container" id="authPage">
+  <div class="auth-shell">
+    <section class="auth-visual">
+      <div>
+        <div class="auth-pill"><i class="fa-solid fa-sparkles"></i> YOUR PRODUCTIVITY SPACE</div>
+        <h1>Work faster.<br>Think clearer.<br><span>Create more.</span></h1>
+        <p>Make every session count. Keep your digital utilities organised and supercharge your daily workflow.</p>
+      </div>
+
+      <div class="auth-artwork" aria-hidden="true">
+        <div class="auth-art-circle"><i class="fa-solid fa-cube"></i></div>
+        <div class="auth-float-card auth-float-one"><i class="fa-solid fa-bolt"></i> Instant PDF Tools</div>
+        <div class="auth-float-card auth-float-two"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Writing Helpers</div>
+      </div>
+
+      <div class="auth-benefits">
+        <div><i class="fa-solid fa-circle-check"></i> One place for all your productivity tools</div>
+        <div><i class="fa-solid fa-circle-check"></i> A simple space designed for creators &amp; students</div>
+        <div><i class="fa-solid fa-circle-check"></i> Protected by Supabase authentication</div>
+      </div>
+    </section>
+
+    <section class="auth-form-side">
+      <div class="auth-topline">Welcome to NovaTools</div>
+      <h2 id="authFormTitle">Welcome back!</h2>
+      <p class="auth-subheading" id="authFormSubtitle">Sign in to continue to your productivity suite.</p>
+
+      <div class="auth-tabs" role="tablist">
+        <button class="auth-tab active" id="authLoginTab" type="button"><i class="fa-solid fa-right-to-bracket"></i> Sign In</button>
+        <button class="auth-tab" id="authSignupTab" type="button"><i class="fa-solid fa-user-plus"></i> Create Account</button>
+      </div>
+
+      <!-- Google OAuth Option -->
+      <button class="google-btn" id="btnGoogleAuth" type="button">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
+        Continue with Google
+      </button>
+
+      <div class="auth-divider">OR WITH EMAIL</div>
+
+      <form id="authEmailForm">
+        <div class="auth-field">
+          <label for="authEmail">Email address</label>
+          <div class="auth-input-wrap">
+            <i class="fa-regular fa-envelope"></i>
+            <input type="email" id="authEmail" placeholder="you@example.com" required>
+          </div>
+        </div>
+
+        <div class="auth-field">
+          <label for="authPassword">Password</label>
+          <div class="auth-input-wrap">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" id="authPassword" placeholder="Enter your password" required minlength="6">
+            <button type="button" class="auth-password-toggle" id="btnToggleAuthPassword" aria-label="Toggle password visibility"><i class="fa-regular fa-eye"></i></button>
+          </div>
+        </div>
+
+        <div id="confirmPasswordGroup" class="auth-field" style="display:none">
+          <label for="authConfirmPassword">Confirm Password</label>
+          <div class="auth-input-wrap">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" id="authConfirmPassword" placeholder="Confirm your password">
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;font-size:12px">
+          <button type="button" id="btnForgotPassword" style="border:0;background:none;color:var(--primary);font-weight:700;padding:0;cursor:pointer">Forgot Password?</button>
+          <button type="button" data-tab="home" style="border:0;background:none;color:var(--muted);font-weight:600;padding:0;cursor:pointer"><i class="fa-solid fa-arrow-left"></i> Back to Home</button>
+        </div>
+
+        <button class="auth-submit-btn" id="authSubmitBtn" type="submit">Sign In <i class="fa-solid fa-arrow-right"></i></button>
+        <div class="auth-status" id="authStatus"></div>
+      </form>
+    </section>
+  </div>
+</div>
+
+<!-- FULLSCREEN ONBOARDING FLOW -->
+<div class="onboarding-page" id="onboardingPage">
+  <div class="onboarding-shell">
+    <div class="onboarding-panel">
+      <div style="display:flex;align-items:center;gap:10px;font-size:22px;font-weight:800">
+        <i class="fa-solid fa-cube"></i> NovaTools
+      </div>
+      <div>
+        <span style="font-size:11px;font-weight:800;letter-spacing:1.5px;color:#93c5fd">FIRST-TIME SETUP</span>
+        <h2 style="font-size:clamp(32px, 3.5vw, 44px);color:white;margin:12px 0">Personalise your workspace.</h2>
+        <p style="color:#dbeafe;font-size:14px;line-height:1.75">A few quick questions to configure your NovaTools experience.</p>
+      </div>
+      <div style="font-size:11px;color:#cbd5e1"><i class="fa-solid fa-shield-halved"></i> Protected user profile</div>
+    </div>
+
+    <div class="onboarding-form-panel">
+      <h2>Welcome aboard!</h2>
+      <p style="color:var(--muted);font-size:13px;margin:4px 0 24px">Complete your setup questionnaire to get started.</p>
+
+      <form id="onboardingForm" class="workspace-form">
+        <div class="form-group">
+          <label for="obName">1. What is your name? *</label>
+          <input type="text" id="obName" placeholder="Enter your full name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="obRole">2. What best describes you? *</label>
+          <select id="obRole" required>
+            <option value="">Select your role</option>
+            <option value="Student">Student</option>
+            <option value="Teacher / Educator">Teacher / Educator</option>
+            <option value="Professional">Professional</option>
+            <option value="Creator / Designer">Creator / Designer</option>
+            <option value="Business Owner">Business Owner</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="obReason">3. Why are you using NovaTools? *</label>
+          <select id="obReason" required>
+            <option value="">Select your purpose</option>
+            <option value="Study and Learning">Study and Learning</option>
+            <option value="Writing and Communication">Writing and Communication</option>
+            <option value="Work and Productivity">Work and Productivity</option>
+            <option value="PDF and Document Tasks">PDF and Document Tasks</option>
+            <option value="Creative Projects">Creative Projects</option>
+            <option value="Exploring AI Tools">Exploring AI Tools</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="obSource">4. Where did you hear about NovaTools? *</label>
+          <select id="obSource" required>
+            <option value="">Select source</option>
+            <option value="Google / Search Engine">Google / Search Engine</option>
+            <option value="YouTube">YouTube</option>
+            <option value="Social Media">Social Media</option>
+            <option value="Friend or Family">Friend or Family</option>
+            <option value="School / College / Workplace">School / College / Workplace</option>
+            <option value="Online Community / Website">Online Community / Website</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="obFeedback">5. Additional preferences or suggestions (Optional)</label>
+          <textarea id="obFeedback" placeholder="What tools would you like to see next?"></textarea>
+        </div>
+
+        <button class="btn btn-primary" style="padding:14px;margin-top:10px" type="submit">Complete Setup &amp; Enter NovaTools <i class="fa-solid fa-arrow-right"></i></button>
+      </form>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- FOOTER WITH VIBRANT COLOR RIBBON -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a href="#home" class="brand" data-tab="home">
+          <div class="brand-icon"><i class="fa-solid fa-cube"></i></div>
           <div>
-            <span class="font-heading font-extrabold text-2xl tracking-tight bg-gradient-to-r from-brand-900 via-brand-700 to-accent-600 bg-clip-text text-transparent">
-              Nova<span class="text-brand-600">Tools</span>
-            </span>
-            <span class="block text-[10px] uppercase tracking-wider font-semibold text-slate-400 -mt-1">AI Productivity Hub</span>
+            <div class="brand-name" style="color:white">Nova<span>Tools</span></div>
+            <div class="brand-caption" style="color:#94a3b8">Smart Digital Utilities</div>
           </div>
         </a>
-
-        <!-- Desktop Navigation Ribbon -->
-        <nav class="hidden md:flex items-center gap-1 font-medium text-slate-600 text-sm">
-          <button onclick="navigate('home')" class="nav-link px-4 py-2 rounded-xl hover:text-brand-600 hover:bg-slate-100/80 transition" data-nav="home">Home</button>
-          <button onclick="navigate('ai-tools')" class="nav-link px-4 py-2 rounded-xl hover:text-brand-600 hover:bg-slate-100/80 transition" data-nav="ai-tools">AI Tools</button>
-          <button onclick="navigate('pdf-tools')" class="nav-link px-4 py-2 rounded-xl hover:text-brand-600 hover:bg-slate-100/80 transition" data-nav="pdf-tools">PDF Tools</button>
-          <button onclick="navigate('ai-directory')" class="nav-link px-4 py-2 rounded-xl hover:text-brand-600 hover:bg-slate-100/80 transition" data-nav="ai-directory">AI Directory</button>
-          <button onclick="navigate('review-centre')" class="nav-link px-4 py-2 rounded-xl hover:text-brand-600 hover:bg-slate-100/80 transition" data-nav="review-centre">Review Centre</button>
-        </nav>
-
-        <!-- Auth Status Actions (Desktop) -->
-        <div class="hidden md:flex items-center gap-3">
-          <!-- Signed Out UI -->
-          <div id="nav-auth-signed-out" class="flex items-center gap-3">
-            <button onclick="navigate('signin')" class="px-4 py-2 text-sm font-semibold text-slate-700 hover:text-brand-600 rounded-xl transition">Sign In</button>
-            <button onclick="navigate('signup')" class="px-5 py-2.5 text-sm font-semibold text-white bg-brand-600 hover:bg-brand-700 rounded-xl shadow-md shadow-brand-600/30 transition transform hover:-translate-y-0.5">
-              Get Started
-            </button>
-          </div>
-          
-          <!-- Signed In UI -->
-          <div id="nav-auth-signed-in" class="hidden flex items-center gap-3">
-            <button onclick="navigate('profile')" class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-white hover:border-brand-300 text-slate-700 text-sm font-medium transition shadow-sm">
-              <div class="w-7 h-7 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-xs" id="nav-user-initial">U</div>
-              <span id="nav-user-name" class="max-w-[120px] truncate">User</span>
-              <i class="fa-solid fa-angle-right text-xs text-slate-400"></i>
-            </button>
-            <button onclick="handleSignOut()" class="p-2 text-slate-400 hover:text-red-500 rounded-xl transition" title="Sign Out">
-              <i class="fa-solid fa-arrow-right-from-bracket"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Mobile Menu Toggle Button -->
-        <button id="mobile-menu-btn" class="md:hidden text-slate-600 hover:text-brand-600 focus:outline-none p-2 rounded-xl" aria-label="Toggle Navigation">
-          <i class="fa-solid fa-bars text-xl"></i>
-        </button>
-
-      </div>
-    </div>
-
-    <!-- Mobile Dropdown Menu -->
-    <div id="mobile-menu" class="hidden md:hidden border-t border-slate-200/80 bg-white/95 backdrop-blur-md px-4 pt-3 pb-6 space-y-2">
-      <button onclick="navigate('home')" class="block w-full text-left px-3 py-2.5 rounded-xl text-base font-medium text-slate-700 hover:bg-brand-50 hover:text-brand-600">Home</button>
-      <button onclick="navigate('ai-tools')" class="block w-full text-left px-3 py-2.5 rounded-xl text-base font-medium text-slate-700 hover:bg-brand-50 hover:text-brand-600">AI Tools</button>
-      <button onclick="navigate('pdf-tools')" class="block w-full text-left px-3 py-2.5 rounded-xl text-base font-medium text-slate-700 hover:bg-brand-50 hover:text-brand-600">PDF Tools</button>
-      <button onclick="navigate('ai-directory')" class="block w-full text-left px-3 py-2.5 rounded-xl text-base font-medium text-slate-700 hover:bg-brand-50 hover:text-brand-600">AI Directory</button>
-      <button onclick="navigate('review-centre')" class="block w-full text-left px-3 py-2.5 rounded-xl text-base font-medium text-slate-700 hover:bg-brand-50 hover:text-brand-600">Review Centre</button>
-      
-      <div class="pt-4 border-t border-slate-100 flex flex-col gap-2">
-        <div id="mobile-auth-signed-out" class="flex flex-col gap-2">
-          <button onclick="navigate('signin')" class="w-full py-2.5 text-center text-sm font-semibold text-slate-700 border border-slate-200 rounded-xl">Sign In</button>
-          <button onclick="navigate('signup')" class="w-full py-2.5 text-center text-sm font-semibold text-white bg-brand-600 rounded-xl">Get Started</button>
-        </div>
-        <div id="mobile-auth-signed-in" class="hidden flex flex-col gap-2">
-          <button onclick="navigate('profile')" class="w-full py-2.5 text-center text-sm font-semibold text-slate-700 border border-slate-200 rounded-xl flex items-center justify-center gap-2">
-            <i class="fa-solid fa-user-circle text-brand-600"></i> My Profile (<span id="mobile-user-name">User</span>)
-          </button>
-          <button onclick="handleSignOut()" class="w-full py-2 text-center text-sm font-semibold text-red-600 hover:bg-red-50 rounded-xl">Sign Out</button>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- Spacer for fixed navbar -->
-  <div class="h-20"></div>
-
-  <!-- MAIN APP ROUTER CONTAINER -->
-  <main class="flex-grow">
-
-    <!-- =============================================================== -->
-    <!-- VIEW 1: HOMEPAGE (STUDY SPHERE STYLE)                          -->
-    <!-- =============================================================== -->
-    <section id="view-home" class="view-container active">
-      
-      <!-- HERO SECTION WITH VERIFIED VISIBLE HTML5 VIDEO -->
-      <div class="hero-video-wrapper flex items-center justify-center bg-brand-navy text-white">
-        
-        <!-- Native Video Element (z-index 1) -->
-        <video 
-          id="hero-video-player"
-          class="hero-bg-video" 
-          autoplay 
-          loop 
-          muted 
-          playsinline
-          preload="auto"
-          poster="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1920&q=80">
-          <!-- Primary reliable coding & technology stream -->
-          <source src="https://assets.mixkit.co/videos/preview/mixkit-software-developer-working-on-code-screen-close-up-1728-large.mp4" type="video/mp4">
-          <!-- Backup direct MP4 public mirror -->
-          <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
-        </video>
-
-        <!-- Canvas Fallback in case browser blocks video totally -->
-        <canvas id="hero-fallback-canvas" class="hero-bg-canvas"></canvas>
-
-        <!-- Refined Dark Blue/Purple Gradient Overlay (z-index 2) -->
-        <div class="hero-overlay"></div>
-
-        <!-- Hero Content Layer (z-index 3, NO SEARCH BAR) -->
-        <div class="hero-content max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-20 lg:py-28">
-          
-          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-indigo-200 text-xs sm:text-sm font-medium mb-6 shadow-sm">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-            <span>All-In-One AI & Document Productivity Hub</span>
-          </div>
-
-          <h1 class="font-heading text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white mb-6 leading-tight">
-            Work Smarter with NovaTools.<br>
-            <span class="bg-gradient-to-r from-blue-200 via-indigo-200 to-purple-300 bg-clip-text text-transparent">
-              AI Helpers, PDF Studio & Discovery.
-            </span>
-          </h1>
-
-          <p class="max-w-2xl mx-auto text-base sm:text-lg lg:text-xl text-slate-200/90 font-light mb-10 leading-relaxed">
-            A fast, distraction-free productivity space built for students, creators, and professionals. Transform raw drafts, merge and format PDF files, and explore top AI models in one place.
-          </p>
-
-          <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button onclick="navigate('ai-tools')" class="w-full sm:w-auto px-8 py-4 rounded-xl font-semibold bg-brand-600 hover:bg-brand-700 text-white shadow-lg shadow-brand-600/40 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
-              <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
-              Launch AI Tools
-            </button>
-            <button onclick="navigate('pdf-tools')" class="w-full sm:w-auto px-8 py-4 rounded-xl font-semibold bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2">
-              <i class="fa-solid fa-file-pdf text-sm text-red-300"></i>
-              Open PDF Studio
-            </button>
-          </div>
-
-          <!-- Video Playback Status Indicator & Manual Play Trigger -->
-          <div class="mt-8 flex items-center justify-center gap-2 text-xs text-slate-400">
-            <span id="video-status-indicator" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/40 backdrop-blur-sm border border-white/10">
-              <i class="fa-solid fa-circle-play text-emerald-400"></i>
-              <span>Live Background Active</span>
-            </span>
-            <button id="toggle-video-btn" onclick="toggleHeroVideo()" class="px-2.5 py-1 rounded-full bg-black/40 hover:bg-black/60 border border-white/10 text-slate-300 transition" title="Toggle Play / Pause">
-              <i class="fa-solid fa-pause text-[10px]"></i>
-            </button>
-          </div>
-
-        </div>
+        <p class="footer-about">An all-in-one productivity platform bringing writing assistants, browser PDF utilities, and AI discovery into one modern, accessible website.</p>
       </div>
 
-      <!-- QUICK-ACCESS CARDS SECTION -->
-      <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 relative z-30 mb-20">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          
-          <!-- Card 1: AI & Writing Helpers -->
-          <div onclick="navigate('ai-tools')" class="study-card cursor-pointer bg-white rounded-2xl p-6 border border-slate-200/90 shadow-sm flex flex-col justify-between group">
-            <div>
-              <div class="w-12 h-12 rounded-xl bg-blue-50 text-brand-600 flex items-center justify-center text-xl mb-4 group-hover:bg-brand-600 group-hover:text-white transition duration-200">
-                <i class="fa-solid fa-pen-nib"></i>
-              </div>
-              <h3 class="font-heading font-bold text-lg text-slate-900 mb-2 group-hover:text-brand-600 transition">AI & Writing Helpers</h3>
-              <p class="text-sm text-slate-500 leading-relaxed">Summarise texts, polish sentences, structure professional emails, and prepare study quiz outlines.</p>
-            </div>
-            <div class="mt-6 flex items-center text-sm font-semibold text-brand-600 gap-1 group-hover:gap-2 transition-all">
-              <span>Open Tools</span>
-              <i class="fa-solid fa-arrow-right text-xs"></i>
-            </div>
-          </div>
-
-          <!-- Card 2: PDF Tools -->
-          <div onclick="navigate('pdf-tools')" class="study-card cursor-pointer bg-white rounded-2xl p-6 border border-slate-200/90 shadow-sm flex flex-col justify-between group">
-            <div>
-              <div class="w-12 h-12 rounded-xl bg-red-50 text-red-600 flex items-center justify-center text-xl mb-4 group-hover:bg-red-600 group-hover:text-white transition duration-200">
-                <i class="fa-solid fa-file-pdf"></i>
-              </div>
-              <h3 class="font-heading font-bold text-lg text-slate-900 mb-2 group-hover:text-red-600 transition">PDF Tools</h3>
-              <p class="text-sm text-slate-500 leading-relaxed">Create formatted PDF documents from scratch and merge multiple PDF files right in your browser.</p>
-            </div>
-            <div class="mt-6 flex items-center text-sm font-semibold text-red-600 gap-1 group-hover:gap-2 transition-all">
-              <span>Open PDF Studio</span>
-              <i class="fa-solid fa-arrow-right text-xs"></i>
-            </div>
-          </div>
-
-          <!-- Card 3: AI Directory -->
-          <div onclick="navigate('ai-directory')" class="study-card cursor-pointer bg-white rounded-2xl p-6 border border-slate-200/90 shadow-sm flex flex-col justify-between group">
-            <div>
-              <div class="w-12 h-12 rounded-xl bg-purple-50 text-accent-600 flex items-center justify-center text-xl mb-4 group-hover:bg-accent-600 group-hover:text-white transition duration-200">
-                <i class="fa-solid fa-compass"></i>
-              </div>
-              <h3 class="font-heading font-bold text-lg text-slate-900 mb-2 group-hover:text-accent-600 transition">AI Directory</h3>
-              <p class="text-sm text-slate-500 leading-relaxed">Discover top artificial intelligence platforms categorized for research, design, writing, and coding.</p>
-            </div>
-            <div class="mt-6 flex items-center text-sm font-semibold text-accent-600 gap-1 group-hover:gap-2 transition-all">
-              <span>Explore Directory</span>
-              <i class="fa-solid fa-arrow-right text-xs"></i>
-            </div>
-          </div>
-
-          <!-- Card 4: Review Centre -->
-          <div onclick="navigate('review-centre')" class="study-card cursor-pointer bg-white rounded-2xl p-6 border border-slate-200/90 shadow-sm flex flex-col justify-between group">
-            <div>
-              <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl mb-4 group-hover:bg-amber-500 group-hover:text-white transition duration-200">
-                <i class="fa-solid fa-star"></i>
-              </div>
-              <h3 class="font-heading font-bold text-lg text-slate-900 mb-2 group-hover:text-amber-600 transition">Review Centre</h3>
-              <p class="text-sm text-slate-500 leading-relaxed">Read user ratings, share your feedback, and suggest feature additions for upcoming updates.</p>
-            </div>
-            <div class="mt-6 flex items-center text-sm font-semibold text-amber-600 gap-1 group-hover:gap-2 transition-all">
-              <span>View Reviews</span>
-              <i class="fa-solid fa-arrow-right text-xs"></i>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      <!-- REVIEW CENTRE PROMOTION BANNER -->
-      <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
-        <div class="rounded-3xl bg-gradient-to-r from-brand-900 via-indigo-950 to-purple-950 text-white p-8 sm:p-12 shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8 border border-white/10">
-          <div class="relative z-10 max-w-xl">
-            <span class="inline-block px-3 py-1 bg-white/10 rounded-full text-xs font-semibold text-indigo-200 uppercase tracking-wider mb-3">Community Feedback</span>
-            <h2 class="font-heading text-2xl sm:text-3xl font-extrabold tracking-tight mb-3">Your Feedback Shapes NovaTools</h2>
-            <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
-              We continually upgrade our utilities based on your suggestions. Share your experience, rate your favorite tools, or request new features.
-            </p>
-          </div>
-          <div class="relative z-10 shrink-0">
-            <button onclick="navigate('review-centre')" class="px-7 py-3.5 bg-white text-brand-900 hover:bg-slate-100 font-semibold rounded-xl shadow-lg transition transform hover:-translate-y-0.5 flex items-center gap-2">
-              <i class="fa-solid fa-pen-to-square text-brand-600"></i>
-              Write a Review
-            </button>
-          </div>
-        </div>
-      </section>
-
-    </section>
-
-    <!-- =============================================================== -->
-    <!-- VIEW 2: AI TOOLS PAGE (6 WORKING UTILITIES)                     -->
-    <!-- =============================================================== -->
-    <section id="view-ai-tools" class="view-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      
-      <!-- Page Header -->
-      <div class="mb-10 text-center max-w-2xl mx-auto">
-        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-50 text-brand-700 text-xs font-semibold uppercase tracking-wider mb-2">
-          <i class="fa-solid fa-bolt"></i> Client-Side Utilities
-        </div>
-        <h2 class="font-heading text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">AI & Writing Helpers</h2>
-        <p class="text-slate-500 mt-2 text-sm sm:text-base">
-          Streamline writing, summarizing, and structured study notes. Operates in-browser with smart heuristic templates.
-        </p>
-      </div>
-
-      <!-- Selector Grid for 6 Tools -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
-        <button onclick="selectAiTool('summariser')" id="tab-tool-summariser" class="tool-tab-btn active p-3 rounded-xl border border-brand-200 bg-brand-50 text-brand-700 text-left font-medium text-xs sm:text-sm flex flex-col gap-2 transition hover:border-brand-400">
-          <i class="fa-solid fa-compress-alt text-brand-600 text-lg"></i>
-          <span>Text Summariser</span>
-        </button>
-        <button onclick="selectAiTool('improver')" id="tab-tool-improver" class="tool-tab-btn p-3 rounded-xl border border-slate-200 bg-white text-slate-700 text-left font-medium text-xs sm:text-sm flex flex-col gap-2 transition hover:border-brand-400">
-          <i class="fa-solid fa-wand-magic text-purple-600 text-lg"></i>
-          <span>Text Improver</span>
-        </button>
-        <button onclick="selectAiTool('writer')" id="tab-tool-writer" class="tool-tab-btn p-3 rounded-xl border border-slate-200 bg-white text-slate-700 text-left font-medium text-xs sm:text-sm flex flex-col gap-2 transition hover:border-brand-400">
-          <i class="fa-solid fa-pen-fancy text-blue-600 text-lg"></i>
-          <span>Writing Assistant</span>
-        </button>
-        <button onclick="selectAiTool('email')" id="tab-tool-email" class="tool-tab-btn p-3 rounded-xl border border-slate-200 bg-white text-slate-700 text-left font-medium text-xs sm:text-sm flex flex-col gap-2 transition hover:border-brand-400">
-          <i class="fa-solid fa-envelope-open-text text-emerald-600 text-lg"></i>
-          <span>Email Helper</span>
-        </button>
-        <button onclick="selectAiTool('notes')" id="tab-tool-notes" class="tool-tab-btn p-3 rounded-xl border border-slate-200 bg-white text-slate-700 text-left font-medium text-xs sm:text-sm flex flex-col gap-2 transition hover:border-brand-400">
-          <i class="fa-solid fa-book-bookmark text-amber-600 text-lg"></i>
-          <span>Study Notes</span>
-        </button>
-        <button onclick="selectAiTool('quiz')" id="tab-tool-quiz" class="tool-tab-btn p-3 rounded-xl border border-slate-200 bg-white text-slate-700 text-left font-medium text-xs sm:text-sm flex flex-col gap-2 transition hover:border-brand-400">
-          <i class="fa-solid fa-list-check text-rose-600 text-lg"></i>
-          <span>Quiz Planner</span>
-        </button>
-      </div>
-
-      <!-- Active Interactive Workspace -->
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8">
-        
-        <div class="flex flex-col md:flex-row md:items-center justify-between pb-6 mb-6 border-b border-slate-100 gap-4">
-          <div>
-            <h3 id="current-tool-title" class="font-heading text-xl font-bold text-slate-900">Text Summariser</h3>
-            <p id="current-tool-desc" class="text-sm text-slate-500">Condenses long articles, research snippets, or text into key bulleted takeaways.</p>
-          </div>
-          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium">
-            <i class="fa-solid fa-shield-halved text-slate-400"></i> Client-Side Processing • Safe & Private
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
-          <!-- Input Side -->
-          <div class="flex flex-col">
-            <div class="flex items-center justify-between mb-2">
-              <label for="ai-tool-input" class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Input Text or Prompt</label>
-              <button onclick="document.getElementById('ai-tool-input').value=''" class="text-xs text-slate-400 hover:text-slate-600">Clear</button>
-            </div>
-            <textarea id="ai-tool-input" rows="10" placeholder="Type or paste your text here..." class="w-full p-4 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm text-slate-800 placeholder-slate-400 resize-none font-sans leading-relaxed"></textarea>
-            
-            <div id="tool-custom-controls" class="mt-4 flex flex-wrap items-center gap-3">
-              <span class="text-xs font-medium text-slate-500">Tone/Style:</span>
-              <select id="tool-tone-select" class="text-xs rounded-lg border border-slate-200 bg-slate-50 py-1.5 px-2.5 text-slate-700">
-                <option value="concise">Concise & Professional</option>
-                <option value="detailed">Detailed & Analytical</option>
-                <option value="friendly">Warm & Friendly</option>
-                <option value="academic">Academic & Formal</option>
-              </select>
-            </div>
-
-            <div class="mt-6 flex items-center gap-3">
-              <button onclick="runSelectedAiTool()" class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium text-sm transition shadow-sm shadow-brand-600/20 flex items-center gap-2">
-                <i class="fa-solid fa-play text-xs"></i>
-                <span id="tool-action-btn-text">Generate Summary</span>
-              </button>
-              <button onclick="loadSampleText()" class="px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 font-medium text-xs transition">
-                Load Sample
-              </button>
-            </div>
-          </div>
-
-          <!-- Output Side -->
-          <div class="flex flex-col">
-            <div class="flex items-center justify-between mb-2">
-              <label class="text-xs font-semibold text-slate-600 uppercase tracking-wider">Formatted Output</label>
-              <button onclick="copyToolOutput()" class="text-xs text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1">
-                <i class="fa-solid fa-copy"></i> Copy Output
-              </button>
-            </div>
-            <div id="ai-tool-output" class="w-full h-full min-h-[240px] p-4 rounded-xl border border-slate-200 bg-slate-50/70 text-sm text-slate-700 leading-relaxed overflow-y-auto whitespace-pre-wrap font-sans">
-Output will appear here after generation...
-            </div>
-          </div>
-
-        </div>
-
-      </div>
-
-    </section>
-
-    <!-- =============================================================== -->
-    <!-- VIEW 3: PDF TOOLS PAGE (PDF-LIB POWERED)                       -->
-    <!-- =============================================================== -->
-    <section id="view-pdf-tools" class="view-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      
-      <!-- Page Header -->
-      <div class="mb-10 text-center max-w-2xl mx-auto">
-        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-50 text-red-700 text-xs font-semibold uppercase tracking-wider mb-2">
-          <i class="fa-solid fa-file-pdf"></i> Browser-Engine Document Studio
-        </div>
-        <h2 class="font-heading text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">PDF Utilities</h2>
-        <p class="text-slate-500 mt-2 text-sm sm:text-base">
-          Generate formatted PDF documents and merge multiple PDF files locally on your computer with complete privacy.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
-        <!-- TOOL 1: CREATE PDF -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center gap-3 mb-4">
-              <div class="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center text-lg">
-                <i class="fa-solid fa-file-circle-plus"></i>
-              </div>
-              <div>
-                <h3 class="font-heading font-bold text-lg text-slate-900">Create PDF from Text</h3>
-                <p class="text-xs text-slate-500">Draft notes, documents, or statements and export as a standardized PDF.</p>
-              </div>
-            </div>
-
-            <div class="space-y-4">
-              <div>
-                <label for="pdf-doc-title" class="block text-xs font-semibold text-slate-700 uppercase mb-1">Document Title</label>
-                <input id="pdf-doc-title" type="text" placeholder="e.g., Weekly Summary Report" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
-              </div>
-
-              <div>
-                <label for="pdf-doc-body" class="block text-xs font-semibold text-slate-700 uppercase mb-1">Document Content</label>
-                <textarea id="pdf-doc-body" rows="9" placeholder="Enter or paste text content for your document..." class="w-full p-3.5 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 resize-none"></textarea>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-            <span class="text-xs text-slate-400">Processed in-memory</span>
-            <button onclick="handleCreatePdf()" id="btn-create-pdf" class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-medium text-sm transition shadow-sm shadow-red-600/20 flex items-center gap-2">
-              <i class="fa-solid fa-download text-xs"></i>
-              Download PDF
-            </button>
-          </div>
-        </div>
-
-        <!-- TOOL 2: MERGE PDF FILES -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 flex flex-col justify-between">
-          <div>
-            <div class="flex items-center gap-3 mb-4">
-              <div class="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center text-lg">
-                <i class="fa-solid fa-object-group"></i>
-              </div>
-              <div>
-                <h3 class="font-heading font-bold text-lg text-slate-900">Merge PDF Files</h3>
-                <p class="text-xs text-slate-500">Combine multiple PDF documents into a single sequential file.</p>
-              </div>
-            </div>
-
-            <!-- Drag & Drop Area -->
-            <div class="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center hover:border-brand-400 transition bg-slate-50/50">
-              <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-400 mb-2"></i>
-              <p class="text-sm font-semibold text-slate-700">Choose multiple PDF files to merge</p>
-              <p class="text-xs text-slate-400 mt-1">Select 2 or more .pdf files from your device</p>
-              <input type="file" id="pdf-merge-input" accept="application/pdf" multiple class="hidden" onchange="handlePdfFilesSelected(event)">
-              <button onclick="document.getElementById('pdf-merge-input').click()" class="mt-4 px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 shadow-sm">
-                Browse Files
-              </button>
-            </div>
-
-            <!-- Selected Files List -->
-            <div class="mt-4">
-              <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Selected Files (<span id="merge-file-count">0</span>)</h4>
-              <div id="merge-file-list" class="space-y-2 max-h-40 overflow-y-auto pr-1">
-                <div class="text-xs text-slate-400 italic py-2 text-center bg-slate-50 rounded-lg">No files added yet</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-            <button onclick="clearMergeFiles()" class="text-xs text-slate-400 hover:text-red-500">Reset list</button>
-            <button onclick="handleMergePdfs()" id="btn-merge-pdf" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-medium text-sm transition shadow-sm shadow-brand-600/20 flex items-center gap-2">
-              <i class="fa-solid fa-code-merge text-xs"></i>
-              Merge & Download
-            </button>
-          </div>
-        </div>
-
-      </div>
-
-    </section>
-
-    <!-- =============================================================== -->
-    <!-- VIEW 4: AI DIRECTORY PAGE                                      -->
-    <!-- =============================================================== -->
-    <section id="view-ai-directory" class="view-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      
-      <!-- Page Header -->
-      <div class="mb-10 text-center max-w-2xl mx-auto">
-        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 text-accent-700 text-xs font-semibold uppercase tracking-wider mb-2">
-          <i class="fa-solid fa-compass"></i> Curated Catalog
-        </div>
-        <h2 class="font-heading text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">AI Tools Directory</h2>
-        <p class="text-slate-500 mt-2 text-sm sm:text-base">
-          Discover verified artificial intelligence software across writing, research, visual design, and productivity.
-        </p>
-      </div>
-
-      <!-- Category Filter Tabs -->
-      <div class="flex flex-wrap items-center justify-center gap-2 mb-10">
-        <button onclick="filterDirectory('all')" class="dir-filter active px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-brand-600 text-white transition shadow-sm" data-category="all">
-          All Tools
-        </button>
-        <button onclick="filterDirectory('writing')" class="dir-filter px-4 py-2 rounded-xl text-xs sm:text-sm font-medium bg-white text-slate-600 border border-slate-200 hover:border-brand-400 transition" data-category="writing">
-          Writing
-        </button>
-        <button onclick="filterDirectory('research')" class="dir-filter px-4 py-2 rounded-xl text-xs sm:text-sm font-medium bg-white text-slate-600 border border-slate-200 hover:border-brand-400 transition" data-category="research">
-          Research
-        </button>
-        <button onclick="filterDirectory('design')" class="dir-filter px-4 py-2 rounded-xl text-xs sm:text-sm font-medium bg-white text-slate-600 border border-slate-200 hover:border-brand-400 transition" data-category="design">
-          Design
-        </button>
-        <button onclick="filterDirectory('productivity')" class="dir-filter px-4 py-2 rounded-xl text-xs sm:text-sm font-medium bg-white text-slate-600 border border-slate-200 hover:border-brand-400 transition" data-category="productivity">
-          Productivity
-        </button>
-      </div>
-
-      <!-- Directory Cards Grid -->
-      <div id="directory-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-
-    </section>
-
-    <!-- =============================================================== -->
-    <!-- VIEW 5: REVIEW CENTRE                                          -->
-    <!-- =============================================================== -->
-    <section id="view-review-centre" class="view-container max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      
-      <!-- Page Header -->
-      <div class="mb-10 text-center max-w-xl mx-auto">
-        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold uppercase tracking-wider mb-2">
-          <i class="fa-solid fa-star"></i> Feedback & Ratings
-        </div>
-        <h2 class="font-heading text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">NovaTools Review Centre</h2>
-        <p class="text-slate-500 mt-2 text-sm sm:text-base">
-          Share your feedback, report ideas, and rate our platform. We value every response to keep refining NovaTools.
-        </p>
-      </div>
-
-      <!-- Review Form Card -->
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-8 mb-12">
-        <h3 class="font-heading font-bold text-lg text-slate-900 mb-1">Leave a Review</h3>
-        <p class="text-xs text-slate-400 mb-6">Select your rating and enter your comments below.</p>
-
-        <form id="review-form" onsubmit="handleReviewSubmit(event)" class="space-y-5">
-          <!-- Interactive Star Selector -->
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 uppercase mb-2">Rating</label>
-            <div id="star-rating-selector" class="flex items-center gap-2 text-2xl text-slate-300 cursor-pointer">
-              <i class="fa-solid fa-star transition hover:text-amber-400" data-star="1" onclick="setRating(1)"></i>
-              <i class="fa-solid fa-star transition hover:text-amber-400" data-star="2" onclick="setRating(2)"></i>
-              <i class="fa-solid fa-star transition hover:text-amber-400" data-star="3" onclick="setRating(3)"></i>
-              <i class="fa-solid fa-star transition hover:text-amber-400" data-star="4" onclick="setRating(4)"></i>
-              <i class="fa-solid fa-star transition hover:text-amber-400" data-star="5" onclick="setRating(5)"></i>
-              <span id="rating-text-label" class="text-xs text-slate-500 font-normal ml-3">5 Stars (Excellent)</span>
-            </div>
-            <input type="hidden" id="review-rating-value" value="5">
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label for="review-author" class="block text-xs font-semibold text-slate-700 uppercase mb-1">Your Name (Optional)</label>
-              <input id="review-author" type="text" placeholder="e.g., Alex Johnson" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
-            </div>
-            <div>
-              <label for="review-role" class="block text-xs font-semibold text-slate-700 uppercase mb-1">Role / Occupation</label>
-              <input id="review-role" type="text" placeholder="e.g., Student, Researcher" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
-            </div>
-          </div>
-
-          <div>
-            <label for="review-content" class="block text-xs font-semibold text-slate-700 uppercase mb-1">Your Experience / Feedback *</label>
-            <textarea id="review-content" rows="4" required placeholder="What do you think of NovaTools? Any features you'd like to see?" class="w-full p-3.5 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 resize-none"></textarea>
-          </div>
-
-          <div class="flex items-center justify-between pt-2">
-            <span class="text-xs text-slate-400">Stored safely on device & synced with platform</span>
-            <button type="submit" class="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-medium text-sm transition shadow-sm shadow-amber-500/20 flex items-center gap-2">
-              <i class="fa-solid fa-paper-plane text-xs"></i>
-              Submit Review
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <!-- Published Reviews Section -->
       <div>
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="font-heading font-bold text-xl text-slate-900">Community Reviews</h3>
-          <span id="review-count-badge" class="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full">3 Reviews</span>
+        <h4>Quick Links</h4>
+        <div class="footer-links">
+          <a href="#ai-tools" data-tab="ai-tools">AI Tools Suite</a>
+          <a href="#pdf-tools" data-tab="pdf-tools">PDF Document Tools</a>
+          <a href="#directory" data-tab="directory">AI Discovery Directory</a>
+          <a href="#communityReviews" data-tab="home">Review Centre</a>
         </div>
-
-        <div id="reviews-feed" class="space-y-4"></div>
       </div>
 
-    </section>
-
-    <!-- =============================================================== -->
-    <!-- VIEW 6: DEDICATED SIGN IN PAGE (FULL PAGE, NO POPUP)           -->
-    <!-- =============================================================== -->
-    <section id="view-signin" class="view-container max-w-md mx-auto px-4 py-14">
-      <div class="bg-white rounded-3xl border border-slate-200 shadow-md p-8 sm:p-10">
-        
-        <div class="text-center mb-8">
-          <div class="w-12 h-12 rounded-2xl bg-brand-600 text-white flex items-center justify-center text-xl mx-auto mb-3 shadow-md shadow-brand-600/30">
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
-          </div>
-          <h2 class="font-heading text-2xl font-extrabold text-slate-900">Welcome Back</h2>
-          <p class="text-xs text-slate-500 mt-1">Sign in to your NovaTools workspace</p>
-        </div>
-
-        <!-- Google OAuth Button -->
-        <button onclick="handleGoogleAuth()" class="w-full py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-semibold flex items-center justify-center gap-3 transition shadow-sm mb-5">
-          <svg class="w-4 h-4" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-          </svg>
-          Continue with Google
-        </button>
-
-        <div class="relative flex py-2 items-center mb-5">
-          <div class="flex-grow border-t border-slate-200"></div>
-          <span class="flex-shrink mx-3 text-slate-400 text-xs uppercase font-medium">or email</span>
-          <div class="flex-grow border-t border-slate-200"></div>
-        </div>
-
-        <!-- Email & Password Form -->
-        <form onsubmit="handleEmailSignIn(event)" class="space-y-4">
-          <div>
-            <label for="signin-email" class="block text-xs font-semibold text-slate-700 uppercase mb-1">Email Address</label>
-            <input id="signin-email" type="email" required placeholder="you@domain.com" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
-          </div>
-          <div>
-            <div class="flex items-center justify-between mb-1">
-              <label for="signin-password" class="block text-xs font-semibold text-slate-700 uppercase">Password</label>
-              <button type="button" onclick="handleForgotPassword()" class="text-xs text-brand-600 hover:text-brand-700">Forgot?</button>
-            </div>
-            <input id="signin-password" type="password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
-          </div>
-
-          <button type="submit" id="btn-signin-submit" class="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm transition shadow-md shadow-brand-600/20">
-            Sign In
-          </button>
-        </form>
-
-        <div class="mt-6 text-center text-xs text-slate-500 space-y-2">
-          <div>
-            Don't have an account? 
-            <button onclick="navigate('signup')" class="text-brand-600 hover:underline font-semibold">Create an account</button>
-          </div>
-          <div>
-            <button onclick="navigate('home')" class="text-slate-400 hover:text-slate-600">
-              <i class="fa-solid fa-arrow-left text-[10px]"></i> Return to Homepage
-            </button>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- =============================================================== -->
-    <!-- VIEW 7: DEDICATED SIGN UP PAGE (FULL PAGE, NO POPUP)           -->
-    <!-- =============================================================== -->
-    <section id="view-signup" class="view-container max-w-md mx-auto px-4 py-14">
-      <div class="bg-white rounded-3xl border border-slate-200 shadow-md p-8 sm:p-10">
-        
-        <div class="text-center mb-8">
-          <div class="w-12 h-12 rounded-2xl bg-accent-600 text-white flex items-center justify-center text-xl mx-auto mb-3 shadow-md shadow-accent-600/30">
-            <i class="fa-solid fa-user-plus"></i>
-          </div>
-          <h2 class="font-heading text-2xl font-extrabold text-slate-900">Create Account</h2>
-          <p class="text-xs text-slate-500 mt-1">Get started with your NovaTools workspace</p>
-        </div>
-
-        <button onclick="handleGoogleAuth()" class="w-full py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-semibold flex items-center justify-center gap-3 transition shadow-sm mb-5">
-          <svg class="w-4 h-4" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-          </svg>
-          Continue with Google
-        </button>
-
-        <div class="relative flex py-2 items-center mb-5">
-          <div class="flex-grow border-t border-slate-200"></div>
-          <span class="flex-shrink mx-3 text-slate-400 text-xs uppercase font-medium">or email</span>
-          <div class="flex-grow border-t border-slate-200"></div>
-        </div>
-
-        <form onsubmit="handleEmailSignUp(event)" class="space-y-4">
-          <div>
-            <label for="signup-email" class="block text-xs font-semibold text-slate-700 uppercase mb-1">Email Address</label>
-            <input id="signup-email" type="email" required placeholder="you@domain.com" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
-          </div>
-          <div>
-            <label for="signup-password" class="block text-xs font-semibold text-slate-700 uppercase mb-1">Password</label>
-            <input id="signup-password" type="password" required minlength="6" placeholder="At least 6 characters" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
-          </div>
-          <div>
-            <label for="signup-password-confirm" class="block text-xs font-semibold text-slate-700 uppercase mb-1">Confirm Password</label>
-            <input id="signup-password-confirm" type="password" required minlength="6" placeholder="Repeat your password" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
-          </div>
-
-          <button type="submit" id="btn-signup-submit" class="w-full py-3 rounded-xl bg-accent-600 hover:bg-accent-700 text-white font-semibold text-sm transition shadow-md shadow-accent-600/20">
-            Create Account
-          </button>
-        </form>
-
-        <div class="mt-6 text-center text-xs text-slate-500 space-y-2">
-          <div>
-            Already have an account? 
-            <button onclick="navigate('signin')" class="text-brand-600 hover:underline font-semibold">Sign In</button>
-          </div>
-          <div>
-            <button onclick="navigate('home')" class="text-slate-400 hover:text-slate-600">
-              <i class="fa-solid fa-arrow-left text-[10px]"></i> Return to Homepage
-            </button>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- =============================================================== -->
-    <!-- VIEW 8: FIRST-TIME USER ONBOARDING PAGE                        -->
-    <!-- =============================================================== -->
-    <section id="view-onboarding" class="view-container max-w-2xl mx-auto px-4 py-12">
-      <div class="bg-white rounded-3xl border border-slate-200 shadow-lg p-8 sm:p-10">
-        
-        <div class="text-center mb-8">
-          <span class="inline-block px-3 py-1 bg-brand-50 text-brand-700 text-xs font-bold rounded-full mb-2">Profile Setup</span>
-          <h2 class="font-heading text-2xl sm:text-3xl font-extrabold text-slate-900">Welcome to NovaTools!</h2>
-          <p class="text-sm text-slate-500 mt-1">Please take a minute to personalize your workspace before continuing.</p>
-        </div>
-
-        <form id="onboarding-form" onsubmit="handleOnboardingSubmit(event)" class="space-y-6">
-          
-          <!-- Field 1: Name (Required) -->
-          <div>
-            <label for="onboard-name" class="block text-sm font-semibold text-slate-800 mb-1">What is your name? *</label>
-            <input id="onboard-name" type="text" required placeholder="e.g., Alex Johnson" class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
-          </div>
-
-          <!-- Field 2: Occupation (Required) -->
-          <div>
-            <label for="onboard-role" class="block text-sm font-semibold text-slate-800 mb-1">What best describes you? *</label>
-            <select id="onboard-role" required class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-white">
-              <option value="" disabled selected>Select an option...</option>
-              <option value="Student">Student</option>
-              <option value="Teacher / Educator">Teacher / Educator</option>
-              <option value="Professional">Professional</option>
-              <option value="Creator / Designer">Creator / Designer</option>
-              <option value="Business Owner">Business Owner</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-
-          <!-- Field 3: Purpose (Required) -->
-          <div>
-            <label for="onboard-reason" class="block text-sm font-semibold text-slate-800 mb-1">Why are you using NovaTools? *</label>
-            <select id="onboard-reason" required class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-white">
-              <option value="" disabled selected>Select an option...</option>
-              <option value="Study and Learning">Study and Learning</option>
-              <option value="Writing and Communication">Writing and Communication</option>
-              <option value="Work and Productivity">Work and Productivity</option>
-              <option value="PDF and Document Tasks">PDF and Document Tasks</option>
-              <option value="Creative Projects">Creative Projects</option>
-              <option value="Exploring AI Tools">Exploring AI Tools</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-
-          <!-- Field 4: Source (Required) -->
-          <div>
-            <label for="onboard-source" class="block text-sm font-semibold text-slate-800 mb-1">Where did you hear about NovaTools? *</label>
-            <select id="onboard-source" required class="w-full px-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-white">
-              <option value="" disabled selected>Select an option...</option>
-              <option value="Google / Search Engine">Google / Search Engine</option>
-              <option value="YouTube">YouTube</option>
-              <option value="Social Media">Social Media</option>
-              <option value="Friend or Family">Friend or Family</option>
-              <option value="School / College / Workplace">School / College / Workplace</option>
-              <option value="Online Community / Website">Online Community / Website</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-
-          <!-- Field 5: Suggestions (Optional) -->
-          <div>
-            <label for="onboard-notes" class="block text-sm font-semibold text-slate-800 mb-1">Additional preferences or suggestions <span class="text-xs font-normal text-slate-400">(Optional)</span></label>
-            <textarea id="onboard-notes" rows="3" placeholder="Tell us if you have any specific tool requests..." class="w-full p-3.5 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 resize-none"></textarea>
-          </div>
-
-          <button type="submit" class="w-full py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm transition shadow-md shadow-brand-600/25">
-            Complete Onboarding & Enter Workspace
-          </button>
-        </form>
-
-      </div>
-    </section>
-
-    <!-- =============================================================== -->
-    <!-- VIEW 9: USER PROFILE MANAGEMENT                                -->
-    <!-- =============================================================== -->
-    <section id="view-profile" class="view-container max-w-2xl mx-auto px-4 py-12">
-      <div class="bg-white rounded-3xl border border-slate-200 shadow-md p-8 sm:p-10">
-        
-        <div class="flex items-center justify-between pb-6 mb-6 border-b border-slate-100">
-          <div class="flex items-center gap-4">
-            <div class="w-14 h-14 rounded-2xl bg-brand-600 text-white flex items-center justify-center text-2xl font-bold font-heading" id="profile-avatar-letter">
-              U
-            </div>
-            <div>
-              <h2 class="font-heading text-xl font-bold text-slate-900" id="profile-display-name">User Name</h2>
-              <p class="text-xs text-slate-500" id="profile-display-email">user@domain.com</p>
-            </div>
-          </div>
-          <button onclick="handleSignOut()" class="px-3.5 py-1.5 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-semibold transition">
-            Sign Out
-          </button>
-        </div>
-
-        <form id="profile-edit-form" onsubmit="handleProfileUpdate(event)" class="space-y-5">
-          <div>
-            <label for="profile-name" class="block text-xs font-semibold text-slate-700 uppercase mb-1">Your Full Name</label>
-            <input id="profile-name" type="text" required class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500">
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label for="profile-role" class="block text-xs font-semibold text-slate-700 uppercase mb-1">Occupation / Role</label>
-              <select id="profile-role" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-white">
-                <option value="Student">Student</option>
-                <option value="Teacher / Educator">Teacher / Educator</option>
-                <option value="Professional">Professional</option>
-                <option value="Creator / Designer">Creator / Designer</option>
-                <option value="Business Owner">Business Owner</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-
-            <div>
-              <label for="profile-reason" class="block text-xs font-semibold text-slate-700 uppercase mb-1">Primary Interest</label>
-              <select id="profile-reason" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 bg-white">
-                <option value="Study and Learning">Study and Learning</option>
-                <option value="Writing and Communication">Writing and Communication</option>
-                <option value="Work and Productivity">Work and Productivity</option>
-                <option value="PDF and Document Tasks">PDF and Document Tasks</option>
-                <option value="Creative Projects">Creative Projects</option>
-                <option value="Exploring AI Tools">Exploring AI Tools</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label for="profile-notes" class="block text-xs font-semibold text-slate-700 uppercase mb-1">Preferences & Notes</label>
-            <textarea id="profile-notes" rows="3" class="w-full p-3.5 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-500 resize-none"></textarea>
-          </div>
-
-          <div class="flex items-center justify-between pt-4 border-t border-slate-100">
-            <span class="text-xs text-slate-400">Settings save directly to your profile</span>
-            <button type="submit" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm transition shadow-sm">
-              Save Changes
-            </button>
-          </div>
-        </form>
-
-      </div>
-    </section>
-
-  </main>
-
-  <!-- ==================== FOOTER WITH PROMINENT AUTHOR BADGE ==================== -->
-  <footer class="bg-white border-t border-slate-200 mt-20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-      
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
-        
-        <div class="md:col-span-2 space-y-4">
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-brand-600 flex items-center justify-center text-white text-base shadow-md shadow-brand-600/30">
-              <i class="fa-solid fa-wand-magic-sparkles"></i>
-            </div>
-            <span class="font-heading font-extrabold text-2xl text-slate-900">Nova<span class="text-brand-600">Tools</span></span>
-          </div>
-          <p class="text-slate-500 text-sm max-w-md leading-relaxed">
-            An all-in-one productivity suite for students, creators, and professionals. Fast browser utilities, client-side PDF processing, and curated AI discovery.
-          </p>
-
-          <!-- PROMINENT GLOWING AUTHOR BADGE -->
-          <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-xl author-glow-badge text-white text-xs font-bold tracking-wide uppercase shadow-lg">
-            <i class="fa-solid fa-crown text-amber-300"></i>
-            <span>MADE BY ABHINANDAN RAJ</span>
-          </div>
-        </div>
-
-        <div>
-          <h4 class="font-heading font-bold text-sm text-slate-900 mb-4 uppercase tracking-wider">Features</h4>
-          <ul class="space-y-2.5 text-sm text-slate-600">
-            <li><button onclick="navigate('ai-tools'); selectAiTool('summariser')" class="hover:text-brand-600">Text Summariser</button></li>
-            <li><button onclick="navigate('ai-tools'); selectAiTool('improver')" class="hover:text-brand-600">Text Improver</button></li>
-            <li><button onclick="navigate('pdf-tools')" class="hover:text-brand-600">Create & Merge PDFs</button></li>
-            <li><button onclick="navigate('ai-directory')" class="hover:text-brand-600">AI Platform Directory</button></li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 class="font-heading font-bold text-sm text-slate-900 mb-4 uppercase tracking-wider">Navigation</h4>
-          <ul class="space-y-2.5 text-sm text-slate-600">
-            <li><button onclick="navigate('home')" class="hover:text-brand-600">Homepage</button></li>
-            <li><button onclick="navigate('review-centre')" class="hover:text-brand-600">Review Centre</button></li>
-            <li><button onclick="navigate('signin')" class="hover:text-brand-600">Sign In</button></li>
-            <li><button onclick="navigate('signup')" class="hover:text-brand-600">Get Started</button></li>
-          </ul>
-        </div>
-
-      </div>
-
-      <!-- BOTTOM COPYRIGHT & CREATOR BAR -->
-      <div class="pt-8 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-        <div>
-          &copy; 2026 NovaTools. All rights reserved.
-        </div>
-        <div class="font-semibold text-brand-700 bg-brand-50 px-3.5 py-1.5 rounded-full border border-brand-100 flex items-center gap-1.5">
-          <span>Designed &amp; Developed with</span>
-          <i class="fa-solid fa-heart text-rose-500 text-xs"></i>
-          <span>by <strong class="text-brand-900 font-extrabold">Abhinandan Raj</strong></span>
+      <div>
+        <h4>Your Account</h4>
+        <div class="footer-links">
+          <a href="#auth" id="footerAuthLink">Sign In / Register</a>
+          <a href="#home" data-tab="home">Terms &amp; Privacy</a>
         </div>
       </div>
     </div>
-  </footer>
 
-  <!-- =============================================================== -->
-  <!-- JAVASCRIPT APPLICATION CODE                                     -->
-  <!-- =============================================================== -->
-  <script>
-    /* ==========================================
-       1. SUPABASE CLIENT & AUTH CONFIGURATION
-       ========================================== */
-    const SUPABASE_PROJECT_URL = "https://ttcixcmajpqrlgqeplbq.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0Y2l4Y21hanBxcmxncWVwbGJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAxNTMwMDgsImV4cCI6MjA1NTcyOTAwOH0.n0c82iY0_0vD3fVw5yYdKj7s2p1Z8";
-    
-    let supabaseClient = null;
+    <!-- COLORFUL BOTTOM RIBBON WITH ATTRIBUTION -->
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> NovaTools · Built for high productivity.</span>
+      <span>
+        Keep learning. Keep growing.
+        <span class="creator-badge">
+          <i class="fa-solid fa-leaf"></i> Made by Abhinandan Raj
+        </span>
+      </span>
+    </div>
+  </div>
+</footer>
+
+<!-- 5-STAR REVIEW MODAL FROM STUDY SPHERE -->
+<div class="review-modal-backdrop" id="reviewModal" aria-modal="true" role="dialog">
+  <div class="review-modal-card">
+    <button type="button" class="review-close" id="closeReviewBtn" aria-label="Close review dialog"><i class="fa-solid fa-xmark"></i></button>
+    <div class="review-modal-icon"><i class="fa-solid fa-star"></i></div>
+    <h2>How was your experience?</h2>
+    <p>Your feedback helps us build a better toolkit for everyone.</p>
+
+    <form id="reviewForm">
+      <div class="star-picker" role="radiogroup" aria-label="Choose a rating">
+        <button type="button" data-rating="1" aria-label="1 star">★</button>
+        <button type="button" data-rating="2" aria-label="2 stars">★</button>
+        <button type="button" data-rating="3" aria-label="3 stars">★</button>
+        <button type="button" data-rating="4" aria-label="4 stars">★</button>
+        <button type="button" data-rating="5" aria-label="5 stars">★</button>
+      </div>
+      <div class="rating-hint" id="ratingHint">Tap a star to rate your experience.</div>
+
+      <div class="form-group" style="text-align:left;margin-bottom:12px">
+        <input type="text" id="reviewName" placeholder="Your name (optional)">
+      </div>
+      <div class="form-group" style="text-align:left;margin-bottom:16px">
+        <textarea id="reviewText" placeholder="What tools did you find most helpful or what can we improve?"></textarea>
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:center">
+        <button type="button" class="btn btn-light" id="btnCancelReview">Cancel</button>
+        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Submit Review</button>
+      </div>
+      <div id="reviewFeedback" style="font-size:12px;color:var(--primary);margin-top:12px"></div>
+    </form>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   1. SUPABASE CLIENT & CONFIGURATION
+========================================================= */
+const SUPABASE_URL = "https://ttcixcmajpqrlgqeplbq.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_DI-cpV_UGIgETXRPFSyCQ_gXGHIsu3";
+
+let supabaseClient = null;
+let currentUser = null;
+
+try {
+  if (window.supabase && SUPABASE_URL && !SUPABASE_URL.includes("PASTE_")) {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+    });
+  }
+} catch (e) {
+  console.warn("Supabase initialization bypassed:", e);
+}
+
+document.getElementById("year").textContent = new Date().getFullYear();
+
+/* =========================================================
+   2. STUDY SPHERE TAB ENGINE (CLEAN & NON-DUPLICATIVE)
+========================================================= */
+const navLinks = document.getElementById("navLinks");
+const menuToggle = document.getElementById("menuToggle");
+
+menuToggle?.addEventListener("click", () => {
+  const isOpen = navLinks.classList.toggle("open");
+  menuToggle.setAttribute("aria-expanded", String(isOpen));
+  menuToggle.innerHTML = isOpen ? '<i class="fa-solid fa-xmark"></i>' : '<i class="fa-solid fa-bars"></i>';
+});
+
+function activateTab(tabId) {
+  const mainSections = document.querySelectorAll("main > section");
+  const homeExtras = [document.getElementById("quickAccess"), document.getElementById("communityReviews")].filter(Boolean);
+  const authPage = document.getElementById("authPage");
+
+  if (tabId === "auth") {
+    mainSections.forEach(s => s.classList.remove("active-page", "active-home-extra"));
+    authPage.classList.add("open");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+
+  authPage.classList.remove("open");
+
+  let target = document.getElementById(tabId);
+  if (!target) target = document.getElementById("home");
+
+  mainSections.forEach(s => s.classList.remove("active-page", "active-home-extra"));
+  target.classList.add("active-page");
+
+  if (target.id === "home") {
+    homeExtras.forEach(e => e.classList.add("active-home-extra"));
+  }
+
+  document.querySelectorAll("[data-tab]").forEach(el => {
+    el.classList.toggle("active-tab", el.getAttribute("data-tab") === target.id);
+  });
+
+  navLinks.classList.remove("open");
+  menuToggle?.setAttribute("aria-expanded", "false");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+document.querySelectorAll("[data-tab]").forEach(el => {
+  el.addEventListener("click", (e) => {
+    e.preventDefault();
+    const tab = el.getAttribute("data-tab");
+    activateTab(tab);
+    history.pushState(null, "", "#" + tab);
+  });
+});
+
+window.addEventListener("popstate", () => {
+  const hash = location.hash.replace("#", "") || "home";
+  activateTab(hash);
+});
+
+/* =========================================================
+   3. AI PRODUCTIVITY TOOLS (CLIENT-SIDE PROCESSING)
+========================================================= */
+let currentAITool = "writer";
+const toolMeta = {
+  writer: { title: "Writing Assistant", desc: "Expands bullet points into a structured, clear draft." },
+  summariser: { title: "Text Summariser", desc: "Extracts key takeaways and shortens long text." },
+  improver: { title: "Text Improver", desc: "Refines flow, corrects phrasing, and elevates tone." },
+  email: { title: "Email Helper", desc: "Generates clear, polite, and actionable email drafts." },
+  notes: { title: "Study Notes", desc: "Converts text into study points and review flashcards." },
+  quiz: { title: "Quiz Planner", desc: "Builds comprehension quiz questions from your notes." }
+};
+
+window.setAITool = function(toolKey) {
+  currentAITool = toolKey;
+  const meta = toolMeta[toolKey];
+  document.getElementById("workspaceTitle").innerHTML = `<i class="fa-solid fa-wand-magic-sparkles" style="color:var(--primary)"></i> ${meta.title}`;
+  document.getElementById("workspaceDesc").textContent = meta.desc;
+  document.getElementById("aiWorkspace").scrollIntoView({ behavior: "smooth", block: "center" });
+};
+
+document.getElementById("aiProcessBtn").addEventListener("click", () => {
+  const input = document.getElementById("aiInputText").value.trim();
+  const resultBox = document.getElementById("aiResultBox");
+
+  if (!input) {
+    resultBox.textContent = "Please enter some text or notes above first.";
+    return;
+  }
+
+  resultBox.textContent = "Processing...";
+
+  setTimeout(() => {
+    const lines = input.split("\n").filter(l => l.trim().length > 0);
+    let output = "";
+
+    switch (currentAITool) {
+      case "summariser":
+        output = "### Executive Summary:\n" +
+          lines.slice(0, 3).map((l, i) => `• ${l.replace(/^[-*•]\s*/, "")}`).join("\n") +
+          "\n\nKey Takeaway: Content successfully condensed.";
+        break;
+      case "improver":
+        output = lines.map(line => {
+          let improved = line.trim();
+          improved = improved.charAt(0).toUpperCase() + improved.slice(1);
+          if (!/[.!?]$/.test(improved)) improved += ".";
+          return improved;
+        }).join(" ");
+        break;
+      case "email":
+        output = `Subject: Update Regarding ${lines[0] || 'Our Discussion'}\n\nHi there,\n\nI hope this email finds you well.\n\nI am writing to share key details regarding our project:\n${lines.map(l => `- ${l}`).join('\n')}\n\nPlease let me know your thoughts.\n\nBest regards,\nNovaTools User`;
+        break;
+      case "notes":
+        output = `### Key Study Notes:\n${lines.map((l, i) => `[Concept ${i+1}] :${l}`).join('\n')}\n\nReview Tip: Read through each point and recite from memory.`;
+        break;
+      case "quiz":
+        output = `### Comprehension Questions:\n${lines.map((l, i) => `Q${i+1}: What is the primary significance of: "${l.slice(0, 50)}..."?\nA: (Answer based on source notes)`).join('\n\n')}`;
+        break;
+      default:
+        output = `### Structured Document Draft\n\n#### 1. Introduction\n${lines[0] || "Overview of topic."}\n\n#### 2. Key Points\n${lines.map(l => `• ${l}`).join('\n')}\n\n#### 3. Conclusion\nSummarising the points outlined above.`;
+        break;
+    }
+
+    resultBox.textContent = output;
+  }, 350);
+});
+
+document.getElementById("aiCopyBtn").addEventListener("click", () => {
+  const text = document.getElementById("aiResultBox").textContent;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => alert("Copied to clipboard!"));
+});
+
+/* =========================================================
+   4. IN-BROWSER PDF SUITE (PDF-LIB)
+========================================================= */
+document.getElementById("btnCreatePdf").addEventListener("click", async () => {
+  const title = document.getElementById("pdfDocTitle").value.trim() || "NovaTools Document";
+  const content = document.getElementById("pdfDocContent").value.trim();
+  const status = document.getElementById("createPdfStatus");
+
+  if (!content) {
+    status.style.color = "#dc2626";
+    status.textContent = "Please enter document content first.";
+    return;
+  }
+
+  status.style.color = "var(--primary)";
+  status.textContent = "Generating PDF...";
+
+  try {
+    const pdfDoc = await PDFLib.PDFDocument.create();
+    let page = pdfDoc.addPage([595.28, 841.89]);
+    const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+    const fontBold = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+
+    page.drawText(title, { x: 50, y: 790, size: 20, font: fontBold, color: PDFLib.rgb(0.1, 0.2, 0.5) });
+
+    const lines = content.split("\n");
+    let y = 740;
+
+    for (const line of lines) {
+      if (y < 60) {
+        page = pdfDoc.addPage([595.28, 841.89]);
+        y = 790;
+      }
+      page.drawText(line.slice(0, 85), { x: 50, y, size: 11, font, color: PDFLib.rgb(0.2, 0.2, 0.2) });
+      y -= 18;
+    }
+
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}.pdf`;
+    link.click();
+
+    status.style.color = "#16a34a";
+    status.textContent = "PDF generated and downloaded successfully!";
+  } catch (err) {
+    status.style.color = "#dc2626";
+    status.textContent = "Error generating PDF: " + err.message;
+  }
+});
+
+const pdfFilesInput = document.getElementById("pdfFilesInput");
+pdfFilesInput.addEventListener("change", () => {
+  const files = Array.from(pdfFilesInput.files);
+  const list = document.getElementById("selectedPdfsList");
+  if (!files.length) {
+    list.textContent = "No files selected.";
+    return;
+  }
+  list.innerHTML = files.map((f, i) => `<div>${i + 1}. <strong>${f.name}</strong> (${(f.size / 1024).toFixed(1)} KB)</div>`).join("");
+});
+
+document.getElementById("btnMergePdf").addEventListener("click", async () => {
+  const files = Array.from(pdfFilesInput.files);
+  const status = document.getElementById("mergePdfStatus");
+
+  if (files.length < 2) {
+    status.style.color = "#dc2626";
+    status.textContent = "Please select at least 2 PDF files to merge.";
+    return;
+  }
+
+  status.style.color = "var(--primary)";
+  status.textContent = "Merging PDF files in browser...";
+
+  try {
+    const mergedDoc = await PDFLib.PDFDocument.create();
+
+    for (const file of files) {
+      const buffer = await file.arrayBuffer();
+      const loadedDoc = await PDFLib.PDFDocument.load(buffer);
+      const copiedPages = await mergedDoc.copyPages(loadedDoc, loadedDoc.getPageIndices());
+      copiedPages.forEach(p => mergedDoc.addPage(p));
+    }
+
+    const mergedBytes = await mergedDoc.save();
+    const blob = new Blob([mergedBytes], { type: "application/pdf" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "merged_document.pdf";
+    link.click();
+
+    status.style.color = "#16a34a";
+    status.textContent = "Merged PDF downloaded successfully!";
+  } catch (err) {
+    status.style.color = "#dc2626";
+    status.textContent = "Could not merge files: " + err.message;
+  }
+});
+
+/* =========================================================
+   5. AI DIRECTORY FILTERS
+========================================================= */
+document.querySelectorAll("[data-dir-filter]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("[data-dir-filter]").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    const filter = btn.getAttribute("data-dir-filter");
+    document.querySelectorAll("#directoryGrid .tool-card").forEach(card => {
+      const cat = card.getAttribute("data-category") || "";
+      if (filter === "all" || cat.includes(filter)) {
+        card.style.display = "flex";
+      } else {
+        card.style.display = "none";
+      }
+    });
+  });
+});
+
+/* =========================================================
+   6. AUTHENTICATION & ONBOARDING (MATCHING AUTH.HTML)
+========================================================= */
+const navSignInBtn = document.getElementById("navSignInBtn");
+const navGetStartedBtn = document.getElementById("navGetStartedBtn");
+const authLoginTab = document.getElementById("authLoginTab");
+const authSignupTab = document.getElementById("authSignupTab");
+const authFormTitle = document.getElementById("authFormTitle");
+const authFormSubtitle = document.getElementById("authFormSubtitle");
+const authSubmitBtn = document.getElementById("authSubmitBtn");
+const confirmPasswordGroup = document.getElementById("confirmPasswordGroup");
+let authMode = "login";
+
+function setAuthMode(mode) {
+  authMode = mode;
+  const isSignup = mode === "signup";
+  authLoginTab.classList.toggle("active", !isSignup);
+  authSignupTab.classList.toggle("active", isSignup);
+  authFormTitle.textContent = isSignup ? "Create your account" : "Welcome back!";
+  authFormSubtitle.textContent = isSignup ? "Join NovaTools and start your productivity journey." : "Sign in to continue to your productivity suite.";
+  authSubmitBtn.innerHTML = isSignup ? 'Create Account <i class="fa-solid fa-arrow-right"></i>' : 'Sign In <i class="fa-solid fa-arrow-right"></i>';
+  confirmPasswordGroup.style.display = isSignup ? "block" : "none";
+}
+
+authLoginTab.addEventListener("click", () => setAuthMode("login"));
+authSignupTab.addEventListener("click", () => setAuthMode("signup"));
+
+navSignInBtn.addEventListener("click", () => { activateTab("auth"); setAuthMode("login"); });
+navGetStartedBtn.addEventListener("click", () => { activateTab("auth"); setAuthMode("signup"); });
+document.getElementById("footerAuthLink").addEventListener("click", (e) => { e.preventDefault(); activateTab("auth"); });
+
+document.getElementById("btnToggleAuthPassword").addEventListener("click", () => {
+  const pwd = document.getElementById("authPassword");
+  pwd.type = pwd.type === "password" ? "text" : "password";
+});
+
+document.getElementById("authEmailForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value;
+  const status = document.getElementById("authStatus");
+
+  status.className = "auth-status info";
+  status.textContent = authMode === "signup" ? "Creating account..." : "Signing in...";
+
+  try {
+    if (supabaseClient) {
+      if (authMode === "signup") {
+        const { error } = await supabaseClient.auth.signUp({ email, password });
+        if (error) throw error;
+      } else {
+        const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+      }
+    }
+
+    status.className = "auth-status success";
+    status.textContent = "Success! Loading your workspace...";
+    setTimeout(() => { checkOnboarding(); }, 900);
+  } catch (err) {
+    status.className = "auth-status error";
+    status.textContent = err.message || "Authentication failed. Please verify credentials.";
+  }
+});
+
+document.getElementById("btnGoogleAuth").addEventListener("click", async () => {
+  if (supabaseClient) {
     try {
-      if (window.supabase && typeof window.supabase.createClient === 'function') {
-        supabaseClient = window.supabase.createClient(SUPABASE_PROJECT_URL, SUPABASE_ANON_KEY);
-      }
-    } catch (err) {
-      console.warn("Supabase initialization note:", err.message);
-    }
-
-    let currentUser = null;
-
-    /* ==========================================
-       2. HERO VIDEO & CANVAS WAVE ENGINE
-       ========================================== */
-    let canvasAnimationId = null;
-
-    function initHeroVideo() {
-      const video = document.getElementById('hero-video-player');
-      const canvas = document.getElementById('hero-fallback-canvas');
-      const indicator = document.getElementById('video-status-indicator');
-      const toggleBtn = document.getElementById('toggle-video-btn');
-
-      if (!video) return;
-
-      // Ensure explicit mute, loop, and playsinline properties
-      video.muted = true;
-      video.loop = true;
-      video.playsInline = true;
-
-      // Attempt immediate programmatic autoplay
-      const playPromise = video.play();
-      if (playPromise !== undefined) {
-        playPromise.then(() => {
-          indicator.innerHTML = `<i class="fa-solid fa-circle-play text-emerald-400"></i> <span>Live Video Active</span>`;
-          toggleBtn.innerHTML = `<i class="fa-solid fa-pause text-[10px]"></i>`;
-        }).catch(err => {
-          console.warn("Autoplay deferred or prevented by client policy; activating canvas mesh fallback:", err);
-          // If video playback fails, switch cleanly to animated particle mesh canvas
-          startHeroCanvasFallback(canvas);
-          indicator.innerHTML = `<i class="fa-solid fa-wave-square text-cyan-400"></i> <span>Digital Canvas Loop</span>`;
-          toggleBtn.innerHTML = `<i class="fa-solid fa-play text-[10px]"></i>`;
-        });
-      }
-
-      // Event listener if video plays after user interaction anywhere
-      window.addEventListener('click', () => {
-        if (video.paused && (!canvasAnimationId || canvas.style.display === 'none')) {
-          video.play().catch(() => {});
-        }
-      }, { once: true });
-    }
-
-    function toggleHeroVideo() {
-      const video = document.getElementById('hero-video-player');
-      const toggleBtn = document.getElementById('toggle-video-btn');
-      const indicator = document.getElementById('video-status-indicator');
-
-      if (!video) return;
-
-      if (video.paused) {
-        video.play().then(() => {
-          indicator.innerHTML = `<i class="fa-solid fa-circle-play text-emerald-400"></i> <span>Live Video Active</span>`;
-          toggleBtn.innerHTML = `<i class="fa-solid fa-pause text-[10px]"></i>`;
-        }).catch(() => {});
-      } else {
-        video.pause();
-        indicator.innerHTML = `<i class="fa-solid fa-circle-pause text-amber-400"></i> <span>Video Paused</span>`;
-        toggleBtn.innerHTML = `<i class="fa-solid fa-play text-[10px]"></i>`;
-      }
-    }
-
-    // High performance digital wave / particle canvas fallback
-    function startHeroCanvasFallback(canvas) {
-      if (!canvas) return;
-      canvas.style.display = 'block';
-      const ctx = canvas.getContext('2d');
-      let width = (canvas.width = canvas.parentElement.offsetWidth);
-      let height = (canvas.height = canvas.parentElement.offsetHeight);
-
-      window.addEventListener('resize', () => {
-        if (canvas) {
-          width = canvas.width = canvas.parentElement.offsetWidth;
-          height = canvas.height = canvas.parentElement.offsetHeight;
-        }
+      await supabaseClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + window.location.pathname }
       });
-
-      const particles = [];
-      for (let i = 0; i < 45; i++) {
-        particles.push({
-          x: Math.random() * width,
-          y: Math.random() * height,
-          vx: (Math.random() - 0.5) * 0.8,
-          vy: (Math.random() - 0.5) * 0.8,
-          radius: Math.random() * 2 + 1
-        });
-      }
-
-      function draw() {
-        ctx.fillStyle = '#0a192f';
-        ctx.fillRect(0, 0, width, height);
-
-        for (let i = 0; i < particles.length; i++) {
-          const p = particles[i];
-          p.x += p.vx;
-          p.y += p.vy;
-
-          if (p.x < 0 || p.x > width) p.vx *= -1;
-          if (p.y < 0 || p.y > height) p.vy *= -1;
-
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(129, 140, 248, 0.45)';
-          ctx.fill();
-
-          for (let j = i + 1; j < particles.length; j++) {
-            const p2 = particles[j];
-            const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-            if (dist < 120) {
-              ctx.beginPath();
-              ctx.moveTo(p.x, p.y);
-              ctx.lineTo(p2.x, p2.y);
-              ctx.strokeStyle = `rgba(99, 102, 241, ${0.25 * (1 - dist / 120)})`;
-              ctx.stroke();
-            }
-          }
-        }
-        canvasAnimationId = requestAnimationFrame(draw);
-      }
-      draw();
+    } catch (e) {
+      alert("Google OAuth redirect error: " + e.message);
     }
+  } else {
+    alert("Supabase credentials not configured yet. Complete onboarding in preview mode.");
+    checkOnboarding();
+  }
+});
 
-    /* ==========================================
-       3. NAVIGATION ROUTER
-       ========================================== */
-    function navigate(viewId) {
-      const views = document.querySelectorAll('.view-container');
-      views.forEach(v => v.classList.remove('active'));
+function checkOnboarding() {
+  const done = localStorage.getItem("novaToolsOnboarded");
+  if (!done) {
+    document.getElementById("onboardingPage").classList.add("open");
+  } else {
+    activateTab("home");
+  }
+}
 
-      const target = document.getElementById(`view-${viewId}`);
-      if (target) {
-        target.classList.add('active');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
+document.getElementById("onboardingForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const profile = {
+    name: document.getElementById("obName").value.trim(),
+    role: document.getElementById("obRole").value,
+    reason: document.getElementById("obReason").value,
+    source: document.getElementById("obSource").value,
+    feedback: document.getElementById("obFeedback").value.trim()
+  };
 
-      if (history.pushState) {
-        history.pushState(null, null, `#${viewId}`);
-      } else {
-        location.hash = `#${viewId}`;
-      }
+  localStorage.setItem("novaToolsOnboarded", "true");
+  localStorage.setItem("novaToolsProfile", JSON.stringify(profile));
 
-      document.querySelectorAll('.nav-link').forEach(link => {
-        if (link.getAttribute('data-nav') === viewId) {
-          link.classList.add('text-brand-600', 'bg-slate-100/80', 'font-semibold');
-        } else {
-          link.classList.remove('text-brand-600', 'bg-slate-100/80', 'font-semibold');
-        }
-      });
+  document.getElementById("onboardingPage").classList.remove("open");
+  activateTab("home");
+  alert(`Welcome to NovaTools, ${profile.name}!`);
+});
 
-      document.getElementById('mobile-menu').classList.add('hidden');
-    }
+/* =========================================================
+   7. REAL REVIEWS ENGINE (STORAGE & INTERACTIVE 5-STAR)
+========================================================= */
+const reviewModal = document.getElementById("reviewModal");
+let selectedRating = 0;
 
-    window.addEventListener('popstate', () => {
-      const hash = window.location.hash.replace('#', '') || 'home';
-      navigate(hash);
+function getReviews() {
+  try { return JSON.parse(localStorage.getItem("novaToolsReviews") || "[]"); } catch { return []; }
+}
+
+function renderReviews() {
+  const list = document.getElementById("reviewList");
+  if (!list) return;
+  const reviews = getReviews().slice(-4).reverse();
+  list.innerHTML = "";
+
+  if (!reviews.length) {
+    list.innerHTML = `
+      <article class="review-item">
+        <strong>Community Member</strong><span class="review-item-stars">★★★★★</span>
+        <p>"The client-side PDF merger is lightning fast and keeps documents private."</p>
+      </article>
+      <article class="review-item">
+        <strong>Content Creator</strong><span class="review-item-stars">★★★★★</span>
+        <p>"Love the quick access bar and the writing assistant. Very clean UI!"</p>
+      </article>
+    `;
+    return;
+  }
+
+  reviews.forEach(r => {
+    const item = document.createElement("article");
+    item.className = "review-item";
+    item.innerHTML = `
+      <div>
+        <strong>${r.name || "NovaTools User"}</strong>
+        <span class="review-item-stars">${"★".repeat(r.rating)}</span>
+      </div>
+      <p>${r.text || "Rated NovaTools!"}</p>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function openReviewModal() { reviewModal.classList.add("open"); }
+function closeReviewModal() { reviewModal.classList.remove("open"); }
+
+document.getElementById("openReviewBtn")?.addEventListener("click", openReviewModal);
+document.getElementById("highlightWriteReviewBtn")?.addEventListener("click", openReviewModal);
+document.getElementById("quickRateBtn")?.addEventListener("click", openReviewModal);
+document.getElementById("closeReviewBtn")?.addEventListener("click", closeReviewModal);
+document.getElementById("btnCancelReview")?.addEventListener("click", closeReviewModal);
+
+document.querySelectorAll(".star-picker button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    selectedRating = Number(btn.getAttribute("data-rating"));
+    document.querySelectorAll(".star-picker button").forEach(b => {
+      b.classList.toggle("selected", Number(b.getAttribute("data-rating")) <= selectedRating);
     });
+    const hints = { 1: "Needs improvement", 2: "Could be better", 3: "It was okay", 4: "Really good!", 5: "Excellent!" };
+    document.getElementById("ratingHint").textContent = hints[selectedRating];
+  });
+});
+
+document.getElementById("reviewForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  if (!selectedRating) {
+    alert("Please tap a star rating first.");
+    return;
+  }
+
+  const reviews = getReviews();
+  reviews.push({
+    rating: selectedRating,
+    name: document.getElementById("reviewName").value.trim(),
+    text: document.getElementById("reviewText").value.trim(),
+    date: new Date().toISOString()
+  });
+
+  localStorage.setItem("novaToolsReviews", JSON.stringify(reviews));
+  renderReviews();
+  closeReviewModal();
+  document.getElementById("reviewForm").reset();
+  selectedRating = 0;
+  document.querySelectorAll(".star-picker button").forEach(b => b.classList.remove("selected"));
+  alert("Thank you! Your review has been saved.");
+});
+
+renderReviews();
+</script>
 
-    document.getElementById('mobile-menu-btn').addEventListener('click', () => {
-      document.getElementById('mobile-menu').classList.toggle('hidden');
-    });
-
-    /* ==========================================
-       4. NOTIFICATION TOAST SYSTEM
-       ========================================== */
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      
-      let borderClass = 'border-brand-500 bg-white text-slate-800';
-      let icon = 'fa-info-circle text-brand-600';
-      
-      if (type === 'success') {
-        borderClass = 'border-emerald-500 bg-white text-slate-800';
-        icon = 'fa-check-circle text-emerald-600';
-      } else if (type === 'error') {
-        borderClass = 'border-red-500 bg-white text-slate-800';
-        icon = 'fa-triangle-exclamation text-red-600';
-      }
-
-      toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lg text-sm max-w-sm transform transition duration-300 translate-y-2 opacity-0 ${borderClass}`;
-      toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${escapeHtml(message)}</span>`;
-      
-      container.appendChild(toast);
-      
-      setTimeout(() => {
-        toast.classList.remove('translate-y-2', 'opacity-0');
-      }, 10);
-
-      setTimeout(() => {
-        toast.classList.add('opacity-0');
-        setTimeout(() => toast.remove(), 300);
-      }, 3500);
-    }
-
-    function escapeHtml(string) {
-      if (!string) return '';
-      const div = document.createElement('div');
-      div.innerText = string;
-      return div.innerHTML;
-    }
-
-    /* ==========================================
-       5. AI & WRITING TOOLS
-       ========================================== */
-    let currentTool = 'summariser';
-
-    const TOOL_CONFIG = {
-      summariser: {
-        title: "Text Summariser",
-        desc: "Extracts key insights and builds a concise bulleted digest.",
-        btnText: "Generate Summary",
-        action: processSummarise
-      },
-      improver: {
-        title: "Text Improver",
-        desc: "Fixes phrasing, eliminates redundancies, and elevates readability.",
-        btnText: "Improve Text",
-        action: processImprove
-      },
-      writer: {
-        title: "Writing Assistant",
-        desc: "Builds a structured essay outline or content draft from your prompt.",
-        btnText: "Draft Content",
-        action: processWrite
-      },
-      email: {
-        title: "Email Helper",
-        desc: "Generates clear, professional email drafts with proper greeting and sign-off.",
-        btnText: "Format Email",
-        action: processEmail
-      },
-      notes: {
-        title: "Study Notes",
-        desc: "Organises complex raw study material into structured revision notes.",
-        btnText: "Structure Notes",
-        action: processNotes
-      },
-      quiz: {
-        title: "Quiz Planner",
-        desc: "Generates practice questions and flashcard concepts from your subject notes.",
-        btnText: "Generate Quiz Plan",
-        action: processQuiz
-      }
-    };
-
-    function selectAiTool(toolKey) {
-      currentTool = toolKey;
-      const conf = TOOL_CONFIG[toolKey];
-      
-      document.getElementById('current-tool-title').textContent = conf.title;
-      document.getElementById('current-tool-desc').textContent = conf.desc;
-      document.getElementById('tool-action-btn-text').textContent = conf.btnText;
-
-      document.querySelectorAll('.tool-tab-btn').forEach(btn => {
-        btn.classList.remove('active', 'border-brand-300', 'bg-brand-50', 'text-brand-700');
-        btn.classList.add('bg-white', 'text-slate-700', 'border-slate-200');
-      });
-      const activeBtn = document.getElementById(`tab-tool-${toolKey}`);
-      if (activeBtn) {
-        activeBtn.classList.add('active', 'border-brand-300', 'bg-brand-50', 'text-brand-700');
-        activeBtn.classList.remove('bg-white', 'text-slate-700');
-      }
-    }
-
-    function runSelectedAiTool() {
-      const input = document.getElementById('ai-tool-input').value.trim();
-      if (!input) {
-        showToast("Please enter some text or a prompt to process.", "error");
-        return;
-      }
-      const tone = document.getElementById('tool-tone-select').value;
-      const outputDiv = document.getElementById('ai-tool-output');
-      
-      outputDiv.textContent = "Processing in-browser...";
-      
-      setTimeout(() => {
-        const handler = TOOL_CONFIG[currentTool].action;
-        const result = handler(input, tone);
-        outputDiv.textContent = result;
-        showToast(`${TOOL_CONFIG[currentTool].title} completed!`, "success");
-      }, 250);
-    }
-
-    function loadSampleText() {
-      const samples = {
-        summariser: "Artificial intelligence in education refers to machine learning technologies and cognitive systems designed to empower learners. Rather than replacing instructors, these tools act as interactive scaffolding. They assist in personalizing pacing, offering immediate formative evaluations on assignments, and summarizing complex research papers. However, ensuring critical thinking and academic integrity remains imperative.",
-        improver: "Basically what I was trying to say is that we should really make sure the project gets finished very quickly because if we don't do it then the other team will definitely beat us to it and that would be bad.",
-        writer: "The psychological benefits of daily physical exercise and exposure to green nature on cognitive performance in college students.",
-        email: "Meeting request to discuss internship timeline and submission of project deliverables by next Tuesday.",
-        notes: "Cellular Respiration occurs in three primary stages: Glycolysis (cytoplasm, yields 2 ATP and pyruvate), Krebs Cycle (mitochondrial matrix, generates NADH and FADH2), and Electron Transport Chain (inner membrane, oxidative phosphorylation yielding ~32 ATP).",
-        quiz: "Newton's laws of motion: inertia, force equation F=ma, and equal-opposite reaction pairs."
-      };
-      document.getElementById('ai-tool-input').value = samples[currentTool] || samples.summariser;
-      showToast("Sample text loaded into editor.");
-    }
-
-    function copyToolOutput() {
-      const output = document.getElementById('ai-tool-output').textContent;
-      if (!output || output.includes("Output will appear here")) {
-        showToast("No output text to copy.", "error");
-        return;
-      }
-      
-      const tempTextArea = document.createElement("textarea");
-      tempTextArea.value = output;
-      document.body.appendChild(tempTextArea);
-      tempTextArea.select();
-      try {
-        document.execCommand('copy');
-        showToast("Output copied to clipboard!", "success");
-      } catch (err) {
-        showToast("Could not copy automatically.", "error");
-      }
-      document.body.removeChild(tempTextArea);
-    }
-
-    function processSummarise(text, tone) {
-      const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-      const clean = sentences.map(s => s.trim()).filter(s => s.length > 15);
-      const digest = clean.slice(0, Math.max(2, Math.ceil(clean.length / 2)));
-      
-      return `📌 KEY TAKEAWAYS (${tone.toUpperCase()} SUMMARY):\n\n` +
-        digest.map((s, idx) => `• [Key Point ${idx + 1}] ${s}`).join('\n\n') +
-        `\n\n—\nSynthesized locally from ${clean.length} source sentences.`;
-    }
-
-    function processImprove(text, tone) {
-      let improved = text
-        .replace(/\bbasically\b/gi, '')
-        .replace(/\bvery\b/gi, 'significantly')
-        .replace(/\breally\b/gi, 'notably')
-        .replace(/\bthat would be bad\b/gi, 'which would compromise our schedule')
-        .replace(/\s+/g, ' ')
-        .trim();
-
-      return `✨ IMPROVED VERSION (${tone.toUpperCase()}):\n\n` +
-        `"${improved}"\n\n` +
-        `🔍 Improvements Applied:\n` +
-        `• Eliminated conversational redundancies and filler words.\n` +
-        `• Enhanced sentence structure and vocabulary precision.\n` +
-        `• Tailored tone to ${tone} guidelines.`;
-    }
-
-    function processWrite(prompt, tone) {
-      return `📝 DRAFT OUTLINE & CONTENT BLUEPRINT:\n` +
-        `Topic: ${prompt}\nTone: ${tone}\n\n` +
-        `1. INTRODUCTION\n` +
-        `   • Context & Background: The fundamental significance of "${prompt}".\n` +
-        `   • Thesis: Systematic application of modern methods produces measurable advantages.\n\n` +
-        `2. DETAILED ANALYSIS & CORE PILLARS\n` +
-        `   • Section 1: Foundational research and baseline observations.\n` +
-        `   • Section 2: Key challenges, edge cases, and mitigating approaches.\n` +
-        `   • Section 3: Strategic implementation frameworks.\n\n` +
-        `3. SYNTHESIS & PRACTICAL OUTCOMES\n` +
-        `   • Summary of core insights.\n` +
-        `   • Actionable takeaways for long-term consistency.`;
-    }
-
-    function processEmail(prompt, tone) {
-      return `✉️ GENERATED EMAIL DRAFT:\n\n` +
-        `Subject: Regarding: ${prompt.slice(0, 45)}...\n\n` +
-        `Dear Team,\n\n` +
-        `I hope this note finds you well.\n\n` +
-        `I am writing to follow up regarding our upcoming objectives: ${prompt}.\n\n` +
-        `Please let me know if this direction aligns with your expectations, or if we should discuss any refinements before finalizing. Looking forward to your response.\n\n` +
-        `Best regards,\n` +
-        `${(currentUser && currentUser.name) ? currentUser.name : 'Abhinandan Raj'}\n` +
-        `NovaTools Workspace`;
-    }
-
-    function processNotes(text, tone) {
-      const lines = text.split('\n').filter(l => l.trim().length > 0);
-      return `📚 STRUCTURED STUDY NOTES\n\n` +
-        `🎯 Core Concepts:\n` +
-        lines.map((l, i) => `[Concept ${i+1}] ${l.trim()}`).join('\n') +
-        `\n\n💡 Retention Prompts:\n` +
-        `• Test understanding through active recall without checking source notes.\n` +
-        `• Review terms after 24 hours to solidify neural pathways.`;
-    }
-
-    function processQuiz(text) {
-      return `🎯 QUIZ QUESTIONS & KNOWLEDGE EVALUATION:\n\n` +
-        `Q1: What is the primary concept described in: "${text.slice(0, 50)}..."?\n` +
-        `   [A] Dependent passive variable\n` +
-        `   [B] Primary causal mechanism\n` +
-        `   [C] Supplementary correlation\n` +
-        `   (Answer: B)\n\n` +
-        `Q2: True or False: The principles outlined apply across diverse operational environments.\n` +
-        `   (Answer: True - fundamental tenets generalize consistently)\n\n` +
-        `Q3: Free Response Question:\n` +
-        `   "Explain how you would apply this concept in a timed evaluation scenario."`;
-    }
-
-    /* ==========================================
-       6. PDF UTILITIES (PDF-LIB IMPLEMENTATION)
-       ========================================== */
-    async function handleCreatePdf() {
-      const title = document.getElementById('pdf-doc-title').value.trim() || 'NovaTools Document';
-      const body = document.getElementById('pdf-doc-body').value.trim();
-
-      if (!body) {
-        showToast("Please provide content for your PDF document.", "error");
-        return;
-      }
-
-      const btn = document.getElementById('btn-create-pdf');
-      btn.disabled = true;
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-xs"></i> Building...`;
-
-      try {
-        const { PDFDocument, StandardFonts, rgb } = PDFLib;
-        const pdfDoc = await PDFDocument.create();
-        
-        let page = pdfDoc.addPage([595.28, 841.89]); // A4 dimensions
-        const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-        const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
-
-        // Header Title
-        page.drawText(title, {
-          x: 50,
-          y: 790,
-          size: 20,
-          font: fontBold,
-          color: rgb(0.06, 0.09, 0.16)
-        });
-
-        // Subtitle line
-        page.drawText(`Generated via NovaTools • Designed by Abhinandan Raj`, {
-          x: 50,
-          y: 770,
-          size: 9,
-          font: fontRegular,
-          color: rgb(0.4, 0.45, 0.55)
-        });
-
-        // Horizontal Rule
-        page.drawLine({
-          start: { x: 50, y: 755 },
-          end: { x: 545, y: 755 },
-          thickness: 1,
-          color: rgb(0.85, 0.88, 0.92)
-        });
-
-        // Text wrapping
-        const words = body.split(/\s+/);
-        let lines = [];
-        let currentLine = "";
-        
-        for (const word of words) {
-          const testLine = currentLine ? `${currentLine} ${word}` : word;
-          const textWidth = fontRegular.widthOfTextAtSize(testLine, 11);
-          if (textWidth > 490) {
-            lines.push(currentLine);
-            currentLine = word;
-          } else {
-            currentLine = testLine;
-          }
-        }
-        if (currentLine) lines.push(currentLine);
-
-        let yPos = 730;
-        for (const line of lines) {
-          if (yPos < 60) {
-            page = pdfDoc.addPage([595.28, 841.89]);
-            yPos = 790;
-          }
-          page.drawText(line, {
-            x: 50,
-            y: yPos,
-            size: 11,
-            font: fontRegular,
-            color: rgb(0.15, 0.2, 0.25)
-          });
-          yPos -= 17;
-        }
-
-        const pdfBytes = await pdfDoc.save();
-        downloadBlob(pdfBytes, `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`, "application/pdf");
-        showToast("PDF document downloaded successfully!", "success");
-      } catch (err) {
-        console.error(err);
-        showToast("Failed to generate PDF. Check console.", "error");
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = `<i class="fa-solid fa-download text-xs"></i> Download PDF`;
-      }
-    }
-
-    let selectedMergeFiles = [];
-
-    function handlePdfFilesSelected(event) {
-      const files = Array.from(event.target.files);
-      selectedMergeFiles = selectedMergeFiles.concat(files);
-      renderMergeFileList();
-    }
-
-    function renderMergeFileList() {
-      const listContainer = document.getElementById('merge-file-list');
-      document.getElementById('merge-file-count').textContent = selectedMergeFiles.length;
-
-      if (selectedMergeFiles.length === 0) {
-        listContainer.innerHTML = `<div class="text-xs text-slate-400 italic py-2 text-center bg-slate-50 rounded-lg">No files added yet</div>`;
-        return;
-      }
-
-      listContainer.innerHTML = selectedMergeFiles.map((file, idx) => `
-        <div class="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs">
-          <div class="flex items-center gap-2 truncate max-w-[240px]">
-            <i class="fa-solid fa-file-pdf text-red-500"></i>
-            <span class="font-medium text-slate-700 truncate">${escapeHtml(file.name)}</span>
-            <span class="text-[10px] text-slate-400">(${(file.size / 1024).toFixed(1)} KB)</span>
-          </div>
-          <button onclick="removeMergeFile(${idx})" class="text-slate-400 hover:text-red-500 p-1">
-            <i class="fa-solid fa-trash-can"></i>
-          </button>
-        </div>
-      `).join('');
-    }
-
-    function removeMergeFile(index) {
-      selectedMergeFiles.splice(index, 1);
-      renderMergeFileList();
-    }
-
-    function clearMergeFiles() {
-      selectedMergeFiles = [];
-      renderMergeFileList();
-      document.getElementById('pdf-merge-input').value = "";
-    }
-
-    async function handleMergePdfs() {
-      if (selectedMergeFiles.length < 2) {
-        showToast("Please choose at least 2 PDF files to merge.", "error");
-        return;
-      }
-
-      const btn = document.getElementById('btn-merge-pdf');
-      btn.disabled = true;
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-xs"></i> Merging...`;
-
-      try {
-        const { PDFDocument } = PDFLib;
-        const mergedDoc = await PDFDocument.create();
-
-        for (const file of selectedMergeFiles) {
-          const arrayBuffer = await file.arrayBuffer();
-          const doc = await PDFDocument.load(arrayBuffer);
-          const copiedPages = await mergedDoc.copyPages(doc, doc.getPageIndices());
-          copiedPages.forEach((page) => mergedDoc.addPage(page));
-        }
-
-        const mergedBytes = await mergedDoc.save();
-        downloadBlob(mergedBytes, `NovaTools_Merged_${Date.now()}.pdf`, "application/pdf");
-        showToast("PDFs successfully merged and downloaded!", "success");
-      } catch (err) {
-        console.error(err);
-        showToast("Unable to merge PDFs. Ensure files are non-corrupted.", "error");
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = `<i class="fa-solid fa-code-merge text-xs"></i> Merge & Download`;
-      }
-    }
-
-    function downloadBlob(bytes, filename, type) {
-      const blob = new Blob([bytes], { type });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(link.href);
-    }
-
-    /* ==========================================
-       7. AI DIRECTORY CATALOG
-       ========================================== */
-    const DIRECTORY_TOOLS = [
-      {
-        name: "ChatGPT",
-        category: "writing",
-        categoryLabel: "Writing & Reasoning",
-        description: "Leading conversational AI for drafting essays, brainstorming, debugging code, and structured problem solving.",
-        url: "https://chatgpt.com",
-        icon: "fa-solid fa-comments",
-        color: "text-emerald-600 bg-emerald-50"
-      },
-      {
-        name: "Perplexity AI",
-        category: "research",
-        categoryLabel: "Research & Citations",
-        description: "Interactive answer engine providing cited web sources, academic papers, and up-to-the-minute findings.",
-        url: "https://www.perplexity.ai",
-        icon: "fa-solid fa-magnifying-glass-chart",
-        color: "text-cyan-600 bg-cyan-50"
-      },
-      {
-        name: "Claude AI",
-        category: "writing",
-        categoryLabel: "Writing & Coding",
-        description: "Anthropic's advanced model renowned for high-nuance prose, document analysis, and safe coding assistance.",
-        url: "https://claude.ai",
-        icon: "fa-solid fa-brain",
-        color: "text-amber-600 bg-amber-50"
-      },
-      {
-        name: "Canva AI",
-        category: "design",
-        categoryLabel: "Design & Media",
-        description: "Visual creation suite featuring Magic Media, smart presentation generators, and intuitive poster templates.",
-        url: "https://www.canva.com",
-        icon: "fa-solid fa-palette",
-        color: "text-purple-600 bg-purple-50"
-      },
-      {
-        name: "Notion AI",
-        category: "productivity",
-        categoryLabel: "Productivity & Notes",
-        description: "Integrated workspace helper for organizing personal wikis, action checklists, project boards, and summaries.",
-        url: "https://www.notion.so",
-        icon: "fa-solid fa-book",
-        color: "text-slate-800 bg-slate-100"
-      },
-      {
-        name: "Grammarly",
-        category: "writing",
-        categoryLabel: "Writing & Grammar",
-        description: "Real-time proofreader that refines tone, conciseness, grammar checks, and vocabulary suggestions.",
-        url: "https://www.grammarly.com",
-        icon: "fa-solid fa-spell-check",
-        color: "text-green-600 bg-green-50"
-      },
-      {
-        name: "Adobe Express",
-        category: "design",
-        categoryLabel: "Design & Generative Art",
-        description: "Fast graphic design and generative fill powered by Adobe Firefly for quick social media and document graphics.",
-        url: "https://www.adobe.com/express/",
-        icon: "fa-solid fa-wand-magic-sparkles",
-        color: "text-red-600 bg-red-50"
-      },
-      {
-        name: "Midjourney",
-        category: "design",
-        categoryLabel: "Generative Imagery",
-        description: "Photorealistic and artistic image generation platform accessed through Discord and web interfaces.",
-        url: "https://www.midjourney.com",
-        icon: "fa-solid fa-image",
-        color: "text-blue-600 bg-blue-50"
-      }
-    ];
-
-    function renderDirectoryCards(category = 'all') {
-      const grid = document.getElementById('directory-grid');
-      const filtered = category === 'all' 
-        ? DIRECTORY_TOOLS 
-        : DIRECTORY_TOOLS.filter(t => t.category === category);
-
-      grid.innerHTML = filtered.map(item => `
-        <div class="study-card bg-white rounded-2xl p-6 border border-slate-200/90 shadow-sm flex flex-col justify-between group">
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl ${item.color}">
-                <i class="${item.icon}"></i>
-              </div>
-              <span class="text-[11px] font-semibold tracking-wide uppercase px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">
-                ${item.categoryLabel}
-              </span>
-            </div>
-            <h3 class="font-heading font-bold text-lg text-slate-900 mb-2 group-hover:text-brand-600 transition">
-              ${escapeHtml(item.name)}
-            </h3>
-            <p class="text-sm text-slate-500 leading-relaxed">
-              ${escapeHtml(item.description)}
-            </p>
-          </div>
-          <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-            <span class="text-xs text-slate-400">Official Portal</span>
-            <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-slate-50 hover:bg-brand-50 text-slate-700 hover:text-brand-600 font-semibold text-xs transition border border-slate-200 flex items-center gap-1.5">
-              <span>Visit</span>
-              <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-            </a>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function filterDirectory(cat) {
-      document.querySelectorAll('.dir-filter').forEach(btn => {
-        if (btn.getAttribute('data-category') === cat) {
-          btn.classList.add('bg-brand-600', 'text-white');
-          btn.classList.remove('bg-white', 'text-slate-600');
-        } else {
-          btn.classList.remove('bg-brand-600', 'text-white');
-          btn.classList.add('bg-white', 'text-slate-600');
-        }
-      });
-      renderDirectoryCards(cat);
-    }
-
-    /* ==========================================
-       8. REVIEW CENTRE
-       ========================================== */
-    const DEFAULT_REVIEWS = [
-      {
-        name: "Sophie Clark",
-        role: "University Student",
-        rating: 5,
-        content: "The Study Notes formatter and PDF utilities make compiling my weekly revision documents so much faster. Clean layout without ads!",
-        date: "2 days ago"
-      },
-      {
-        name: "Marcus V.",
-        role: "Content Writer",
-        rating: 5,
-        content: "Love the Study Sphere inspired navigation and how fast everything loads directly in the browser without lagging.",
-        date: "1 week ago"
-      },
-      {
-        name: "Priya Patel",
-        role: "Educator",
-        rating: 4,
-        content: "The Quiz Planner template saves me at least 30 minutes every lesson prep. Very practical tool suite.",
-        date: "2 weeks ago"
-      }
-    ];
-
-    let currentRatingSelection = 5;
-
-    function setRating(val) {
-      currentRatingSelection = val;
-      document.getElementById('review-rating-value').value = val;
-      
-      const stars = document.querySelectorAll('#star-rating-selector i');
-      stars.forEach(star => {
-        const starVal = parseInt(star.getAttribute('data-star'));
-        if (starVal <= val) {
-          star.classList.add('text-amber-400');
-          star.classList.remove('text-slate-300');
-        } else {
-          star.classList.remove('text-amber-400');
-          star.classList.add('text-slate-300');
-        }
-      });
-
-      const labels = ["Poor", "Fair", "Good", "Very Good", "Excellent"];
-      document.getElementById('rating-text-label').textContent = `${val} Star${val > 1 ? 's' : ''} (${labels[val - 1]})`;
-    }
-
-    function getStoredReviews() {
-      try {
-        const local = localStorage.getItem('novatools_user_reviews');
-        return local ? JSON.parse(local) : DEFAULT_REVIEWS;
-      } catch (e) {
-        return DEFAULT_REVIEWS;
-      }
-    }
-
-    function saveStoredReviews(revs) {
-      try {
-        localStorage.setItem('novatools_user_reviews', JSON.stringify(revs));
-      } catch (e) {}
-    }
-
-    function renderReviewsFeed() {
-      const reviews = getStoredReviews();
-      const feed = document.getElementById('reviews-feed');
-      document.getElementById('review-count-badge').textContent = `${reviews.length} Review${reviews.length === 1 ? '' : 's'}`;
-
-      feed.innerHTML = reviews.map(r => {
-        const starsHtml = Array.from({ length: 5 }, (_, i) => 
-          `<i class="fa-solid fa-star ${i < r.rating ? 'text-amber-400' : 'text-slate-200'}"></i>`
-        ).join('');
-
-        return `
-          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-3">
-              <div>
-                <h4 class="font-heading font-bold text-slate-900 text-sm">${escapeHtml(r.name || 'Anonymous User')}</h4>
-                <p class="text-xs text-slate-400">${escapeHtml(r.role || 'Visitor')} • ${r.date || 'Recent'}</p>
-              </div>
-              <div class="text-xs flex gap-0.5">${starsHtml}</div>
-            </div>
-            <p class="text-sm text-slate-600 leading-relaxed font-sans">${escapeHtml(r.content)}</p>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function handleReviewSubmit(e) {
-      e.preventDefault();
-      const author = document.getElementById('review-author').value.trim() || 'Anonymous Member';
-      const role = document.getElementById('review-role').value.trim() || 'NovaTools User';
-      const content = document.getElementById('review-content').value.trim();
-      const rating = currentRatingSelection;
-
-      if (!content) {
-        showToast("Please provide your review feedback.", "error");
-        return;
-      }
-
-      const newReview = {
-        name: author,
-        role: role,
-        rating: rating,
-        content: content,
-        date: "Just now"
-      };
-
-      const reviews = getStoredReviews();
-      reviews.unshift(newReview);
-      saveStoredReviews(reviews);
-      renderReviewsFeed();
-
-      document.getElementById('review-form').reset();
-      setRating(5);
-      showToast("Thank you! Your review has been published.", "success");
-    }
-
-    /* ==========================================
-       9. AUTHENTICATION & ONBOARDING SYSTEM
-       ========================================== */
-    function checkExistingAuth() {
-      if (supabaseClient) {
-        supabaseClient.auth.getSession().then(({ data, error }) => {
-          if (data && data.session && data.session.user) {
-            setupAuthenticatedUser(data.session.user);
-          } else {
-            checkLocalSession();
-          }
-        }).catch(() => {
-          checkLocalSession();
-        });
-      } else {
-        checkLocalSession();
-      }
-    }
-
-    function checkLocalSession() {
-      try {
-        const local = localStorage.getItem('novatools_auth_user');
-        if (local) {
-          const user = JSON.parse(local);
-          setupAuthenticatedUser(user);
-        } else {
-          setSignedOutUI();
-        }
-      } catch (err) {
-        setSignedOutUI();
-      }
-    }
-
-    function setupAuthenticatedUser(user) {
-      currentUser = user;
-      
-      document.getElementById('nav-auth-signed-out').classList.add('hidden');
-      document.getElementById('nav-auth-signed-in').classList.remove('hidden');
-      document.getElementById('mobile-auth-signed-out').classList.add('hidden');
-      document.getElementById('mobile-auth-signed-in').classList.remove('hidden');
-
-      const displayName = user.user_metadata?.full_name || user.name || (user.email ? user.email.split('@')[0] : 'User');
-      const initial = displayName.charAt(0).toUpperCase();
-
-      document.getElementById('nav-user-name').textContent = displayName;
-      document.getElementById('mobile-user-name').textContent = displayName;
-      document.getElementById('nav-user-initial').textContent = initial;
-
-      document.getElementById('profile-avatar-letter').textContent = initial;
-      document.getElementById('profile-display-name').textContent = displayName;
-      document.getElementById('profile-display-email').textContent = user.email || 'Anonymous';
-      document.getElementById('profile-name').value = displayName;
-
-      if (user.role) document.getElementById('profile-role').value = user.role;
-      if (user.reason) document.getElementById('profile-reason').value = user.reason;
-      if (user.notes) document.getElementById('profile-notes').value = user.notes;
-
-      const onboardCompleted = localStorage.getItem(`novatools_onboarded_${user.id || user.email}`);
-      if (!onboardCompleted && !user.onboarded) {
-        navigate('onboarding');
-      }
-    }
-
-    function setSignedOutUI() {
-      currentUser = null;
-      document.getElementById('nav-auth-signed-out').classList.remove('hidden');
-      document.getElementById('nav-auth-signed-in').classList.add('hidden');
-      document.getElementById('mobile-auth-signed-out').classList.remove('hidden');
-      document.getElementById('mobile-auth-signed-in').classList.add('hidden');
-    }
-
-    async function handleEmailSignIn(e) {
-      e.preventDefault();
-      const email = document.getElementById('signin-email').value.trim();
-      const password = document.getElementById('signin-password').value;
-      const btn = document.getElementById('btn-signin-submit');
-
-      btn.disabled = true;
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Signing In...`;
-
-      try {
-        if (supabaseClient) {
-          const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-          if (!error && data && data.user) {
-            setupAuthenticatedUser(data.user);
-            showToast(`Welcome back, ${data.user.email}!`, "success");
-            navigate('home');
-            return;
-          }
-        }
-      } catch (err) {
-        console.warn("Supabase auth note:", err.message);
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = `Sign In`;
-      }
-
-      // Local fallback session
-      const mockUser = {
-        id: 'usr_' + Date.now(),
-        email: email,
-        name: email.split('@')[0],
-        onboarded: true
-      };
-      localStorage.setItem('novatools_auth_user', JSON.stringify(mockUser));
-      setupAuthenticatedUser(mockUser);
-      showToast("Signed in successfully!", "success");
-      navigate('home');
-    }
-
-    async function handleEmailSignUp(e) {
-      e.preventDefault();
-      const email = document.getElementById('signup-email').value.trim();
-      const password = document.getElementById('signup-password').value;
-      const confirm = document.getElementById('signup-password-confirm').value;
-
-      if (password !== confirm) {
-        showToast("Passwords do not match.", "error");
-        return;
-      }
-
-      const btn = document.getElementById('btn-signup-submit');
-      btn.disabled = true;
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Registering...`;
-
-      try {
-        if (supabaseClient) {
-          const { data, error } = await supabaseClient.auth.signUp({
-            email,
-            password,
-            options: {
-              emailRedirectTo: window.location.origin + window.location.pathname
-            }
-          });
-          if (!error && data && data.user) {
-            setupAuthenticatedUser(data.user);
-            showToast("Account created successfully! Please finish onboarding.", "success");
-            navigate('onboarding');
-            return;
-          }
-        }
-      } catch (err) {
-        console.warn("Supabase signup note:", err.message);
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = `Create Account`;
-      }
-
-      // Local fallback
-      const newUser = {
-        id: 'usr_' + Date.now(),
-        email: email,
-        name: email.split('@')[0],
-        onboarded: false
-      };
-      localStorage.setItem('novatools_auth_user', JSON.stringify(newUser));
-      setupAuthenticatedUser(newUser);
-      showToast("Account created! Let's set up your profile.", "success");
-      navigate('onboarding');
-    }
-
-    async function handleGoogleAuth() {
-      showToast("Initiating Google Sign-In...", "info");
-      try {
-        if (supabaseClient) {
-          const { data, error } = await supabaseClient.auth.signInWithOAuth({
-            provider: 'google',
-            options: {
-              redirectTo: window.location.origin + window.location.pathname
-            }
-          });
-          if (!error) return;
-        }
-      } catch (err) {
-        console.warn("OAuth note:", err.message);
-      }
-
-      // Sandbox Fallback
-      setTimeout(() => {
-        const googleUser = {
-          id: 'goog_' + Date.now(),
-          email: 'google.user@example.com',
-          name: 'Google Explorer',
-          onboarded: false
-        };
-        localStorage.setItem('novatools_auth_user', JSON.stringify(googleUser));
-        setupAuthenticatedUser(googleUser);
-        navigate('onboarding');
-      }, 600);
-    }
-
-    async function handleForgotPassword() {
-      const email = document.getElementById('signin-email').value.trim();
-      if (!email) {
-        showToast("Please enter your email address first.", "error");
-        return;
-      }
-      try {
-        if (supabaseClient) {
-          await supabaseClient.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.origin + window.location.pathname
-          });
-        }
-      } catch (err) {}
-      showToast(`Password reset link dispatched to ${email}`, "info");
-    }
-
-    async function handleSignOut() {
-      try {
-        if (supabaseClient) {
-          await supabaseClient.auth.signOut();
-        }
-      } catch (e) {}
-      localStorage.removeItem('novatools_auth_user');
-      setSignedOutUI();
-      showToast("You have been signed out.", "info");
-      navigate('home');
-    }
-
-    function handleOnboardingSubmit(e) {
-      e.preventDefault();
-      const name = document.getElementById('onboard-name').value.trim();
-      const role = document.getElementById('onboard-role').value;
-      const reason = document.getElementById('onboard-reason').value;
-      const source = document.getElementById('onboard-source').value;
-      const notes = document.getElementById('onboard-notes').value.trim();
-
-      if (!name || !role || !reason || !source) {
-        showToast("Please complete all 4 required fields.", "error");
-        return;
-      }
-
-      if (currentUser) {
-        currentUser.name = name;
-        currentUser.role = role;
-        currentUser.reason = reason;
-        currentUser.source = source;
-        currentUser.notes = notes;
-        currentUser.onboarded = true;
-
-        const userKey = currentUser.id || currentUser.email;
-        localStorage.setItem(`novatools_onboarded_${userKey}`, 'true');
-        localStorage.setItem('novatools_auth_user', JSON.stringify(currentUser));
-        setupAuthenticatedUser(currentUser);
-      }
-
-      showToast("Workspace initialized! Welcome aboard.", "success");
-      navigate('home');
-    }
-
-    function handleProfileUpdate(e) {
-      e.preventDefault();
-      const name = document.getElementById('profile-name').value.trim();
-      const role = document.getElementById('profile-role').value;
-      const reason = document.getElementById('profile-reason').value;
-      const notes = document.getElementById('profile-notes').value.trim();
-
-      if (currentUser) {
-        currentUser.name = name;
-        currentUser.role = role;
-        currentUser.reason = reason;
-        currentUser.notes = notes;
-        localStorage.setItem('novatools_auth_user', JSON.stringify(currentUser));
-        setupAuthenticatedUser(currentUser);
-      }
-
-      showToast("Profile details updated successfully!", "success");
-    }
-
-    /* ==========================================
-       10. APPLICATION INITIALIZATION
-       ========================================== */
-    window.addEventListener('DOMContentLoaded', () => {
-      const initialHash = window.location.hash.replace('#', '') || 'home';
-      navigate(initialHash);
-      
-      initHeroVideo();
-      selectAiTool('summariser');
-      renderDirectoryCards('all');
-      renderReviewsFeed();
-      setRating(5);
-      
-      checkExistingAuth();
-    });
-  </script>
 </body>
 </html>
