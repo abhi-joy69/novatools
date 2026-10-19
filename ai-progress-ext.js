@@ -1,5 +1,5 @@
 /* =========================================================
-   AI PROGRESS & PDF EXPORT EXTENSION (100% ERROR-FREE)
+   AI COLORFUL BUTTON PROGRESS & ICON ANIMATION EXTENSION
 ========================================================= */
 (function() {
   window.processAITool = async function(toolKey) {
@@ -12,6 +12,15 @@
     if (!input) {
       resultBox.textContent = "Please enter some text, instructions, or points above first.";
       return;
+    }
+
+    // Find the generate button inside this tool's workspace
+    const workspace = resultBox.closest(".workspace-form");
+    const generateBtn = workspace ? workspace.querySelector("button.btn-primary") : null;
+    
+    const originalBtnHTML = generateBtn ? generateBtn.innerHTML : "";
+    if (generateBtn) {
+      generateBtn.disabled = true;
     }
 
     let format = "email";
@@ -32,29 +41,30 @@
     const promptGen = promptGenerators[toolKey] || ((_, txt) => txt);
     const finalPrompt = promptGen(format, input);
 
-    // Show live progress UI (Hiding copy buttons until ready)
+    // Colorful step-by-step icon messages while button acts as a progress bar
+    const steps = [
+      { pct: 20, icon: "fa-solid fa-brain", color: "#3b82f6", text: "Connecting & Analyzing..." },
+      { pct: 50, icon: "fa-solid fa-wand-magic-sparkles", color: "#8b5cf6", text: "Drafting & Structuring..." },
+      { pct: 80, icon: "fa-solid fa-paintbrush", color: "#ec4899", text: "Polishing & Refining Tone..." },
+      { pct: 95, icon: "fa-solid fa-circle-check", color: "#10b981", text: "Final Touches..." }
+    ];
+
     resultBox.innerHTML = `
       <div style="font-weight:700;color:var(--primary);margin-bottom:8px;">
-        <i class="fa-solid fa-spinner fa-spin"></i> Generating Response... (15%)
+        <i class="fa-solid fa-spinner fa-spin"></i> Generating intelligent response...
       </div>
-      <div style="font-size:12px;color:var(--muted);" id="ai-progress-status-${toolKey}">Connecting to AI engine...</div>
-      <div style="width:100%;background:#e2e8f0;height:6px;border-radius:3px;margin:10px 0 16px;overflow:hidden;">
-        <div id="ai-progress-bar-${toolKey}" style="width:15%;background:var(--primary);height:100%;transition:width 0.4s ease;"></div>
-      </div>
+      <div style="font-size:12px;color:var(--muted);">Your AI assistant is working on your request.</div>
     `;
 
-    const progressBar = document.getElementById(`ai-progress-bar-${toolKey}`);
-    const progressStatus = document.getElementById(`ai-progress-status-${toolKey}`);
-
-    const updateStep = (pct, msg) => {
-      if (progressBar) progressBar.style.width = pct + "%";
-      if (progressStatus) {
-        progressStatus.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Generating Response... (${pct}%) — ${msg}`;
+    let currentStepIndex = 0;
+    const progressInterval = setInterval(() => {
+      if (currentStepIndex < steps.length && generateBtn) {
+        const s = steps[currentStepIndex];
+        generateBtn.style.background = `linear-gradient(90deg, ${s.color} ${s.pct}%, #cbd5e1 ${s.pct}%)`;
+        generateBtn.innerHTML = `<i class="${s.icon}" style="color:white; margin-right:6px;"></i> ${s.text} (${s.pct}%)`;
+        currentStepIndex++;
       }
-    };
-
-    const timer1 = setTimeout(() => updateStep(40, "Analyzing instructions & context..."), 600);
-    const timer2 = setTimeout(() => updateStep(75, "Structuring prose and refining tone..."), 1500);
+    }, 450);
 
     try {
       const response = await fetch("https://text.pollinations.ai/", {
@@ -69,9 +79,16 @@
         })
       });
 
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      updateStep(100, "Finalizing output...");
+      clearInterval(progressInterval);
+
+      if (generateBtn) {
+        generateBtn.style.background = "";
+        generateBtn.innerHTML = `<i class="fa-solid fa-check"></i> Completed!`;
+        setTimeout(() => {
+          generateBtn.innerHTML = originalBtnHTML;
+          generateBtn.disabled = false;
+        }, 1500);
+      }
 
       if (!response.ok) throw new Error(`Engine status: ${response.status}`);
 
@@ -84,30 +101,33 @@
         }
       } catch (_) {}
 
-      setTimeout(() => {
-        const safeText = typeof escapeHTML === "function" ? escapeHTML(generatedText) : generatedText;
-        resultBox.innerHTML = `
-          <div style="white-space: pre-wrap; font-size: 13px; line-height: 1.7; margin-bottom: 16px;" id="ai-output-text-${toolKey}">${safeText}</div>
-          <div style="display:flex; gap:10px; flex-wrap:wrap; border-top:1px solid var(--border); padding-top:14px;">
-            <button class="btn btn-primary" type="button" onclick="copyResultText('ai-output-text-${toolKey}')"><i class="fa-regular fa-copy"></i> Copy Output</button>
-            <button class="btn btn-light" type="button" onclick="downloadAiPdf('${toolKey}', 'ai_generated_document.pdf')"><i class="fa-solid fa-file-pdf"></i> Download PDF</button>
-          </div>
-        `;
-        if (typeof recordHistoryEvent === "function") {
-          recordHistoryEvent({
-            tool: toolKey,
-            category: "AI Productivity",
-            title: `AI ${toolKey.toUpperCase()}`,
-            content: generatedText,
-            icon: "fa-bolt",
-            colorClass: "blue"
-          });
-        }
-      }, 300);
+      const safeText = typeof escapeHTML === "function" ? escapeHTML(generatedText) : generatedText;
+      resultBox.innerHTML = `
+        <div style="white-space: pre-wrap; font-size: 13px; line-height: 1.7; margin-bottom: 16px;" id="ai-output-text-${toolKey}">${safeText}</div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; border-top:1px solid var(--border); padding-top:14px;">
+          <button class="btn btn-primary" type="button" onclick="copyResultText('ai-output-text-${toolKey}')"><i class="fa-regular fa-copy"></i> Copy Output</button>
+          <button class="btn btn-light" type="button" onclick="downloadAiPdf('${toolKey}', 'ai_generated_document.pdf')"><i class="fa-solid fa-file-pdf"></i> Download PDF</button>
+        </div>
+      `;
+
+      if (typeof recordHistoryEvent === "function") {
+        recordHistoryEvent({
+          tool: toolKey,
+          category: "AI Productivity",
+          title: `AI ${toolKey.toUpperCase()}`,
+          content: generatedText,
+          icon: "fa-bolt",
+          colorClass: "blue"
+        });
+      }
 
     } catch (err) {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
+      clearInterval(progressInterval);
+      if (generateBtn) {
+        generateBtn.style.background = "";
+        generateBtn.innerHTML = originalBtnHTML;
+        generateBtn.disabled = false;
+      }
       resultBox.textContent = "Error generating response: " + err.message;
     }
   };
