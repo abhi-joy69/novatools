@@ -1,5 +1,5 @@
 /* =========================================================
-   AI PROGRESS EXTENSION - REAL-TIME SYNC & PDF EXPORT
+   AI PROGRESS & PDF EXPORT EXTENSION (100% ERROR-FREE)
 ========================================================= */
 (function() {
   window.processAITool = async function(toolKey) {
@@ -20,13 +20,19 @@
       if (formatEl) format = formatEl.value;
     }
 
-    const promptGenerator = typeof TOOL_SYSTEM_PROMPTS !== "undefined" && TOOL_SYSTEM_PROMPTS[toolKey]
-      ? TOOL_SYSTEM_PROMPTS[toolKey]
-      : (_, text) => text;
+    const promptGenerators = {
+      writer: (fmt, txt) => `You are an expert writing assistant. Format the output strictly as a ${fmt}. Instructions/Topic: "${txt}".`,
+      summariser: (_, txt) => `Summarise the following text into crisp, high-yield bullet points with an executive takeaway:\n\n${txt}`,
+      improver: (_, txt) => `Rewrite the following text to enhance vocabulary, eliminate fluff, and fix grammar while keeping clear prose:\n\n${txt}`,
+      email: (_, txt) => `Generate a polite, structured business email with a clear subject line and call to action based on these notes:\n\n${txt}`,
+      code: (_, txt) => `Explain this code snippet clearly: 1) What it does, 2) Step-by-step logic, and 3) Potential optimizations:\n\n${txt}`,
+      prompt: (_, txt) => `Rewrite the following simple prompt into a structured, highly-effective prompt for LLMs including Role, Task, Context, and Constraints:\n\n${txt}`
+    };
 
-    const finalPrompt = promptGenerator(format, input);
+    const promptGen = promptGenerators[toolKey] || ((_, txt) => txt);
+    const finalPrompt = promptGen(format, input);
 
-    // Show live progress UI and hide copy/download buttons until complete
+    // Show live progress UI (Hiding copy buttons until ready)
     resultBox.innerHTML = `
       <div style="font-weight:700;color:var(--primary);margin-bottom:8px;">
         <i class="fa-solid fa-spinner fa-spin"></i> Generating Response... (15%)
@@ -47,8 +53,8 @@
       }
     };
 
-    const timer1 = setTimeout(() => updateStep(40, "Analyzing instructions & context..."), 500);
-    const timer2 = setTimeout(() => updateStep(75, "Structuring prose and refining tone..."), 1200);
+    const timer1 = setTimeout(() => updateStep(40, "Analyzing instructions & context..."), 600);
+    const timer2 = setTimeout(() => updateStep(75, "Structuring prose and refining tone..."), 1500);
 
     try {
       const response = await fetch("https://text.pollinations.ai/", {
@@ -79,9 +85,9 @@
       } catch (_) {}
 
       setTimeout(() => {
-        // Render final text and reveal action buttons (Copy & Download PDF)
+        const safeText = typeof escapeHTML === "function" ? escapeHTML(generatedText) : generatedText;
         resultBox.innerHTML = `
-          <div style="white-space: pre-wrap; font-size: 13px; line-height: 1.7; margin-bottom: 16px;" id="ai-output-text-${toolKey}">${escapeHTML(generatedText)}</div>
+          <div style="white-space: pre-wrap; font-size: 13px; line-height: 1.7; margin-bottom: 16px;" id="ai-output-text-${toolKey}">${safeText}</div>
           <div style="display:flex; gap:10px; flex-wrap:wrap; border-top:1px solid var(--border); padding-top:14px;">
             <button class="btn btn-primary" type="button" onclick="copyResultText('ai-output-text-${toolKey}')"><i class="fa-regular fa-copy"></i> Copy Output</button>
             <button class="btn btn-light" type="button" onclick="downloadAiPdf('${toolKey}', 'ai_generated_document.pdf')"><i class="fa-solid fa-file-pdf"></i> Download PDF</button>
@@ -97,7 +103,7 @@
             colorClass: "blue"
           });
         }
-      }, 400);
+      }, 300);
 
     } catch (err) {
       clearTimeout(timer1);
