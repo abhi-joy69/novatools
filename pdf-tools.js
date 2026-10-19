@@ -1,3 +1,13 @@
+/* =========================================================
+   IN-BROWSER PDF SUITE & MS WORD LIVE STUDIO
+========================================================= */
+
+// Helper to safely fetch PDFLib from the browser window
+function getPDFLib() {
+  return window.PDFLib;
+}
+
+// Helper to trigger file downloads
 function downloadBlob(bytes, filename) {
   const blob = new Blob([bytes], { type: "application/pdf" });
   const link = document.createElement("a");
@@ -6,6 +16,7 @@ function downloadBlob(bytes, filename) {
   link.click();
 }
 
+// Live WYSIWYG Editor Helpers
 window.applyCanvasFontFamily = function(font) {
   const canvas = document.getElementById('wordCanvas');
   if (canvas) canvas.style.fontFamily = font;
@@ -76,8 +87,17 @@ window.updatePageCanvasPreview = function() {
   }
 };
 
+// 1. Photo to PDF
 document.getElementById("btnExecutePhotoPdf")?.addEventListener("click", async () => {
   const status = document.getElementById("status-photo_to_pdf");
+  const PDFLib = getPDFLib();
+
+  if (!PDFLib) {
+    status.style.color = "#dc2626";
+    status.textContent = "PDF Library is still loading. Please wait a moment and try again.";
+    return;
+  }
+
   const files = Array.from(document.getElementById("pdfPhotoInput").files);
   const docName = document.getElementById("pdfPhotoDocTitle").value.trim() || "Photos_Archive";
   if (!files.length) {
@@ -117,8 +137,17 @@ document.getElementById("btnExecutePhotoPdf")?.addEventListener("click", async (
   }
 });
 
+// 2. Text to PDF
 document.getElementById("btnExecuteTextPdf")?.addEventListener("click", async () => {
   const status = document.getElementById("status-text_to_pdf");
+  const PDFLib = getPDFLib();
+
+  if (!PDFLib) {
+    status.style.color = "#dc2626";
+    status.textContent = "PDF Library is still loading. Please wait a moment and try again.";
+    return;
+  }
+
   const docName = document.getElementById("pdfDocTitle").value.trim() || "My_Document";
   const canvas = document.getElementById("wordCanvas");
   const content = canvas ? canvas.innerText.trim() : "";
@@ -272,6 +301,7 @@ document.getElementById("btnExecuteTextPdf")?.addEventListener("click", async ()
   }
 });
 
+// 3. Merge PDF
 const mergeInput = document.getElementById("pdfMergeInput");
 mergeInput?.addEventListener("change", () => {
   const list = document.getElementById("mergeFileList");
@@ -281,6 +311,14 @@ mergeInput?.addEventListener("change", () => {
 
 document.getElementById("btnExecuteMergePdf")?.addEventListener("click", async () => {
   const status = document.getElementById("status-merge_pdf");
+  const PDFLib = getPDFLib();
+
+  if (!PDFLib) {
+    status.style.color = "#dc2626";
+    status.textContent = "PDF Library is still loading. Please wait a moment and try again.";
+    return;
+  }
+
   const files = Array.from(document.getElementById("pdfMergeInput").files);
   if (files.length < 2) {
     status.style.color = "#dc2626";
@@ -319,8 +357,17 @@ document.getElementById("btnExecuteMergePdf")?.addEventListener("click", async (
   }
 });
 
+// 4. Split PDF
 document.getElementById("btnExecuteSplitPdf")?.addEventListener("click", async () => {
   const status = document.getElementById("status-split_pdf");
+  const PDFLib = getPDFLib();
+
+  if (!PDFLib) {
+    status.style.color = "#dc2626";
+    status.textContent = "PDF Library is still loading. Please wait a moment and try again.";
+    return;
+  }
+
   const file = document.getElementById("pdfSplitInput").files[0];
   if (!file) {
     status.style.color = "#dc2626";
@@ -357,8 +404,17 @@ document.getElementById("btnExecuteSplitPdf")?.addEventListener("click", async (
   }
 });
 
+// 5. Extract Pages
 document.getElementById("btnExecuteExtractPdf")?.addEventListener("click", async () => {
   const status = document.getElementById("status-extract_pdf");
+  const PDFLib = getPDFLib();
+
+  if (!PDFLib) {
+    status.style.color = "#dc2626";
+    status.textContent = "PDF Library is still loading. Please wait a moment and try again.";
+    return;
+  }
+
   const file = document.getElementById("pdfExtractInput").files[0];
   const pageStr = document.getElementById("pdfExtractPages").value.trim();
   if (!file || !pageStr) {
@@ -400,8 +456,17 @@ document.getElementById("btnExecuteExtractPdf")?.addEventListener("click", async
   }
 });
 
+// 6. Rotate PDF
 document.getElementById("btnExecuteRotatePdf")?.addEventListener("click", async () => {
   const status = document.getElementById("status-rotate_pdf");
+  const PDFLib = getPDFLib();
+
+  if (!PDFLib) {
+    status.style.color = "#dc2626";
+    status.textContent = "PDF Library is still loading. Please wait a moment and try again.";
+    return;
+  }
+
   const file = document.getElementById("pdfRotateInput").files[0];
   const angle = parseInt(document.getElementById("pdfRotateAngle").value, 10);
   if (!file) {
