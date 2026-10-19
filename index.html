@@ -518,9 +518,16 @@ button:disabled { opacity: .6; cursor: not-allowed; }
 
 /* Page Border Presets */
 .border-style-none { border: 0; }
-.border-style-solid { border: 3px solid #1e293b; }
+.border-style-solid { border: 2px solid #1e293b; }
+.border-style-thick { border: 5px solid #1e293b; }
 .border-style-double { border: 6px double #1e293b; }
-.border-style-dashed { border: 3px dashed #64748b; }
+.border-style-dashed { border: 2px dashed #64748b; }
+.border-style-dotted { border: 3px dotted #1e293b; }
+.border-style-inset { border: 4px inset #64748b; }
+.border-style-groove { border: 4px groove #94a3b8; }
+.border-style-ridge { border: 5px ridge #64748b; }
+.border-style-outset { border: 4px outset #94a3b8; }
+.border-style-frame { border: 8px solid #0f172a; outline: 2px dashed #94a3b8; outline-offset: -5px; }
 
 /* HISTORY TIMELINE STYLES */
 .history-item {
@@ -1456,72 +1463,119 @@ body.tab-navigation main > section#home.active-page { display: block !important;
   </div>
 </section>
 
-<!-- Dedicated Tool: Text to PDF (MS WORD STYLE STUDIO) -->
+<!-- Dedicated Tool: Text to PDF (EXPANDED MS WORD STYLE STUDIO) -->
 <section class="section tool-dedicated-page" id="page-text_to_pdf">
   <div class="container animate-in">
-    <div class="dedicated-card-shell" style="max-width:960px">
+    <div class="dedicated-card-shell" style="max-width:980px">
       <div class="dedicated-header">
         <div class="dedicated-title-box">
           <div class="dedicated-icon-badge purple"><i class="fa-solid fa-file-word"></i></div>
           <div>
             <h2>Document Studio (Text to PDF)</h2>
-            <p>Edit your document live with MS Word-style styling, fonts, borders, and page sizing.</p>
+            <p>Customise fonts, sizes, page setups, and borders like Microsoft Word.</p>
           </div>
         </div>
         <button class="btn btn-light" data-tab="pdf-tools"><i class="fa-solid fa-arrow-left"></i> Back to PDF Suite</button>
       </div>
 
       <div class="workspace-form">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px">
           <div class="form-group">
             <label for="pdfDocTitle">Document Name:</label>
             <input type="text" id="pdfDocTitle" value="My_Document" placeholder="e.g., Project_Report">
           </div>
+
+          <!-- Extended Paper Sizes & Custom Size Selector -->
           <div class="form-group">
-            <label for="pdfPageSize">Page Dimensions:</label>
-            <select id="pdfPageSize" class="studio-select" onchange="updatePageCanvasPreview()">
-              <option value="A4">A4 (Standard 210 x 297mm)</option>
-              <option value="Letter">Letter (8.5 x 11 in)</option>
-              <option value="Legal">Legal (8.5 x 14 in)</option>
+            <label for="pdfPageSize">Paper Format:</label>
+            <select id="pdfPageSize" class="studio-select" onchange="handlePageSizeChange()">
+              <option value="A4" selected>A4 (210 x 297 mm)</option>
+              <option value="A3">A3 (297 x 420 mm)</option>
+              <option value="A5">A5 (148 x 210 mm)</option>
+              <option value="Letter">US Letter (8.5 x 11 in)</option>
+              <option value="Legal">US Legal (8.5 x 14 in)</option>
+              <option value="Tabloid">Tabloid (11 x 17 in)</option>
+              <option value="Executive">Executive (7.25 x 10.5 in)</option>
+              <option value="Custom">Custom Page Size...</option>
             </select>
           </div>
+
+          <!-- Extended Border Styles -->
           <div class="form-group">
-            <label for="pdfBorderStyle">Page Border:</label>
+            <label for="pdfBorderStyle">Page Border Style:</label>
             <select id="pdfBorderStyle" class="studio-select" onchange="updatePageCanvasPreview()">
               <option value="none">None (Clean Margin)</option>
-              <option value="solid">Classic Solid Line</option>
+              <option value="solid">Single Solid Line</option>
+              <option value="thick">Thick Bold Border</option>
               <option value="double">Executive Double Border</option>
               <option value="dashed">Dashed Outline</option>
+              <option value="dotted">Dotted Outline</option>
+              <option value="inset">Shadow Inset Frame</option>
+              <option value="groove">Classic Groove Frame</option>
+              <option value="ridge">Modern Ridge Frame</option>
+              <option value="outset">Raised Outset Frame</option>
+              <option value="frame">Formal Dual Margin Frame</option>
             </select>
           </div>
         </div>
 
-        <!-- MS WORD STYLE FORMATTING TOOLBAR -->
+        <!-- Custom Page Size Input Panel (Shows when Custom is selected) -->
+        <div id="customSizeRow" style="display:none;background:#f8fafc;padding:12px 16px;border-radius:12px;border:1px solid var(--border);grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-group">
+            <label for="customWidthMm">Width (mm):</label>
+            <input type="number" id="customWidthMm" value="210" min="50" max="600" oninput="updatePageCanvasPreview()">
+          </div>
+          <div class="form-group">
+            <label for="customHeightMm">Height (mm):</label>
+            <input type="number" id="customHeightMm" value="297" min="50" max="800" oninput="updatePageCanvasPreview()">
+          </div>
+        </div>
+
+        <!-- EXTENDED MS WORD FORMATTING TOOLBAR -->
         <div class="word-studio-toolbar">
+          <!-- Extended Font Styles -->
           <select id="pdfFontFamily" class="studio-select" onchange="applyCanvasFontFamily(this.value)">
-            <option value="Helvetica, sans-serif">Helvetica / Arial</option>
-            <option value="'Times New Roman', Times, serif">Times New Roman</option>
-            <option value="'Courier New', Courier, monospace">Courier New</option>
+            <option value="Helvetica, Arial, sans-serif">Helvetica / Arial (Standard)</option>
+            <option value="'Times New Roman', Times, serif">Times New Roman (Formal)</option>
+            <option value="'Courier New', Courier, monospace">Courier New (Monospace)</option>
+            <option value="Georgia, serif">Georgia (Editorial)</option>
+            <option value="Garamond, serif">Garamond (Classic Book)</option>
+            <option value="'Trebuchet MS', sans-serif">Trebuchet MS (Modern Clean)</option>
+            <option value="Verdana, sans-serif">Verdana (Readable)</option>
+            <option value="Impact, sans-serif">Impact (Bold Headings)</option>
+            <option value="'Palatino Linotype', 'Book Antiqua', Palatino, serif">Palatino (Academic)</option>
+            <option value="'Lucida Console', Monaco, monospace">Lucida Console (Typewriter)</option>
           </select>
 
+          <!-- Extended Font Sizes -->
           <select id="pdfFontSize" class="studio-select" onchange="applyCanvasFontSize(this.value)">
-            <option value="12px">10 pt</option>
-            <option value="14px" selected>12 pt</option>
-            <option value="18px">14 pt</option>
-            <option value="22px">18 pt</option>
-            <option value="28px">24 pt</option>
+            <option value="11px">8 pt (Tiny / Footnote)</option>
+            <option value="12px">9 pt (Compact)</option>
+            <option value="13px">10 pt (Small Body)</option>
+            <option value="14px">11 pt (Standard Body)</option>
+            <option value="15px" selected>12 pt (Formal Document)</option>
+            <option value="18px">14 pt (Subheading)</option>
+            <option value="21px">16 pt (Major Section)</option>
+            <option value="24px">18 pt (Heading 3)</option>
+            <option value="28px">21 pt (Heading 2)</option>
+            <option value="32px">24 pt (Section Title)</option>
+            <option value="40px">30 pt (Heading 1)</option>
+            <option value="48px">36 pt (Large Title)</option>
+            <option value="60px">48 pt (Hero Cover Title)</option>
           </select>
 
           <div class="studio-btn-group">
             <button type="button" class="studio-tool-btn" onclick="toggleFormat('bold')" title="Bold"><i class="fa-solid fa-bold"></i></button>
             <button type="button" class="studio-tool-btn" onclick="toggleFormat('italic')" title="Italic"><i class="fa-solid fa-italic"></i></button>
             <button type="button" class="studio-tool-btn" onclick="toggleFormat('underline')" title="Underline"><i class="fa-solid fa-underline"></i></button>
+            <button type="button" class="studio-tool-btn" onclick="toggleFormat('strikeThrough')" title="Strikethrough"><i class="fa-solid fa-strikethrough"></i></button>
           </div>
 
           <div class="studio-btn-group">
             <button type="button" class="studio-tool-btn" onclick="setTextAlign('left')" title="Align Left"><i class="fa-solid fa-align-left"></i></button>
             <button type="button" class="studio-tool-btn" onclick="setTextAlign('center')" title="Align Center"><i class="fa-solid fa-align-center"></i></button>
             <button type="button" class="studio-tool-btn" onclick="setTextAlign('right')" title="Align Right"><i class="fa-solid fa-align-right"></i></button>
+            <button type="button" class="studio-tool-btn" onclick="setTextAlign('justify')" title="Justify"><i class="fa-solid fa-align-justify"></i></button>
           </div>
         </div>
 
@@ -1529,13 +1583,12 @@ body.tab-navigation main > section#home.active-page { display: block !important;
         <div class="word-page-viewport">
           <div id="wordCanvas" class="word-page-canvas border-style-none" contenteditable="true" spellcheck="true">
             <h1>Document Title</h1>
-            <p>Start writing or editing your document here just like Microsoft Word. You can highlight text, change fonts, apply borders, and alter page dimensions dynamically.</p>
-            <p>This layout will be formatted and exported directly as a clean PDF file.</p>
+            <p>Start drafting your notes or content here. Adjust the font, size, border, and paper dimensions from the toolbar above to preview how it will appear in your exported PDF file.</p>
           </div>
         </div>
 
         <button class="btn btn-primary" id="btnExecuteTextPdf" style="padding:15px;margin-top:10px" type="button">
-          <i class="fa-solid fa-file-arrow-down"></i> Export &amp; Download Formatted PDF
+          <i class="fa-solid fa-file-arrow-down"></i> Export &amp; Download Custom PDF
         </button>
         <div id="status-text_to_pdf" style="font-size:12px;font-weight:700;margin-top:10px"></div>
       </div>
@@ -2098,7 +2151,6 @@ function updateNavigation(user) {
     }
   }
 
-  // Refresh history view when user changes
   renderUserHistory();
 }
 
@@ -2377,7 +2429,6 @@ window.processAITool = function(toolKey) {
 
     resultBox.textContent = output;
 
-    // Record to Account History
     recordHistoryEvent({
       tool: toolKey,
       category: "AI Productivity",
@@ -2396,7 +2447,7 @@ window.copyResult = function(boxId) {
 };
 
 /* =========================================================
-   6. MS WORD LIVE EDITOR & IN-BROWSER PDF SUITE
+   6. EXTENDED MS WORD LIVE STUDIO & IN-BROWSER PDF SUITE
 ========================================================= */
 function downloadBlob(bytes, filename) {
   const blob = new Blob([bytes], { type: "application/pdf" });
@@ -2406,7 +2457,6 @@ function downloadBlob(bytes, filename) {
   link.click();
 }
 
-// MS Word Studio Live Formatting Helpers
 window.applyCanvasFontFamily = function(font) {
   document.getElementById('wordCanvas').style.fontFamily = font;
 };
@@ -2424,6 +2474,13 @@ window.setTextAlign = function(align) {
   document.getElementById('wordCanvas').style.textAlign = align;
 };
 
+window.handlePageSizeChange = function() {
+  const size = document.getElementById('pdfPageSize').value;
+  const customRow = document.getElementById('customSizeRow');
+  customRow.style.display = size === 'Custom' ? 'grid' : 'none';
+  updatePageCanvasPreview();
+};
+
 window.updatePageCanvasPreview = function() {
   const canvas = document.getElementById('wordCanvas');
   const border = document.getElementById('pdfBorderStyle').value;
@@ -2431,11 +2488,34 @@ window.updatePageCanvasPreview = function() {
 
   canvas.className = 'word-page-canvas border-style-' + border;
 
-  if (size === 'Legal') {
-    canvas.style.minHeight = '620px';
+  if (size === 'A3') {
+    canvas.style.maxWidth = '750px';
+    canvas.style.minHeight = '700px';
+  } else if (size === 'A5') {
+    canvas.style.maxWidth = '450px';
+    canvas.style.minHeight = '380px';
+  } else if (size === 'Legal') {
+    canvas.style.maxWidth = '600px';
+    canvas.style.minHeight = '640px';
   } else if (size === 'Letter') {
+    canvas.style.maxWidth = '600px';
     canvas.style.minHeight = '500px';
+  } else if (size === 'Tabloid') {
+    canvas.style.maxWidth = '720px';
+    canvas.style.minHeight = '750px';
+  } else if (size === 'Executive') {
+    canvas.style.maxWidth = '520px';
+    canvas.style.minHeight = '480px';
+  } else if (size === 'Custom') {
+    const w = Number(document.getElementById('customWidthMm').value) || 210;
+    const h = Number(document.getElementById('customHeightMm').value) || 297;
+    const scaledWidth = Math.min(Math.max(w * 2.2, 350), 750);
+    const scaledHeight = Math.min(Math.max(h * 2.2, 300), 850);
+    canvas.style.maxWidth = `${scaledWidth}px`;
+    canvas.style.minHeight = `${scaledHeight}px`;
   } else {
+    // Default A4
+    canvas.style.maxWidth = '600px';
     canvas.style.minHeight = '480px';
   }
 };
@@ -2480,7 +2560,7 @@ document.getElementById("btnExecutePhotoPdf")?.addEventListener("click", async (
   }
 });
 
-// 2. Text to PDF (Full Word Processor with Page Sizes & Borders)
+// 2. Text to PDF (Extended Font Styles, Font Sizes, Borders, and Custom Page Dimensions)
 document.getElementById("btnExecuteTextPdf")?.addEventListener("click", async () => {
   const status = document.getElementById("status-text_to_pdf");
   const docName = document.getElementById("pdfDocTitle").value.trim() || "My_Document";
@@ -2496,26 +2576,36 @@ document.getElementById("btnExecuteTextPdf")?.addEventListener("click", async ()
     return;
   }
   status.style.color = "var(--primary)";
-  status.textContent = "Formatting and rendering your Word document to PDF...";
+  status.textContent = "Formatting and rendering your custom PDF...";
 
   try {
     const pdfDoc = await PDFLib.PDFDocument.create();
 
-    // Map Page Dimensions [width, height] in points
+    // Map Exact Point Dimensions (1 mm = 2.83465 pt)
     let dims = [595.28, 841.89]; // A4 default
+    if (selectedSize === "A3") dims = [841.89, 1190.55];
+    if (selectedSize === "A5") dims = [419.53, 595.28];
     if (selectedSize === "Letter") dims = [612.00, 792.00];
     if (selectedSize === "Legal") dims = [612.00, 1008.00];
+    if (selectedSize === "Tabloid") dims = [792.00, 1224.00];
+    if (selectedSize === "Executive") dims = [522.00, 756.00];
+    if (selectedSize === "Custom") {
+      const wMm = Number(document.getElementById("customWidthMm").value) || 210;
+      const hMm = Number(document.getElementById("customHeightMm").value) || 297;
+      dims = [wMm * 2.83465, hMm * 2.83465];
+    }
 
     let page = pdfDoc.addPage(dims);
     const { width, height } = page.getSize();
 
-    // Pick Font Family
+    // Pick Appropriate PDF Standard Font Family
     let chosenFont = PDFLib.StandardFonts.Helvetica;
     let chosenBold = PDFLib.StandardFonts.HelveticaBold;
-    if (selectedFont.includes("Times")) {
+
+    if (selectedFont.includes("Times") || selectedFont.includes("Georgia") || selectedFont.includes("Garamond") || selectedFont.includes("Palatino")) {
       chosenFont = PDFLib.StandardFonts.TimesRoman;
       chosenBold = PDFLib.StandardFonts.TimesRomanBold;
-    } else if (selectedFont.includes("Courier")) {
+    } else if (selectedFont.includes("Courier") || selectedFont.includes("Lucida")) {
       chosenFont = PDFLib.StandardFonts.Courier;
       chosenBold = PDFLib.StandardFonts.CourierBold;
     }
@@ -2523,31 +2613,53 @@ document.getElementById("btnExecuteTextPdf")?.addEventListener("click", async ()
     const fontNormal = await pdfDoc.embedFont(chosenFont);
     const fontHeader = await pdfDoc.embedFont(chosenBold);
 
-    // Draw Decorative Borders
+    // Advanced Decorative Border Rendering
     const drawPageBorder = (targetPage) => {
       const margin = 24;
+      const rectOptions = {
+        x: margin,
+        y: margin,
+        width: width - (margin * 2),
+        height: height - (margin * 2)
+      };
+
       if (selectedBorder === "solid") {
-        targetPage.drawRectangle({
-          x: margin, y: margin,
-          width: width - (margin * 2), height: height - (margin * 2),
-          borderColor: PDFLib.rgb(0.12, 0.16, 0.23), borderWidth: 2
-        });
+        targetPage.drawRectangle({ ...rectOptions, borderColor: PDFLib.rgb(0.12, 0.16, 0.23), borderWidth: 2 });
+      } else if (selectedBorder === "thick") {
+        targetPage.drawRectangle({ ...rectOptions, borderColor: PDFLib.rgb(0.08, 0.12, 0.20), borderWidth: 5 });
       } else if (selectedBorder === "double") {
+        targetPage.drawRectangle({ ...rectOptions, borderColor: PDFLib.rgb(0.12, 0.16, 0.23), borderWidth: 3 });
         targetPage.drawRectangle({
-          x: margin, y: margin,
-          width: width - (margin * 2), height: height - (margin * 2),
-          borderColor: PDFLib.rgb(0.12, 0.16, 0.23), borderWidth: 3
-        });
-        targetPage.drawRectangle({
-          x: margin + 4, y: margin + 4,
-          width: width - ((margin + 4) * 2), height: height - ((margin + 4) * 2),
-          borderColor: PDFLib.rgb(0.12, 0.16, 0.23), borderWidth: 1
+          x: margin + 4,
+          y: margin + 4,
+          width: width - ((margin + 4) * 2),
+          height: height - ((margin + 4) * 2),
+          borderColor: PDFLib.rgb(0.12, 0.16, 0.23),
+          borderWidth: 1
         });
       } else if (selectedBorder === "dashed") {
+        targetPage.drawRectangle({ ...rectOptions, borderColor: PDFLib.rgb(0.39, 0.45, 0.55), borderWidth: 2, borderDashArray: [6, 4] });
+      } else if (selectedBorder === "dotted") {
+        targetPage.drawRectangle({ ...rectOptions, borderColor: PDFLib.rgb(0.39, 0.45, 0.55), borderWidth: 2, borderDashArray: [2, 3] });
+      } else if (selectedBorder === "inset" || selectedBorder === "groove" || selectedBorder === "ridge" || selectedBorder === "outset") {
+        targetPage.drawRectangle({ ...rectOptions, borderColor: PDFLib.rgb(0.2, 0.25, 0.35), borderWidth: 3 });
         targetPage.drawRectangle({
-          x: margin, y: margin,
-          width: width - (margin * 2), height: height - (margin * 2),
-          borderColor: PDFLib.rgb(0.39, 0.45, 0.55), borderWidth: 1.5,
+          x: margin + 3,
+          y: margin + 3,
+          width: width - ((margin + 3) * 2),
+          height: height - ((margin + 3) * 2),
+          borderColor: PDFLib.rgb(0.7, 0.75, 0.85),
+          borderWidth: 1.5
+        });
+      } else if (selectedBorder === "frame") {
+        targetPage.drawRectangle({ ...rectOptions, borderColor: PDFLib.rgb(0.08, 0.12, 0.20), borderWidth: 6 });
+        targetPage.drawRectangle({
+          x: margin + 5,
+          y: margin + 5,
+          width: width - ((margin + 5) * 2),
+          height: height - ((margin + 5) * 2),
+          borderColor: PDFLib.rgb(0.45, 0.52, 0.65),
+          borderWidth: 1.5,
           borderDashArray: [4, 4]
         });
       }
@@ -2555,7 +2667,7 @@ document.getElementById("btnExecuteTextPdf")?.addEventListener("click", async ()
 
     drawPageBorder(page);
 
-    // Write Text
+    // Write Text to PDF
     const lines = content.split("\n");
     let y = height - 56;
     for (let i = 0; i < lines.length; i++) {
@@ -2568,7 +2680,6 @@ document.getElementById("btnExecuteTextPdf")?.addEventListener("click", async ()
         y = height - 56;
       }
 
-      // First line gets heading accent
       if (i === 0) {
         page.drawText(line.slice(0, 65), {
           x: 52, y: y,
@@ -2577,7 +2688,7 @@ document.getElementById("btnExecuteTextPdf")?.addEventListener("click", async ()
         });
         y -= 26;
       } else {
-        page.drawText(line.slice(0, 80), {
+        page.drawText(line.slice(0, 85), {
           x: 52, y: y,
           size: 11, font: fontNormal,
           color: PDFLib.rgb(0.18, 0.24, 0.32)
@@ -2591,13 +2702,13 @@ document.getElementById("btnExecuteTextPdf")?.addEventListener("click", async ()
     downloadBlob(pdfBytes, fileName);
 
     status.style.color = "#16a34a";
-    status.textContent = "Custom Word-styled PDF generated & downloaded!";
+    status.textContent = "Custom styled PDF generated & downloaded!";
 
     recordHistoryEvent({
       tool: "text_to_pdf",
       category: "PDF Suite",
       title: "Exported Document to PDF",
-      content: `Size: ${selectedSize} | Border: ${selectedBorder} | Name: '${fileName}'`,
+      content: `Format: ${selectedSize} | Border: ${selectedBorder} | Document: '${fileName}'`,
       icon: "fa-file-word",
       colorClass: "purple"
     });
