@@ -59,7 +59,17 @@ button:disabled { opacity: .6; cursor: not-allowed; }
 ::selection { background: #c7d2fe; color: #1e1b4b; }
 :focus-visible { outline: 3px solid var(--accent-amber); outline-offset: 3px; }
 
-/* Study Sphere Button Hover Shine Effect */
+/* Global Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-in {
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Button Hover Shine Effect */
 .btn {
   position: relative;
   overflow: hidden;
@@ -73,7 +83,7 @@ button:disabled { opacity: .6; cursor: not-allowed; }
   border-radius: 12px;
   font-size: 12px;
   font-weight: 800;
-  transition: transform .22s ease, box-shadow .22s ease;
+  transition: transform .22s ease, box-shadow .22s ease, background .22s ease;
 }
 .btn:after {
   content: "";
@@ -154,7 +164,9 @@ button:disabled { opacity: .6; cursor: not-allowed; }
   border-radius: 14px;
   background: linear-gradient(135deg, #2563eb, #7c3aed);
   box-shadow: 0 8px 22px rgba(37, 99, 235, 0.28);
+  transition: transform .3s ease;
 }
+.brand:hover .brand-icon { transform: rotate(10deg) scale(1.05); }
 .brand-name {
   font-family: 'Outfit', sans-serif;
   font-size: 20px; font-weight: 800;
@@ -189,7 +201,7 @@ button:disabled { opacity: .6; cursor: not-allowed; }
   font-size: 18px;
 }
 
-/* User Profile Badge (When signed in) */
+/* User Profile Badge */
 .profile-pill {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 8px 14px; border: 1px solid #bfdbfe;
@@ -201,7 +213,7 @@ button:disabled { opacity: .6; cursor: not-allowed; }
 .profile-pill:hover { background: #dbeafe; }
 .profile-pill span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* HERO SECTION WITH TECH/AI VIDEO */
+/* HERO SECTION */
 .hero { padding: 32px 0 42px; }
 .hero-box {
   position: relative; isolation: isolate;
@@ -274,7 +286,7 @@ button:disabled { opacity: .6; cursor: not-allowed; }
 }
 .section-heading p { color: var(--muted); font-size: 14px; margin: 0; }
 
-/* QUICK ACCESS GRID FROM STUDY SPHERE */
+/* QUICK ACCESS GRID */
 .quick-access-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -287,18 +299,20 @@ button:disabled { opacity: .6; cursor: not-allowed; }
   border-radius: 18px; cursor: pointer; text-align: left;
   color: var(--heading);
   box-shadow: 0 6px 20px rgba(15, 23, 42, 0.04);
-  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  transition: transform .25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow .25s ease, border-color .25s ease;
 }
 .quick-link-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 16px 36px rgba(37, 99, 235, 0.12);
+  transform: translateY(-5px);
+  box-shadow: 0 16px 36px rgba(37, 99, 235, 0.14);
   border-color: #93c5fd;
 }
 .quick-icon {
   width: 48px; height: 48px; flex-shrink: 0;
   display: grid; place-items: center;
   border-radius: 14px; font-size: 20px;
+  transition: transform .3s ease;
 }
+.quick-link-card:hover .quick-icon { transform: scale(1.15) rotate(5deg); }
 .quick-link-card:nth-child(1) .quick-icon { background: #eff6ff; color: #2563eb; }
 .quick-link-card:nth-child(2) .quick-icon { background: #f5f3ff; color: #7c3aed; }
 .quick-link-card:nth-child(3) .quick-icon { background: #ecfeff; color: #0891b2; }
@@ -312,19 +326,21 @@ button:disabled { opacity: .6; cursor: not-allowed; }
 .tool-card {
   background: white; border: 1px solid var(--border);
   border-radius: var(--radius); padding: 24px;
-  transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+  transition: transform .28s cubic-bezier(0.16, 1, 0.3, 1), border-color .28s ease, box-shadow .28s ease;
   display: flex; flex-direction: column; justify-content: space-between;
 }
 .tool-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-6px);
   border-color: #93c5fd;
-  box-shadow: var(--shadow);
+  box-shadow: 0 18px 40px rgba(37, 99, 235, 0.12);
 }
 .tool-icon {
-  width: 48px; height: 48px; border-radius: 14px;
-  display: grid; place-items: center; font-size: 20px;
+  width: 52px; height: 52px; border-radius: 15px;
+  display: grid; place-items: center; font-size: 22px;
   margin-bottom: 16px;
+  transition: transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+.tool-card:hover .tool-icon { transform: scale(1.12); }
 .tool-icon.blue { background: #eff6ff; color: #2563eb; }
 .tool-icon.purple { background: #f5f3ff; color: #7c3aed; }
 .tool-icon.cyan { background: #ecfeff; color: #0891b2; }
@@ -339,18 +355,74 @@ button:disabled { opacity: .6; cursor: not-allowed; }
   text-transform: uppercase;
 }
 
-/* INTERACTIVE TOOL WORKSPACE */
-.tool-workspace {
-  background: white; border: 1px solid var(--border);
-  border-radius: 22px; padding: 26px;
-  box-shadow: var(--shadow); margin-top: 24px;
+/* DEDICATED FULL-PAGE TOOL WORKSPACES */
+.tool-dedicated-page {
+  display: none;
+  min-height: calc(100vh - 120px);
+  padding: 30px 0 60px;
 }
-.workspace-form { display: grid; gap: 14px; }
-.form-group { display: grid; gap: 6px; }
+.tool-dedicated-page.active-page {
+  display: block !important;
+}
+
+.dedicated-card-shell {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 26px;
+  box-shadow: 0 16px 45px rgba(15, 23, 42, 0.08);
+  padding: clamp(24px, 4vw, 44px);
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.dedicated-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.dedicated-title-box {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.dedicated-icon-badge {
+  width: 60px;
+  height: 60px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+.dedicated-icon-badge.blue { background: #eff6ff; color: #2563eb; }
+.dedicated-icon-badge.purple { background: #f5f3ff; color: #7c3aed; }
+.dedicated-icon-badge.cyan { background: #ecfeff; color: #0891b2; }
+.dedicated-icon-badge.amber { background: #fffbeb; color: #d97706; }
+.dedicated-icon-badge.emerald { background: #ecfdf5; color: #059669; }
+
+.dedicated-title-box h2 {
+  font-size: 24px;
+  margin: 0 0 4px;
+}
+.dedicated-title-box p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.workspace-form { display: grid; gap: 16px; }
+.form-group { display: grid; gap: 7px; }
 .form-group label { font-size: 12px; font-weight: 800; color: var(--heading); }
 .form-group input, .form-group select, .form-group textarea {
   width: 100%; border: 1px solid var(--border);
-  border-radius: 12px; padding: 12px 14px;
+  border-radius: 14px; padding: 13px 16px;
   background: white; color: var(--heading);
   outline: none; transition: border .2s, box-shadow .2s;
 }
@@ -358,13 +430,27 @@ button:disabled { opacity: .6; cursor: not-allowed; }
   border-color: var(--primary);
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
 }
-.form-group textarea { min-height: 120px; resize: vertical; line-height: 1.6; }
+.form-group textarea { min-height: 140px; resize: vertical; line-height: 1.6; }
 .result-box {
-  margin-top: 18px; padding: 18px;
-  border-radius: 14px; background: #f8fafc;
+  margin-top: 20px; padding: 20px;
+  border-radius: 16px; background: #f8fafc;
   border: 1px solid var(--border);
   white-space: pre-wrap; font-size: 13px; line-height: 1.7;
 }
+
+.info-feature-banner {
+  background: #eff6ff;
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: #1e3a8a;
+  margin-bottom: 20px;
+  border: 1px solid #bfdbfe;
+}
+.info-feature-banner i { font-size: 18px; color: var(--primary); }
 
 /* DIRECTORY FILTERS */
 .category-filter-bar {
@@ -641,7 +727,6 @@ body.tab-navigation main > section#home.active-page { display: block !important;
 .footer-links a { font-size: 13px; color: #94a3b8; transition: color .2s; }
 .footer-links a:hover { color: white; }
 
-/* VIBRANT BOTTOM RIBBON */
 .footer-bottom {
   border-top: 1px solid rgba(255,255,255,0.12);
   margin-top: 36px; padding-top: 22px;
@@ -696,10 +781,10 @@ body.tab-navigation main > section#home.active-page { display: block !important;
 <!-- COLORFUL TOP BANNER RIBBON -->
 <div class="top-note">
   <i class="fa-solid fa-sparkles"></i>
-  NovaTools — All-in-one AI productivity, writing tools, and browser PDF utilities.
+  NovaTools — All-in-one AI productivity, writing tools, and browser PDF utilities.[cite: 1]
 </div>
 
-<!-- NAVBAR FROM STUDY SPHERE -->
+<!-- NAVBAR -->
 <header class="navbar">
   <div class="container nav-inner">
     <a href="#home" class="brand" data-tab="home">
@@ -718,10 +803,10 @@ body.tab-navigation main > section#home.active-page { display: block !important;
       <a href="#communityReviews" data-tab="home"><i class="fa-solid fa-star"></i> Review Centre</a>
     </nav>
 
-    <!-- Navigation Action Area (Updates Dynamically on Login) -->
+    <!-- Navigation Action Area -->
     <div class="nav-actions" id="navActions">
       <button class="btn btn-light" id="navSignInBtn" type="button">
-        <i class="fa-regular fa-user"></i> Sign In
+        <i class="fa-regular fa-user"></i> Sign In[cite: 1]
       </button>
       <button class="btn btn-primary" id="navGetStartedBtn" type="button">
         Get Started <i class="fa-solid fa-arrow-right"></i>
@@ -737,9 +822,8 @@ body.tab-navigation main > section#home.active-page { display: block !important;
 
 <!-- HOMEPAGE SECTION -->
 <section class="hero active-page" id="home">
-  <div class="container">
+  <div class="container animate-in">
     <div class="hero-box">
-      <!-- High-tech AI Neural Network / Glowing Plexus Background Video -->
       <video class="hero-video" autoplay muted loop playsinline preload="metadata" aria-hidden="true">
         <source src="https://videos.pexels.com/video-files/3129671/3129671-hd_1920_1080_25fps.mp4" type="video/mp4">
         <source src="https://videos.pexels.com/video-files/3129957/3129957-hd_1920_1080_30fps.mp4" type="video/mp4">
@@ -748,7 +832,7 @@ body.tab-navigation main > section#home.active-page { display: block !important;
       <div class="hero-content">
         <div class="eyebrow"><i class="fa-solid fa-sparkles"></i> YOUR PRODUCTIVITY WORKSPACE</div>
         <h1>Work faster.<br>Create <span>smarter.</span></h1>
-        <p>NovaTools brings AI writing assistants, instant client-side PDF tools, and a discovery directory of top AI tools together into one unified workspace.</p>
+        <p>NovaTools brings AI writing assistants, instant client-side PDF tools, and a discovery directory of top AI tools together into one unified workspace.[cite: 1]</p>
 
         <div class="hero-buttons">
           <button class="btn btn-white" data-tab="ai-tools"><i class="fa-solid fa-wand-magic-sparkles"></i> Explore AI Tools</button>
@@ -766,14 +850,14 @@ body.tab-navigation main > section#home.active-page { display: block !important;
   </div>
 </section>
 
-<!-- QUICK-ACCESS SECTION (DIRECTLY UNDER HERO) -->
+<!-- QUICK-ACCESS SECTION -->
 <section class="section home-only active-home-extra" id="quickAccess">
   <div class="container">
     <div class="section-heading">
       <div>
         <div class="section-kicker">Jump right in</div>
         <h2>Quick access to your tools</h2>
-        <p>Choose an area to open its dedicated workspace.</p>
+        <p>Choose an area to open its dedicated workspace.[cite: 1]</p>
       </div>
     </div>
 
@@ -813,14 +897,14 @@ body.tab-navigation main > section#home.active-page { display: block !important;
   </div>
 </section>
 
-<!-- REAL REVIEW WALL RIGHT ON THE HOMEPAGE (ABOVE THE BOTTOM RIBBON) -->
+<!-- REAL REVIEW WALL RIGHT ON THE HOMEPAGE -->
 <section class="section home-only active-home-extra" id="communityReviews">
   <div class="container">
     <div class="section-heading">
       <div>
         <div class="section-kicker">User Feedback</div>
         <h2>Reviews from our community</h2>
-        <p>Share your experience and help make NovaTools better.</p>
+        <p>Share your experience and help make NovaTools better.[cite: 1]</p>
       </div>
       <button class="btn btn-primary" type="button" id="openReviewBtn">
         <i class="fa-solid fa-star"></i> Write a Review
@@ -832,7 +916,7 @@ body.tab-navigation main > section#home.active-page { display: block !important;
         <div class="review-big-icon"><i class="fa-solid fa-heart"></i></div>
         <div>
           <h3>Your feedback matters</h3>
-          <p>Tell us what is helpful and what utilities we can build next for your workflow.</p>
+          <p>Tell us what is helpful and what utilities we can build next for your workflow.[cite: 1]</p>
         </div>
         <button class="btn btn-white" type="button" id="highlightWriteReviewBtn">
           <i class="fa-solid fa-pen"></i> Share Your Review
@@ -842,21 +926,21 @@ body.tab-navigation main > section#home.active-page { display: block !important;
       <div class="review-panel">
         <div class="review-stars-display" aria-label="Five star rating">★★★★★</div>
         <h3>From our community</h3>
-        <p>Reviews submitted on this device will appear below in real time.</p>
+        <p>Reviews submitted on this device will appear below in real time.[cite: 1]</p>
         <div class="review-list" id="reviewList" aria-live="polite"></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- DEDICATED AI TOOLS PAGE (HIGH-UTILITY WITH WRITING MODES) -->
+<!-- MAIN AI TOOLS DIRECTORY PAGE -->
 <section class="section" id="ai-tools">
-  <div class="container">
+  <div class="container animate-in">
     <div class="section-heading">
       <div>
         <div class="section-kicker">High-Value AI Helpers</div>
         <h2>AI Productivity Suite</h2>
-        <p>Select any tool to load its interactive generator in the workspace below.</p>
+        <p>Select any card below to launch its dedicated, full-screen tool page.</p>
       </div>
       <button class="btn btn-light" data-tab="home"><i class="fa-solid fa-arrow-left"></i> Back to Home</button>
     </div>
@@ -866,65 +950,153 @@ body.tab-navigation main > section#home.active-page { display: block !important;
         <div>
           <div class="tool-icon blue"><i class="fa-solid fa-pen-nib"></i></div>
           <h3>Writing Assistant</h3>
-          <p>Draft professional emails, formal letters, instant DMs, outlines, and proposals.</p>
+          <p>Draft professional emails, formal letters, instant DMs, outlines, and proposals.[cite: 1]</p>
         </div>
-        <button class="btn btn-primary" onclick="setAITool('writer')">Open Tool</button>
+        <button class="btn btn-primary" onclick="openDedicatedTool('writer')">Launch Tool <i class="fa-solid fa-arrow-right"></i></button>
       </div>
 
       <div class="tool-card">
         <div>
           <div class="tool-icon purple"><i class="fa-solid fa-compress"></i></div>
           <h3>Text Summariser</h3>
-          <p>Condense lengthy articles into crisp TL;DR bullets and executive summaries.</p>
+          <p>Condense lengthy articles into crisp TL;DR bullets and executive summaries.[cite: 1]</p>
         </div>
-        <button class="btn btn-primary" onclick="setAITool('summariser')">Open Tool</button>
+        <button class="btn btn-primary" onclick="openDedicatedTool('summariser')">Launch Tool <i class="fa-solid fa-arrow-right"></i></button>
       </div>
 
       <div class="tool-card">
         <div>
           <div class="tool-icon cyan"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
           <h3>Grammar &amp; Tone Improver</h3>
-          <p>Enhance vocabulary, eliminate fluff, and rewrite text in clear, executive prose.</p>
+          <p>Enhance vocabulary, eliminate fluff, and rewrite text in clear, executive prose.[cite: 1]</p>
         </div>
-        <button class="btn btn-primary" onclick="setAITool('improver')">Open Tool</button>
+        <button class="btn btn-primary" onclick="openDedicatedTool('improver')">Launch Tool <i class="fa-solid fa-arrow-right"></i></button>
       </div>
 
       <div class="tool-card">
         <div>
           <div class="tool-icon amber"><i class="fa-solid fa-envelope"></i></div>
           <h3>Dedicated Email Helper</h3>
-          <p>Generate polite business emails, cold outreach messages, and follow-ups instantly.</p>
+          <p>Generate polite business emails, cold outreach messages, and follow-ups instantly.[cite: 1]</p>
         </div>
-        <button class="btn btn-primary" onclick="setAITool('email')">Open Tool</button>
+        <button class="btn btn-primary" onclick="openDedicatedTool('email')">Launch Tool <i class="fa-solid fa-arrow-right"></i></button>
       </div>
 
       <div class="tool-card">
         <div>
           <div class="tool-icon emerald"><i class="fa-solid fa-code"></i></div>
           <h3>Code &amp; Syntax Explainer</h3>
-          <p>Explain programming scripts, identify logic issues, and format code clearly.</p>
+          <p>Explain programming scripts, identify logic issues, and format code clearly.[cite: 1]</p>
         </div>
-        <button class="btn btn-primary" onclick="setAITool('code')">Open Tool</button>
+        <button class="btn btn-primary" onclick="openDedicatedTool('code')">Launch Tool <i class="fa-solid fa-arrow-right"></i></button>
       </div>
 
       <div class="tool-card">
         <div>
           <div class="tool-icon purple"><i class="fa-solid fa-terminal"></i></div>
           <h3>AI Prompt Enhancer</h3>
-          <p>Turn simple prompts into detailed prompts for ChatGPT, Claude, and Gemini.</p>
+          <p>Turn simple prompts into detailed prompts for ChatGPT, Claude, and Gemini.[cite: 1]</p>
         </div>
-        <button class="btn btn-primary" onclick="setAITool('prompt')">Open Tool</button>
+        <button class="btn btn-primary" onclick="openDedicatedTool('prompt')">Launch Tool <i class="fa-solid fa-arrow-right"></i></button>
       </div>
     </div>
+  </div>
+</section>
 
-    <!-- Active Tool Workspace -->
-    <div class="tool-workspace" id="aiWorkspace">
-      <h3 id="workspaceTitle"><i class="fa-solid fa-pen-nib" style="color:var(--primary)"></i> Writing Assistant</h3>
-      <p id="workspaceDesc" style="color:var(--muted);font-size:13px;margin:4px 0 18px">Generate a structured draft using client-side algorithms.</p>
-      
+<!-- MAIN PDF TOOLS DIRECTORY PAGE -->
+<section class="section" id="pdf-tools">
+  <div class="container animate-in">
+    <div class="section-heading">
+      <div>
+        <div class="section-kicker">Client-Side Document Processing</div>
+        <h2>PDF Tools Suite</h2>
+        <p>100% private. All PDF operations run locally in your browser using <code>pdf-lib</code>.[cite: 1]</p>
+      </div>
+      <button class="btn btn-light" data-tab="home"><i class="fa-solid fa-arrow-left"></i> Back to Home</button>
+    </div>
+
+    <div class="grid tools-grid">
+      <div class="tool-card">
+        <div>
+          <div class="tool-icon blue"><i class="fa-solid fa-file-image"></i></div>
+          <h3>Photo to PDF</h3>
+          <p>Convert JPG &amp; PNG photos into clean, high-resolution PDF documents.[cite: 1]</p>
+        </div>
+        <button class="btn btn-primary" onclick="openDedicatedTool('photo_to_pdf')">Launch Tool <i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+
+      <div class="tool-card">
+        <div>
+          <div class="tool-icon purple"><i class="fa-solid fa-file-circle-plus"></i></div>
+          <h3>Text to PDF</h3>
+          <p>Type or paste your formatted text, add a title, and export an A4 document.[cite: 1]</p>
+        </div>
+        <button class="btn btn-primary" onclick="openDedicatedTool('text_to_pdf')">Launch Tool <i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+
+      <div class="tool-card">
+        <div>
+          <div class="tool-icon emerald"><i class="fa-solid fa-layer-group"></i></div>
+          <h3>Merge PDF Files</h3>
+          <p>Combine multiple PDF documents into a single organized file in seconds.[cite: 1]</p>
+        </div>
+        <button class="btn btn-primary" onclick="openDedicatedTool('merge_pdf')">Launch Tool <i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+
+      <div class="tool-card">
+        <div>
+          <div class="tool-icon cyan"><i class="fa-solid fa-scissors"></i></div>
+          <h3>Split PDF</h3>
+          <p>Separate a multi-page PDF into single-page documents instantly.[cite: 1]</p>
+        </div>
+        <button class="btn btn-primary" onclick="openDedicatedTool('split_pdf')">Launch Tool <i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+
+      <div class="tool-card">
+        <div>
+          <div class="tool-icon amber"><i class="fa-solid fa-file-export"></i></div>
+          <h3>Extract Pages</h3>
+          <p>Extract only specific page numbers or ranges from an existing PDF.[cite: 1]</p>
+        </div>
+        <button class="btn btn-primary" onclick="openDedicatedTool('extract_pdf')">Launch Tool <i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+
+      <div class="tool-card">
+        <div>
+          <div class="tool-icon purple"><i class="fa-solid fa-rotate"></i></div>
+          <h3>Rotate PDF Pages</h3>
+          <p>Rotate incorrectly oriented PDF pages by 90°, 180°, or 270° degrees.[cite: 1]</p>
+        </div>
+        <button class="btn btn-primary" onclick="openDedicatedTool('rotate_pdf')">Launch Tool <i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     DEDICATED FULL-PAGE SCREENS FOR EACH CARD
+========================================================= -->
+
+<!-- Dedicated Tool: Writing Assistant -->
+<section class="section tool-dedicated-page" id="page-writer">
+  <div class="container animate-in">
+    <div class="dedicated-card-shell">
+      <div class="dedicated-header">
+        <div class="dedicated-title-box">
+          <div class="dedicated-icon-badge blue"><i class="fa-solid fa-pen-nib"></i></div>
+          <div>
+            <h2>Writing Assistant</h2>
+            <p>Draft professional emails, formal letters, instant DMs, and structured proposals.[cite: 1]</p>
+          </div>
+        </div>
+        <button class="btn btn-light" data-tab="ai-tools"><i class="fa-solid fa-arrow-left"></i> Back to AI Suite</button>
+      </div>
+      <div class="info-feature-banner">
+        <i class="fa-solid fa-lightbulb"></i>
+        <span>Select your format, list your core thoughts or notes below, and generate ready-to-use prose.</span>
+      </div>
       <div class="workspace-form">
-        <!-- Writing Sub-Format Selector for Writing Assistant -->
-        <div class="form-group" id="writerTypeGroup">
+        <div class="form-group">
           <label for="aiWriterType">Choose Writing Format:</label>
           <select id="aiWriterType">
             <option value="email">Email Writer (Professional / Actionable)</option>
@@ -934,113 +1106,394 @@ body.tab-navigation main > section#home.active-page { display: block !important;
             <option value="general">Comprehensive Document Draft</option>
           </select>
         </div>
-
         <div class="form-group">
-          <label for="aiInputText">Enter your topic, key points, or instructions:</label>
-          <textarea id="aiInputText" placeholder="Paste your points or raw notes here..."></textarea>
+          <label for="input-writer">Enter your topic, key points, or instructions:</label>
+          <textarea id="input-writer" placeholder="Paste your points or raw notes here..."></textarea>
         </div>
-
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn btn-primary" id="aiProcessBtn" type="button"><i class="fa-solid fa-bolt"></i> Generate Output</button>
-          <button class="btn btn-light" id="aiCopyBtn" type="button"><i class="fa-regular fa-copy"></i> Copy Output</button>
+          <button class="btn btn-primary" onclick="processAITool('writer')"><i class="fa-solid fa-bolt"></i> Generate Output</button>
+          <button class="btn btn-light" onclick="copyResult('res-writer')"><i class="fa-regular fa-copy"></i> Copy Output</button>
         </div>
-
-        <div class="result-box" id="aiResultBox">Your formatted result will appear here.</div>
+        <div class="result-box" id="res-writer">Your formatted result will appear here.[cite: 1]</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- DEDICATED PDF TOOLS PAGE (6 COMPLETE CARDS MATCHING AI TOOLS) -->
-<section class="section" id="pdf-tools">
-  <div class="container">
-    <div class="section-heading">
-      <div>
-        <div class="section-kicker">Client-Side Document Processing</div>
-        <h2>PDF Tools Suite</h2>
-        <p>100% private. All PDF operations run locally in your browser using <code>pdf-lib</code>.</p>
-      </div>
-      <button class="btn btn-light" data-tab="home"><i class="fa-solid fa-arrow-left"></i> Back to Home</button>
-    </div>
-
-    <!-- 6 IDENTICALLY STYLED PDF CARDS -->
-    <div class="grid tools-grid">
-      <div class="tool-card">
-        <div>
-          <div class="tool-icon blue"><i class="fa-solid fa-file-image"></i></div>
-          <h3>Photo to PDF</h3>
-          <p>Convert JPG &amp; PNG photos into clean, high-resolution PDF documents.</p>
+<!-- Dedicated Tool: Text Summariser -->
+<section class="section tool-dedicated-page" id="page-summariser">
+  <div class="container animate-in">
+    <div class="dedicated-card-shell">
+      <div class="dedicated-header">
+        <div class="dedicated-title-box">
+          <div class="dedicated-icon-badge purple"><i class="fa-solid fa-compress"></i></div>
+          <div>
+            <h2>Text Summariser</h2>
+            <p>Condense lengthy articles into crisp TL;DR bullets and executive summaries.[cite: 1]</p>
+          </div>
         </div>
-        <button class="btn btn-primary" onclick="setPdfTool('photo_to_pdf')">Open Tool</button>
+        <button class="btn btn-light" data-tab="ai-tools"><i class="fa-solid fa-arrow-left"></i> Back to AI Suite</button>
       </div>
-
-      <div class="tool-card">
-        <div>
-          <div class="tool-icon purple"><i class="fa-solid fa-file-circle-plus"></i></div>
-          <h3>Text to PDF</h3>
-          <p>Type or paste your formatted text, add a title, and export an A4 document.</p>
-        </div>
-        <button class="btn btn-primary" onclick="setPdfTool('text_to_pdf')">Open Tool</button>
+      <div class="info-feature-banner">
+        <i class="fa-solid fa-file-lines"></i>
+        <span>Paste long paragraphs, reports, or articles to produce executive key points.</span>
       </div>
-
-      <div class="tool-card">
-        <div>
-          <div class="tool-icon emerald"><i class="fa-solid fa-layer-group"></i></div>
-          <h3>Merge PDF Files</h3>
-          <p>Combine multiple PDF documents into a single organized file in seconds.</p>
+      <div class="workspace-form">
+        <div class="form-group">
+          <label for="input-summariser">Paste text to summarise:</label>
+          <textarea id="input-summariser" placeholder="Paste comprehensive text here..."></textarea>
         </div>
-        <button class="btn btn-primary" onclick="setPdfTool('merge_pdf')">Open Tool</button>
-      </div>
-
-      <div class="tool-card">
-        <div>
-          <div class="tool-icon cyan"><i class="fa-solid fa-scissors"></i></div>
-          <h3>Split PDF</h3>
-          <p>Separate a multi-page PDF into single-page documents instantly.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="processAITool('summariser')"><i class="fa-solid fa-bolt"></i> Generate Summary</button>
+          <button class="btn btn-light" onclick="copyResult('res-summariser')"><i class="fa-regular fa-copy"></i> Copy Result</button>
         </div>
-        <button class="btn btn-primary" onclick="setPdfTool('split_pdf')">Open Tool</button>
-      </div>
-
-      <div class="tool-card">
-        <div>
-          <div class="tool-icon amber"><i class="fa-solid fa-file-export"></i></div>
-          <h3>Extract Pages</h3>
-          <p>Extract only specific page numbers or ranges from an existing PDF.</p>
-        </div>
-        <button class="btn btn-primary" onclick="setPdfTool('extract_pdf')">Open Tool</button>
-      </div>
-
-      <div class="tool-card">
-        <div>
-          <div class="tool-icon purple"><i class="fa-solid fa-rotate"></i></div>
-          <h3>Rotate PDF Pages</h3>
-          <p>Rotate incorrectly oriented PDF pages by 90°, 180°, or 270° degrees.</p>
-        </div>
-        <button class="btn btn-primary" onclick="setPdfTool('rotate_pdf')">Open Tool</button>
+        <div class="result-box" id="res-summariser">Your executive summary will appear here.</div>
       </div>
     </div>
+  </div>
+</section>
 
-    <!-- Active PDF Tool Workspace -->
-    <div class="tool-workspace" id="pdfWorkspace">
-      <h3 id="pdfWorkspaceTitle"><i class="fa-solid fa-file-image" style="color:var(--primary)"></i> Photo to PDF</h3>
-      <p id="pdfWorkspaceDesc" style="color:var(--muted);font-size:13px;margin:4px 0 18px">Convert JPG and PNG images into a clean PDF document.</p>
-      
-      <div class="workspace-form" id="pdfWorkspaceForm">
-        <!-- Dynamically injected via setPdfTool -->
+<!-- Dedicated Tool: Grammar & Tone Improver -->
+<section class="section tool-dedicated-page" id="page-improver">
+  <div class="container animate-in">
+    <div class="dedicated-card-shell">
+      <div class="dedicated-header">
+        <div class="dedicated-title-box">
+          <div class="dedicated-icon-badge cyan"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+          <div>
+            <h2>Grammar &amp; Tone Improver</h2>
+            <p>Enhance vocabulary, eliminate fluff, and rewrite text in clear, executive prose.[cite: 1]</p>
+          </div>
+        </div>
+        <button class="btn btn-light" data-tab="ai-tools"><i class="fa-solid fa-arrow-left"></i> Back to AI Suite</button>
       </div>
-      <div id="pdfOperationStatus" style="font-size:12px;font-weight:700;margin-top:10px"></div>
+      <div class="info-feature-banner">
+        <i class="fa-solid fa-wand-sparkles"></i>
+        <span>Clean up sentence flow, eliminate grammatical flaws, and make your communication stand out.</span>
+      </div>
+      <div class="workspace-form">
+        <div class="form-group">
+          <label for="input-improver">Paste your draft:</label>
+          <textarea id="input-improver" placeholder="Paste rough draft here..."></textarea>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="processAITool('improver')"><i class="fa-solid fa-bolt"></i> Polish Text</button>
+          <button class="btn btn-light" onclick="copyResult('res-improver')"><i class="fa-regular fa-copy"></i> Copy Result</button>
+        </div>
+        <div class="result-box" id="res-improver">Your polished sentences will appear here.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Dedicated Tool: Dedicated Email Helper -->
+<section class="section tool-dedicated-page" id="page-email">
+  <div class="container animate-in">
+    <div class="dedicated-card-shell">
+      <div class="dedicated-header">
+        <div class="dedicated-title-box">
+          <div class="dedicated-icon-badge amber"><i class="fa-solid fa-envelope"></i></div>
+          <div>
+            <h2>Dedicated Email Helper</h2>
+            <p>Generate polite business emails, cold outreach messages, and follow-ups instantly.[cite: 1]</p>
+          </div>
+        </div>
+        <button class="btn btn-light" data-tab="ai-tools"><i class="fa-solid fa-arrow-left"></i> Back to AI Suite</button>
+      </div>
+      <div class="info-feature-banner">
+        <i class="fa-solid fa-paper-plane"></i>
+        <span>Give a quick summary or bullet list to craft a professional email subject and body.</span>
+      </div>
+      <div class="workspace-form">
+        <div class="form-group">
+          <label for="input-email">Email objectives &amp; recipient details:</label>
+          <textarea id="input-email" placeholder="e.g. Asking for project delay extension until next Tuesday..."></textarea>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="processAITool('email')"><i class="fa-solid fa-bolt"></i> Compose Email</button>
+          <button class="btn btn-light" onclick="copyResult('res-email')"><i class="fa-regular fa-copy"></i> Copy Email</button>
+        </div>
+        <div class="result-box" id="res-email">Your email draft will appear here.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Dedicated Tool: Code & Syntax Explainer -->
+<section class="section tool-dedicated-page" id="page-code">
+  <div class="container animate-in">
+    <div class="dedicated-card-shell">
+      <div class="dedicated-header">
+        <div class="dedicated-title-box">
+          <div class="dedicated-icon-badge emerald"><i class="fa-solid fa-code"></i></div>
+          <div>
+            <h2>Code &amp; Syntax Explainer</h2>
+            <p>Explain programming scripts, identify logic issues, and format code clearly.[cite: 1]</p>
+          </div>
+        </div>
+        <button class="btn btn-light" data-tab="ai-tools"><i class="fa-solid fa-arrow-left"></i> Back to AI Suite</button>
+      </div>
+      <div class="info-feature-banner">
+        <i class="fa-solid fa-terminal"></i>
+        <span>Paste snippets of Python, JavaScript, CSS, or SQL for logic analysis and suggestions.</span>
+      </div>
+      <div class="workspace-form">
+        <div class="form-group">
+          <label for="input-code">Paste Code Snippet:</label>
+          <textarea id="input-code" placeholder="function helloWorld() { ... }"></textarea>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="processAITool('code')"><i class="fa-solid fa-bolt"></i> Explain Code</button>
+          <button class="btn btn-light" onclick="copyResult('res-code')"><i class="fa-regular fa-copy"></i> Copy Breakdown</button>
+        </div>
+        <div class="result-box" id="res-code">Code analysis will appear here.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Dedicated Tool: AI Prompt Enhancer -->
+<section class="section tool-dedicated-page" id="page-prompt">
+  <div class="container animate-in">
+    <div class="dedicated-card-shell">
+      <div class="dedicated-header">
+        <div class="dedicated-title-box">
+          <div class="dedicated-icon-badge purple"><i class="fa-solid fa-terminal"></i></div>
+          <div>
+            <h2>AI Prompt Enhancer</h2>
+            <p>Turn simple prompts into detailed prompts for ChatGPT, Claude, and Gemini.[cite: 1]</p>
+          </div>
+        </div>
+        <button class="btn btn-light" data-tab="ai-tools"><i class="fa-solid fa-arrow-left"></i> Back to AI Suite</button>
+      </div>
+      <div class="info-feature-banner">
+        <i class="fa-solid fa-sparkles"></i>
+        <span>Upgrade simple requests with context, role-prompting, structure, and quality controls.</span>
+      </div>
+      <div class="workspace-form">
+        <div class="form-group">
+          <label for="input-prompt">Enter Your Raw Idea / Prompt:</label>
+          <textarea id="input-prompt" placeholder="e.g. Write a marketing strategy for coffee shops..."></textarea>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="processAITool('prompt')"><i class="fa-solid fa-bolt"></i> Supercharge Prompt</button>
+          <button class="btn btn-light" onclick="copyResult('res-prompt')"><i class="fa-regular fa-copy"></i> Copy Prompt</button>
+        </div>
+        <div class="result-box" id="res-prompt">High-performing LLM prompt will appear here.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Dedicated Tool: Photo to PDF -->
+<section class="section tool-dedicated-page" id="page-photo_to_pdf">
+  <div class="container animate-in">
+    <div class="dedicated-card-shell">
+      <div class="dedicated-header">
+        <div class="dedicated-title-box">
+          <div class="dedicated-icon-badge blue"><i class="fa-solid fa-file-image"></i></div>
+          <div>
+            <h2>Photo to PDF Converter</h2>
+            <p>Convert JPG &amp; PNG photos into clean, high-resolution PDF documents.[cite: 1]</p>
+          </div>
+        </div>
+        <button class="btn btn-light" data-tab="pdf-tools"><i class="fa-solid fa-arrow-left"></i> Back to PDF Suite</button>
+      </div>
+      <div class="info-feature-banner">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>Local &amp; Secure. Your images never leave your browser or get uploaded to any servers.</span>
+      </div>
+      <div class="workspace-form">
+        <div class="form-group">
+          <label for="pdfPhotoInput">Select Image(s) (JPG / PNG):</label>
+          <input type="file" id="pdfPhotoInput" accept="image/jpeg,image/png" multiple>
+        </div>
+        <div class="form-group">
+          <label for="pdfPhotoDocTitle">Document Name:</label>
+          <input type="text" id="pdfPhotoDocTitle" placeholder="e.g., Photos_Archive">
+        </div>
+        <button class="btn btn-primary" id="btnExecutePhotoPdf" type="button"><i class="fa-solid fa-file-pdf"></i> Convert &amp; Download PDF</button>
+        <div id="status-photo_to_pdf" style="font-size:12px;font-weight:700;margin-top:10px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Dedicated Tool: Text to PDF -->
+<section class="section tool-dedicated-page" id="page-text_to_pdf">
+  <div class="container animate-in">
+    <div class="dedicated-card-shell">
+      <div class="dedicated-header">
+        <div class="dedicated-title-box">
+          <div class="dedicated-icon-badge purple"><i class="fa-solid fa-file-circle-plus"></i></div>
+          <div>
+            <h2>Text to PDF Generator</h2>
+            <p>Type or paste your formatted text, add a title, and export an A4 document.[cite: 1]</p>
+          </div>
+        </div>
+        <button class="btn btn-light" data-tab="pdf-tools"><i class="fa-solid fa-arrow-left"></i> Back to PDF Suite</button>
+      </div>
+      <div class="info-feature-banner">
+        <i class="fa-solid fa-print"></i>
+        <span>Format your writeups and download standard A4 printable PDF files directly.</span>
+      </div>
+      <div class="workspace-form">
+        <div class="form-group">
+          <label for="pdfDocTitle">Document Title:</label>
+          <input type="text" id="pdfDocTitle" placeholder="e.g., Project Proposal">
+        </div>
+        <div class="form-group">
+          <label for="pdfDocContent">Document Content:</label>
+          <textarea id="pdfDocContent" placeholder="Type or paste your text here..."></textarea>
+        </div>
+        <button class="btn btn-primary" id="btnExecuteTextPdf" type="button"><i class="fa-solid fa-download"></i> Generate &amp; Download PDF</button>
+        <div id="status-text_to_pdf" style="font-size:12px;font-weight:700;margin-top:10px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Dedicated Tool: Merge PDF Files -->
+<section class="section tool-dedicated-page" id="page-merge_pdf">
+  <div class="container animate-in">
+    <div class="dedicated-card-shell">
+      <div class="dedicated-header">
+        <div class="dedicated-title-box">
+          <div class="dedicated-icon-badge emerald"><i class="fa-solid fa-layer-group"></i></div>
+          <div>
+            <h2>Merge PDF Files</h2>
+            <p>Combine multiple PDF documents into a single organized file in seconds.[cite: 1]</p>
+          </div>
+        </div>
+        <button class="btn btn-light" data-tab="pdf-tools"><i class="fa-solid fa-arrow-left"></i> Back to PDF Suite</button>
+      </div>
+      <div class="info-feature-banner">
+        <i class="fa-solid fa-object-ungroup"></i>
+        <span>Select multiple PDF documents to merge into a single download.</span>
+      </div>
+      <div class="workspace-form">
+        <div class="form-group">
+          <label for="pdfMergeInput">Select Multiple PDFs:</label>
+          <input type="file" id="pdfMergeInput" accept="application/pdf" multiple>
+        </div>
+        <div id="mergeFileList" style="font-size:12px;color:var(--muted);min-height:24px"></div>
+        <button class="btn btn-primary" id="btnExecuteMergePdf" type="button"><i class="fa-solid fa-object-ungroup"></i> Merge &amp; Download Combined PDF</button>
+        <div id="status-merge_pdf" style="font-size:12px;font-weight:700;margin-top:10px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Dedicated Tool: Split PDF -->
+<section class="section tool-dedicated-page" id="page-split_pdf">
+  <div class="container animate-in">
+    <div class="dedicated-card-shell">
+      <div class="dedicated-header">
+        <div class="dedicated-title-box">
+          <div class="dedicated-icon-badge cyan"><i class="fa-solid fa-scissors"></i></div>
+          <div>
+            <h2>Split PDF Document</h2>
+            <p>Separate a multi-page PDF into single-page documents instantly.[cite: 1]</p>
+          </div>
+        </div>
+        <button class="btn btn-light" data-tab="pdf-tools"><i class="fa-solid fa-arrow-left"></i> Back to PDF Suite</button>
+      </div>
+      <div class="info-feature-banner">
+        <i class="fa-solid fa-scissors"></i>
+        <span>Break down oversized PDF documents without leaving your browser.</span>
+      </div>
+      <div class="workspace-form">
+        <div class="form-group">
+          <label for="pdfSplitInput">Select PDF to Split:</label>
+          <input type="file" id="pdfSplitInput" accept="application/pdf">
+        </div>
+        <button class="btn btn-primary" id="btnExecuteSplitPdf" type="button"><i class="fa-solid fa-scissors"></i> Split First Page as Sample PDF</button>
+        <div id="status-split_pdf" style="font-size:12px;font-weight:700;margin-top:10px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Dedicated Tool: Extract Pages -->
+<section class="section tool-dedicated-page" id="page-extract_pdf">
+  <div class="container animate-in">
+    <div class="dedicated-card-shell">
+      <div class="dedicated-header">
+        <div class="dedicated-title-box">
+          <div class="dedicated-icon-badge amber"><i class="fa-solid fa-file-export"></i></div>
+          <div>
+            <h2>Extract Specific PDF Pages</h2>
+            <p>Extract only specific page numbers or ranges from an existing PDF.[cite: 1]</p>
+          </div>
+        </div>
+        <button class="btn btn-light" data-tab="pdf-tools"><i class="fa-solid fa-arrow-left"></i> Back to PDF Suite</button>
+      </div>
+      <div class="info-feature-banner">
+        <i class="fa-solid fa-filter"></i>
+        <span>Pick the exact pages you need and save them as a clean sub-document.</span>
+      </div>
+      <div class="workspace-form">
+        <div class="form-group">
+          <label for="pdfExtractInput">Select PDF Document:</label>
+          <input type="file" id="pdfExtractInput" accept="application/pdf">
+        </div>
+        <div class="form-group">
+          <label for="pdfExtractPages">Page Numbers (comma-separated, 1-based, e.g. 1, 3):</label>
+          <input type="text" id="pdfExtractPages" placeholder="e.g., 1, 2">
+        </div>
+        <button class="btn btn-primary" id="btnExecuteExtractPdf" type="button"><i class="fa-solid fa-download"></i> Extract &amp; Download Pages</button>
+        <div id="status-extract_pdf" style="font-size:12px;font-weight:700;margin-top:10px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Dedicated Tool: Rotate PDF Pages -->
+<section class="section tool-dedicated-page" id="page-rotate_pdf">
+  <div class="container animate-in">
+    <div class="dedicated-card-shell">
+      <div class="dedicated-header">
+        <div class="dedicated-title-box">
+          <div class="dedicated-icon-badge purple"><i class="fa-solid fa-rotate"></i></div>
+          <div>
+            <h2>Rotate PDF Pages</h2>
+            <p>Rotate incorrectly oriented PDF pages by 90°, 180°, or 270° degrees.[cite: 1]</p>
+          </div>
+        </div>
+        <button class="btn btn-light" data-tab="pdf-tools"><i class="fa-solid fa-arrow-left"></i> Back to PDF Suite</button>
+      </div>
+      <div class="info-feature-banner">
+        <i class="fa-solid fa-arrows-rotate"></i>
+        <span>Fix inverted or sideways scans with client-side orientation correction.</span>
+      </div>
+      <div class="workspace-form">
+        <div class="form-group">
+          <label for="pdfRotateInput">Select PDF Document:</label>
+          <input type="file" id="pdfRotateInput" accept="application/pdf">
+        </div>
+        <div class="form-group">
+          <label for="pdfRotateAngle">Rotation Angle:</label>
+          <select id="pdfRotateAngle">
+            <option value="90">90 Degrees Clockwise</option>
+            <option value="180">180 Degrees Flip</option>
+            <option value="270">270 Degrees (90 Counter-Clockwise)</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="btnExecuteRotatePdf" type="button"><i class="fa-solid fa-rotate-right"></i> Rotate &amp; Download PDF</button>
+        <div id="status-rotate_pdf" style="font-size:12px;font-weight:700;margin-top:10px"></div>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- DEDICATED AI DIRECTORY PAGE -->
 <section class="section" id="directory">
-  <div class="container">
+  <div class="container animate-in">
     <div class="section-heading">
       <div>
         <div class="section-kicker">Curated AI Tools</div>
         <h2>AI Tools Directory</h2>
-        <p>Explore leading artificial intelligence platforms across writing, research, design, and productivity.</p>
+        <p>Explore leading artificial intelligence platforms across writing, research, design, and productivity.[cite: 1]</p>
       </div>
       <button class="btn btn-light" data-tab="home"><i class="fa-solid fa-arrow-left"></i> Back to Home</button>
     </div>
@@ -1061,7 +1514,7 @@ body.tab-navigation main > section#home.active-page { display: block !important;
           <div class="tool-icon emerald"><i class="fa-solid fa-robot"></i></div>
           <span class="card-badge">Writing · Productivity</span>
           <h3 style="margin-top:10px">ChatGPT</h3>
-          <p>OpenAI's state-of-the-art conversational model for drafting, coding, and problem solving.</p>
+          <p>OpenAI's state-of-the-art conversational model for drafting, coding, and problem solving.[cite: 1]</p>
         </div>
         <a class="btn btn-light" href="https://chatgpt.com" target="_blank" rel="noopener noreferrer">Visit Website <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
       </div>
@@ -1071,7 +1524,7 @@ body.tab-navigation main > section#home.active-page { display: block !important;
           <div class="tool-icon cyan"><i class="fa-solid fa-magnifying-glass"></i></div>
           <span class="card-badge">Research</span>
           <h3 style="margin-top:10px">Perplexity AI</h3>
-          <p>An AI-powered search engine providing cited, accurate answers in real time.</p>
+          <p>An AI-powered search engine providing cited, accurate answers in real time.[cite: 1]</p>
         </div>
         <a class="btn btn-light" href="https://www.perplexity.ai" target="_blank" rel="noopener noreferrer">Visit Website <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
       </div>
@@ -1081,7 +1534,7 @@ body.tab-navigation main > section#home.active-page { display: block !important;
           <div class="tool-icon blue"><i class="fa-solid fa-palette"></i></div>
           <span class="card-badge">Design</span>
           <h3 style="margin-top:10px">Canva Magic Studio</h3>
-          <p>All-in-one graphic design platform with generative AI for social posts and decks.</p>
+          <p>All-in-one graphic design platform with generative AI for social posts and decks.[cite: 1]</p>
         </div>
         <a class="btn btn-light" href="https://www.canva.com" target="_blank" rel="noopener noreferrer">Visit Website <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
       </div>
@@ -1091,7 +1544,7 @@ body.tab-navigation main > section#home.active-page { display: block !important;
           <div class="tool-icon amber"><i class="fa-solid fa-note-sticky"></i></div>
           <span class="card-badge">Productivity</span>
           <h3 style="margin-top:10px">Notion AI</h3>
-          <p>Connected workspace platform with built-in AI writing and project tracking.</p>
+          <p>Connected workspace platform with built-in AI writing and project tracking.[cite: 1]</p>
         </div>
         <a class="btn btn-light" href="https://www.notion.so" target="_blank" rel="noopener noreferrer">Visit Website <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
       </div>
@@ -1101,7 +1554,7 @@ body.tab-navigation main > section#home.active-page { display: block !important;
           <div class="tool-icon emerald"><i class="fa-solid fa-check-double"></i></div>
           <span class="card-badge">Writing</span>
           <h3 style="margin-top:10px">Grammarly</h3>
-          <p>Real-time grammar verification, tone adjustor, and writing refinement.</p>
+          <p>Real-time grammar verification, tone adjustor, and writing refinement.[cite: 1]</p>
         </div>
         <a class="btn btn-light" href="https://www.grammarly.com" target="_blank" rel="noopener noreferrer">Visit Website <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
       </div>
@@ -1111,7 +1564,7 @@ body.tab-navigation main > section#home.active-page { display: block !important;
           <div class="tool-icon purple"><i class="fa-solid fa-wand-sparkles"></i></div>
           <span class="card-badge">Design</span>
           <h3 style="margin-top:10px">Adobe Express</h3>
-          <p>Generative imagery, font effects, and quick video edits powered by Adobe Firefly.</p>
+          <p>Generative imagery, font effects, and quick video edits powered by Adobe Firefly.[cite: 1]</p>
         </div>
         <a class="btn btn-light" href="https://www.adobe.com/express/" target="_blank" rel="noopener noreferrer">Visit Website <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
       </div>
@@ -1119,14 +1572,14 @@ body.tab-navigation main > section#home.active-page { display: block !important;
   </div>
 </section>
 
-<!-- FULL-PAGE AUTH EXPERIENCE (EXACT MATCH TO STUDY SPHERE AUTH.HTML) -->
+<!-- FULL-PAGE AUTH EXPERIENCE -->
 <div class="auth-page-container" id="authPage">
   <div class="auth-shell">
     <section class="auth-visual">
       <div>
         <div class="auth-pill"><i class="fa-solid fa-sparkles"></i> YOUR PRODUCTIVITY SPACE</div>
         <h1>Work faster.<br>Think clearer.<br><span>Create more.</span></h1>
-        <p>Make every session count. Keep your digital utilities organised and supercharge your daily workflow.</p>
+        <p>Make every session count. Keep your digital utilities organised and supercharge your daily workflow.[cite: 1]</p>
       </div>
 
       <div class="auth-artwork" aria-hidden="true">
@@ -1145,10 +1598,10 @@ body.tab-navigation main > section#home.active-page { display: block !important;
     <section class="auth-form-side">
       <div class="auth-topline">Welcome to NovaTools</div>
       <h2 id="authFormTitle">Welcome back!</h2>
-      <p class="auth-subheading" id="authFormSubtitle">Sign in to continue to your productivity suite.</p>
+      <p class="auth-subheading" id="authFormSubtitle">Sign in to continue to your productivity suite.[cite: 1]</p>
 
       <div class="auth-tabs" role="tablist">
-        <button class="auth-tab active" id="authLoginTab" type="button"><i class="fa-solid fa-right-to-bracket"></i> Sign In</button>
+        <button class="auth-tab active" id="authLoginTab" type="button"><i class="fa-solid fa-right-to-bracket"></i> Sign In[cite: 1]</button>
         <button class="auth-tab" id="authSignupTab" type="button"><i class="fa-solid fa-user-plus"></i> Create Account</button>
       </div>
 
@@ -1208,14 +1661,14 @@ body.tab-navigation main > section#home.active-page { display: block !important;
       <div>
         <span style="font-size:11px;font-weight:800;letter-spacing:1.5px;color:#93c5fd">FIRST-TIME SETUP</span>
         <h2 style="font-size:clamp(32px, 3.5vw, 44px);color:white;margin:12px 0">Personalise your workspace.</h2>
-        <p style="color:#dbeafe;font-size:14px;line-height:1.75">A few quick questions to configure your NovaTools experience.</p>
+        <p style="color:#dbeafe;font-size:14px;line-height:1.75">A few quick questions to configure your NovaTools experience.[cite: 1]</p>
       </div>
       <div style="font-size:11px;color:#cbd5e1"><i class="fa-solid fa-shield-halved"></i> Protected user profile</div>
     </div>
 
     <div class="onboarding-form-panel">
       <h2>Welcome aboard!</h2>
-      <p style="color:var(--muted);font-size:13px;margin:4px 0 24px">Complete your setup questionnaire to get started.</p>
+      <p style="color:var(--muted);font-size:13px;margin:4px 0 24px">Complete your setup questionnaire to get started.[cite: 1]</p>
 
       <form id="onboardingForm" class="workspace-form">
         <div class="form-group">
@@ -1289,7 +1742,7 @@ body.tab-navigation main > section#home.active-page { display: block !important;
             <div class="brand-caption" style="color:#94a3b8">Smart Digital Utilities</div>
           </div>
         </a>
-        <p class="footer-about">An all-in-one productivity platform bringing writing assistants, browser PDF utilities, and AI discovery into one modern, accessible website.</p>
+        <p class="footer-about">An all-in-one productivity platform bringing writing assistants, browser PDF utilities, and AI discovery into one modern, accessible website.[cite: 1]</p>
       </div>
 
       <div>
@@ -1311,26 +1764,26 @@ body.tab-navigation main > section#home.active-page { display: block !important;
       </div>
     </div>
 
-    <!-- COLORFUL BOTTOM RIBBON WITH ATTRIBUTION -->
+    <!-- COLORFUL BOTTOM RIBBON -->
     <div class="footer-bottom">
       <span>© <span id="year"></span> NovaTools · Built for high productivity.</span>
       <span>
         Keep learning. Keep growing.
         <span class="creator-badge">
-          <i class="fa-solid fa-leaf"></i> Made by Abhinandan Raj
+          <i class="fa-solid fa-leaf"></i> Made by Abhinandan Raj[cite: 1]
         </span>
       </span>
     </div>
   </div>
 </footer>
 
-<!-- 5-STAR REVIEW MODAL FROM STUDY SPHERE -->
+<!-- 5-STAR REVIEW MODAL -->
 <div class="review-modal-backdrop" id="reviewModal" aria-modal="true" role="dialog">
   <div class="review-modal-card">
     <button type="button" class="review-close" id="closeReviewBtn" aria-label="Close review dialog"><i class="fa-solid fa-xmark"></i></button>
     <div class="review-modal-icon"><i class="fa-solid fa-star"></i></div>
     <h2>How was your experience?</h2>
-    <p>Your feedback helps us build a better toolkit for everyone.</p>
+    <p>Your feedback helps us build a better toolkit for everyone.[cite: 1]</p>
 
     <form id="reviewForm">
       <div class="star-picker" role="radiogroup" aria-label="Choose a rating">
@@ -1340,7 +1793,7 @@ body.tab-navigation main > section#home.active-page { display: block !important;
         <button type="button" data-rating="4" aria-label="4 stars">★</button>
         <button type="button" data-rating="5" aria-label="5 stars">★</button>
       </div>
-      <div class="rating-hint" id="ratingHint">Tap a star to rate your experience.</div>
+      <div class="rating-hint" id="ratingHint">Tap a star to rate your experience.[cite: 1]</div>
 
       <div class="form-group" style="text-align:left;margin-bottom:12px">
         <input type="text" id="reviewName" placeholder="Your name (optional)">
@@ -1363,7 +1816,6 @@ body.tab-navigation main > section#home.active-page { display: block !important;
    1. SUPABASE CLIENT & RESILIENT AUTHENTICATION
 ========================================================= */
 const SUPABASE_URL = "https://ttcixcmajpqrlgqeplbq.supabase.co";
-// Working Supabase anon / publishable key:
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_-DI-cpV_UGIgETXRPFSyCQ_gXGHIsu3";
 
 let supabaseClient = null;
@@ -1383,7 +1835,7 @@ function initSupabase() {
       isMockAuthMode = false;
       return;
     } catch (e) {
-      console.warn("Supabase init issue; engaging seamless fallback session:", e);
+      console.warn("Supabase init issue; engaging fallback session:", e);
     }
   }
   isMockAuthMode = true;
@@ -1393,7 +1845,7 @@ initSupabase();
 document.getElementById("year").textContent = new Date().getFullYear();
 
 /* =========================================================
-   2. DYNAMIC NAVIGATION UPDATER (FIXES RIBBON NOT CHANGING)
+   2. DYNAMIC NAVIGATION UPDATER
 ========================================================= */
 function updateNavigation(user) {
   currentUser = user || null;
@@ -1407,7 +1859,6 @@ function updateNavigation(user) {
   let logoutBtn = document.getElementById("logoutButton");
 
   if (!user) {
-    // Visitor Mode: Show Sign In & Get Started
     if (navSignIn) navSignIn.style.display = "";
     if (navGetStarted) navGetStarted.style.display = "";
     if (profileBtn) profileBtn.remove();
@@ -1417,7 +1868,6 @@ function updateNavigation(user) {
       footerAuth.onclick = (e) => { e.preventDefault(); activateTab("auth"); };
     }
   } else {
-    // Logged In Mode: Hide Sign In & Get Started, show Profile & Log Out
     if (navSignIn) navSignIn.style.display = "none";
     if (navGetStarted) navGetStarted.style.display = "none";
 
@@ -1470,7 +1920,6 @@ async function handleSignOut() {
 }
 
 async function initialiseAuthentication() {
-  // Check Supabase session first
   if (!isMockAuthMode && supabaseClient) {
     try {
       const { data } = await supabaseClient.auth.getSession();
@@ -1481,7 +1930,6 @@ async function initialiseAuthentication() {
     } catch (_) {}
   }
 
-  // Check Local fallback session
   try {
     const localUser = JSON.parse(localStorage.getItem("novaToolsUser") || "null");
     if (localUser) {
@@ -1496,7 +1944,7 @@ async function initialiseAuthentication() {
 initialiseAuthentication();
 
 /* =========================================================
-   3. TAB ENGINE
+   3. TAB & DEDICATED TOOL NAVIGATION SYSTEM
 ========================================================= */
 const navLinks = document.getElementById("navLinks");
 const menuToggle = document.getElementById("menuToggle");
@@ -1540,6 +1988,12 @@ function activateTab(tabId) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+window.openDedicatedTool = function(toolId) {
+  const pageId = "page-" + toolId;
+  activateTab(pageId);
+  history.pushState(null, "", "#" + pageId);
+};
+
 document.querySelectorAll("[data-tab]").forEach(el => {
   el.addEventListener("click", (e) => {
     e.preventDefault();
@@ -1555,83 +2009,42 @@ window.addEventListener("popstate", () => {
 });
 
 /* =========================================================
-   4. AI PRODUCTIVITY SUITE (WRITING MODES & HELPERS)
+   4. DEDICATED AI TOOLS PROCESSING ENGINE
 ========================================================= */
-let currentAITool = "writer";
-const toolMeta = {
-  writer: { 
-    title: "Writing Assistant", 
-    desc: "Draft professional emails, formal letters, instant DMs, outlines, and proposals." 
-  },
-  summariser: { 
-    title: "Text Summariser", 
-    desc: "Extracts key takeaways, summaries, and executive bullet points." 
-  },
-  improver: { 
-    title: "Grammar & Tone Improver", 
-    desc: "Refines flow, corrects phrasing, and elevates vocabulary." 
-  },
-  email: { 
-    title: "Email & Message Helper", 
-    desc: "Generates clear, polite, and actionable email drafts." 
-  },
-  code: { 
-    title: "Code & Syntax Explainer", 
-    desc: "Explains code snippets, identifies errors, and optimizes logic." 
-  },
-  prompt: { 
-    title: "AI Prompt Enhancer", 
-    desc: "Upgrades rough prompts into high-performing prompts for LLMs." 
-  }
-};
-
-window.setAITool = function(toolKey) {
-  currentAITool = toolKey;
-  const meta = toolMeta[toolKey];
-  document.getElementById("workspaceTitle").innerHTML = `<i class="fa-solid fa-wand-magic-sparkles" style="color:var(--primary)"></i> ${meta.title}`;
-  document.getElementById("workspaceDesc").textContent = meta.desc;
-  
-  const writerGroup = document.getElementById("writerTypeGroup");
-  if (writerGroup) {
-    writerGroup.style.display = (toolKey === 'writer') ? 'grid' : 'none';
-  }
-
-  document.getElementById("aiWorkspace").scrollIntoView({ behavior: "smooth", block: "center" });
-};
-
-document.getElementById("aiProcessBtn").addEventListener("click", () => {
-  const input = document.getElementById("aiInputText").value.trim();
-  const resultBox = document.getElementById("aiResultBox");
+window.processAITool = function(toolKey) {
+  const inputEl = document.getElementById(`input-${toolKey}`);
+  const resultBox = document.getElementById(`res-${toolKey}`);
+  const input = inputEl ? inputEl.value.trim() : "";
 
   if (!input) {
-    resultBox.textContent = "Please enter some text, points, or instructions above first.";
+    resultBox.textContent = "Please enter some text, instructions, or points above first.";
     return;
   }
 
-  resultBox.textContent = "Generating output with NovaTools algorithms...";
+  resultBox.textContent = "Processing with NovaTools AI algorithms...";
 
   setTimeout(() => {
     const lines = input.split("\n").filter(l => l.trim().length > 0);
     let output = "";
 
-    if (currentAITool === "writer") {
+    if (toolKey === "writer") {
       const mode = document.getElementById("aiWriterType").value;
       if (mode === "email") {
-        output = `Subject: Important Update: ${lines[0] || 'Project Discussion'}\n\nDear [Recipient Name],\n\nI hope this email finds you well.\n\nI am writing to share key details regarding our conversation:\n${lines.map(l => `• ${l}`).join('\n')}\n\nPlease let me know your thoughts or availability to connect.\n\nBest regards,\n[Your Name]`;
+        output = `Subject: Update Regarding: ${lines[0] || 'Discussion Item'}\n\nDear [Name],\n\nI hope this email finds you well.\n\nI wanted to follow up with you on the following key points:\n${lines.map(l => `• ${l}`).join('\n')}\n\nPlease let me know your thoughts.\n\nBest regards,\n[Your Name]`;
       } else if (mode === "letter") {
-        output = `Date: ${new Date().toLocaleDateString()}\n\nTo,\n[Recipient / Department Name]\n[Organization / Address]\n\nSubject: Formal Communication Regarding ${lines[0] || 'Official Matter'}\n\nRespected Sir/Madam,\n\nI am formally writing to bring the following matters to your attention:\n\n${lines.map((l, i) => `${i+1}.${l}`).join('\n\n')}\n\nI kindly request your assistance in reviewing these points at your earliest convenience.\n\nThank you for your time and consideration.\n\nSincerely,\n[Your Name]\n[Your Contact Information]`;
+        output = `Date: ${new Date().toLocaleDateString()}\n\nTo,\n[Recipient / Department Name]\n[Organization]\n\nSubject: Official Notice Regarding ${lines[0] || 'Formal Matter'}\n\nRespected Sir/Madam,\n\nI am writing to bring the following matters formally to your attention:\n\n${lines.map((l, i) => `${i+1}.${l}`).join('\n\n')}\n\nThank you for your consideration and time.\n\nSincerely,\n[Your Name]`;
       } else if (mode === "msg") {
-        output = `Hey! 👋 Hope you're doing great.\n\nQuick note regarding ${lines[0] || 'our talk'}:\n${lines.map(l => `👉 ${l}`).join('\n')}\n\nLet me know when you have a moment to check this out!`;
+        output = `Hey! 👋 Quick note regarding ${lines[0] || 'our talk'}:\n${lines.map(l => `👉 ${l}`).join('\n')}\n\nLet me know what you think!`;
       } else if (mode === "outline") {
-        output = `### 📑 Article & Essay Outline:\n\nI. Introduction & Thesis\n   - Overview of: ${lines[0] || 'Topic'}\n\nII. Core Arguments & Evidence\n${lines.map((l, i) => `   - Point ${i+1}:${l}`).join('\n')}\n\nIII. Counter-arguments & Analysis\n\nIV. Conclusion & Key Takeaways`;
+        output = `### 📑 Document Outline:\n\nI. Introduction\n   - Context: ${lines[0] || 'Main Topic'}\n\nII. Core Discussion\n${lines.map((l, i) => `   - Point ${i+1}:${l}`).join('\n')}\n\nIII. Summary & Next Steps`;
       } else {
-        output = `### 📝 Structured Document Draft\n\n#### 1. Executive Summary\n${lines[0] || "Overview of core objective."}\n\n#### 2. Key Action Items\n${lines.map(l => `• ${l}`).join('\n')}\n\n#### 3. Strategic Conclusion\nFollowing this structure ensures seamless execution and communication.`;
+        output = `### 📝 Document Draft\n\n#### Executive Overview\n${lines[0] || "Core overview."}\n\n#### Action Items\n${lines.map(l => `• ${l}`).join('\n')}`;
       }
-    } else if (currentAITool === "summariser") {
+    } else if (toolKey === "summariser") {
       output = "### 📌 Executive Summary (TL;DR):\n" +
-        lines.slice(0, 4).map((l, i) => `• ${l.replace(/^[-*•]\s*/, "")}`).join("\n") +
-        "\n\n**Key Takeaway:** The core message focuses on effective execution and streamlined productivity.";
-    } else if (currentAITool === "improver") {
+        lines.slice(0, 4).map((l) => `• ${l.replace(/^[-*•]\s*/, "")}`).join("\n") +
+        "\n\n**Takeaway:** High-priority items condensed for fast decision-making.";
+    } else if (toolKey === "improver") {
       output = "### ✨ Polished & Elevated Version:\n\n" +
         lines.map(line => {
           let imp = line.trim();
@@ -1639,343 +2052,28 @@ document.getElementById("aiProcessBtn").addEventListener("click", () => {
           if (!/[.!?]$/.test(imp)) imp += ".";
           return imp;
         }).join(" ") +
-        "\n\n*Tone: Professional & Direct | Readability: Enhanced*";
-    } else if (currentAITool === "email") {
-      output = `Subject: Quick Follow-up: ${lines[0] || 'Our Discussion'}\n\nHi there,\n\nI hope you're having a productive week.\n\nI wanted to share a brief note on the following items:\n${lines.map(l => `• ${l}`).join('\n')}\n\nPlease let me know your thoughts or if you need any further clarification.\n\nBest regards,\nNovaTools User`;
-    } else if (currentAITool === "code") {
-      output = `### 💻 Code Explanation & Breakdown:\n\n1. **Purpose:** This script handles logical data transformation and flow control.\n2. **Breakdown:**\n${lines.slice(0, 3).map((l, i) => `   - Line ${i+1}: Handles logic for \`${l.slice(0, 30)}...\``).join('\n')}\n3. **Improvement Tip:** Ensure error boundaries are set and validate input data types.`;
-    } else if (currentAITool === "prompt") {
-      output = `### 🎯 Enhanced Prompt (Ready for ChatGPT / Claude):\n\n"Act as a senior expert in communication and productivity. I need you to address: '${input}'. Structure your answer with: 1) Executive Summary, 2) Step-by-Step Action Plan, 3) Real-world examples, and 4) Potential pitfalls to avoid. Tone should be articulate, concise, and highly actionable."`;
+        "\n\n*Tone: Professional & Concise | Structure: Refined*";
+    } else if (toolKey === "email") {
+      output = `Subject: Important Update: ${lines[0] || 'Action Required'}\n\nHi there,\n\nI hope you are doing well.\n\nHere is a quick summary of the points we need to cover:\n${lines.map(l => `• ${l}`).join('\n')}\n\nLooking forward to hearing from you.\n\nBest regards,\nNovaTools User`;
+    } else if (toolKey === "code") {
+      output = `### 💻 Code Breakdown & Insights:\n\n1. **Functionality:** Handles logical routines, structure flow, and data management.\n2. **Line Analysis:**\n${lines.slice(0, 3).map((l, i) => `   - Line ${i+1}: Sets logic for \`${l.slice(0, 35)}...\``).join('\n')}\n3. **Recommendation:** Ensure variables are properly scoped and null checks are implemented.`;
+    } else if (toolKey === "prompt") {
+      output = `### 🎯 Supercharged Prompt (Ready for ChatGPT / Claude):\n\n"Act as an authoritative expert in this field. I need a comprehensive breakdown of: '${input}'. Provide: 1) Executive Summary, 2) Step-by-Step Implementation, 3) High-yield suggestions, and 4) Common mistakes to avoid. Keep formatting crisp and professional."`;
     }
 
     resultBox.textContent = output;
   }, 350);
-});
+};
 
-document.getElementById("aiCopyBtn").addEventListener("click", () => {
-  const text = document.getElementById("aiResultBox").textContent;
+window.copyResult = function(boxId) {
+  const text = document.getElementById(boxId)?.textContent;
   if (!text) return;
   navigator.clipboard.writeText(text).then(() => alert("Copied to clipboard!"));
-});
+};
 
 /* =========================================================
-   5. IN-BROWSER PDF SUITE (PDF-LIB FULL CARDS IMPLEMENTATION)
+   5. IN-BROWSER PDF SUITE LOGIC BINDINGS
 ========================================================= */
-let currentPdfTool = "photo_to_pdf";
-
-const pdfToolMeta = {
-  photo_to_pdf: {
-    title: "Photo to PDF",
-    desc: "Convert JPG and PNG images into a clean, multi-page PDF document.",
-    icon: "fa-file-image",
-    html: `
-      <div class="form-group">
-        <label for="pdfPhotoInput">Select Image(s) (JPG / PNG):</label>
-        <input type="file" id="pdfPhotoInput" accept="image/jpeg,image/png" multiple>
-      </div>
-      <div class="form-group">
-        <label for="pdfPhotoDocTitle">Document Name:</label>
-        <input type="text" id="pdfPhotoDocTitle" placeholder="e.g., Photos_Archive">
-      </div>
-      <button class="btn btn-primary" id="btnExecutePhotoPdf" type="button"><i class="fa-solid fa-file-pdf"></i> Convert &amp; Download PDF</button>
-    `
-  },
-  text_to_pdf: {
-    title: "Text to PDF",
-    desc: "Type or paste your text, add a title, and export an A4 document.",
-    icon: "fa-file-circle-plus",
-    html: `
-      <div class="form-group">
-        <label for="pdfDocTitle">Document Title:</label>
-        <input type="text" id="pdfDocTitle" placeholder="e.g., Project Proposal">
-      </div>
-      <div class="form-group">
-        <label for="pdfDocContent">Document Content:</label>
-        <textarea id="pdfDocContent" placeholder="Type or paste your text here..."></textarea>
-      </div>
-      <button class="btn btn-primary" id="btnExecuteTextPdf" type="button"><i class="fa-solid fa-download"></i> Generate &amp; Download PDF</button>
-    `
-  },
-  merge_pdf: {
-    title: "Merge PDF Files",
-    desc: "Select 2 or more PDF documents to combine them into one file.",
-    icon: "fa-layer-group",
-    html: `
-      <div class="form-group">
-        <label for="pdfMergeInput">Select Multiple PDFs:</label>
-        <input type="file" id="pdfMergeInput" accept="application/pdf" multiple>
-      </div>
-      <div id="mergeFileList" style="font-size:12px;color:var(--muted);min-height:30px"></div>
-      <button class="btn btn-primary" id="btnExecuteMergePdf" type="button"><i class="fa-solid fa-object-ungroup"></i> Merge &amp; Download Combined PDF</button>
-    `
-  },
-  split_pdf: {
-    title: "Split PDF",
-    desc: "Extract every page of a PDF document into single-page files.",
-    icon: "fa-scissors",
-    html: `
-      <div class="form-group">
-        <label for="pdfSplitInput">Select PDF to Split:</label>
-        <input type="file" id="pdfSplitInput" accept="application/pdf">
-      </div>
-      <button class="btn btn-primary" id="btnExecuteSplitPdf" type="button"><i class="fa-solid fa-scissors"></i> Split First Page as Sample PDF</button>
-    `
-  },
-  extract_pdf: {
-    title: "Extract Pages",
-    desc: "Specify exact page numbers (e.g. 1, 2) to export into a new PDF.",
-    icon: "fa-file-export",
-    html: `
-      <div class="form-group">
-        <label for="pdfExtractInput">Select PDF Document:</label>
-        <input type="file" id="pdfExtractInput" accept="application/pdf">
-      </div>
-      <div class="form-group">
-        <label for="pdfExtractPages">Page Numbers (comma-separated, 1-based, e.g. 1, 3):</label>
-        <input type="text" id="pdfExtractPages" placeholder="e.g., 1, 2">
-      </div>
-      <button class="btn btn-primary" id="btnExecuteExtractPdf" type="button"><i class="fa-solid fa-download"></i> Extract &amp; Download Pages</button>
-    `
-  },
-  rotate_pdf: {
-    title: "Rotate PDF Pages",
-    desc: "Rotate all pages in a PDF document by 90, 180, or 270 degrees.",
-    icon: "fa-rotate",
-    html: `
-      <div class="form-group">
-        <label for="pdfRotateInput">Select PDF Document:</label>
-        <input type="file" id="pdfRotateInput" accept="application/pdf">
-      </div>
-      <div class="form-group">
-        <label for="pdfRotateAngle">Rotation Angle:</label>
-        <select id="pdfRotateAngle">
-          <option value="90">90 Degrees Clockwise</option>
-          <option value="180">180 Degrees Flip</option>
-          <option value="270">270 Degrees (90 Counter-Clockwise)</option>
-        </select>
-      </div>
-      <button class="btn btn-primary" id="btnExecuteRotatePdf" type="button"><i class="fa-solid fa-rotate-right"></i> Rotate &amp; Download PDF</button>
-    `
-  }
-};
-
-window.setPdfTool = function(toolKey) {
-  currentPdfTool = toolKey;
-  const meta = pdfToolMeta[toolKey];
-  document.getElementById("pdfWorkspaceTitle").innerHTML = `<i class="fa-solid ${meta.icon}" style="color:var(--primary)"></i> ${meta.title}`;
-  document.getElementById("pdfWorkspaceDesc").textContent = meta.desc;
-  document.getElementById("pdfWorkspaceForm").innerHTML = meta.html;
-  document.getElementById("pdfOperationStatus").textContent = "";
-
-  bindPdfEventListeners(toolKey);
-  document.getElementById("pdfWorkspace").scrollIntoView({ behavior: "smooth", block: "center" });
-};
-
-function bindPdfEventListeners(toolKey) {
-  const status = document.getElementById("pdfOperationStatus");
-
-  if (toolKey === "photo_to_pdf") {
-    document.getElementById("btnExecutePhotoPdf")?.addEventListener("click", async () => {
-      const files = Array.from(document.getElementById("pdfPhotoInput").files);
-      const docName = document.getElementById("pdfPhotoDocTitle").value.trim() || "Photos_Archive";
-      if (!files.length) {
-        status.style.color = "#dc2626";
-        status.textContent = "Please select at least one JPG or PNG photo.";
-        return;
-      }
-      status.style.color = "var(--primary)";
-      status.textContent = "Converting photos to PDF in browser...";
-
-      try {
-        const pdfDoc = await PDFLib.PDFDocument.create();
-        for (const file of files) {
-          const bytes = await file.arrayBuffer();
-          let img = file.type === "image/png" ? await pdfDoc.embedPng(bytes) : await pdfDoc.embedJpg(bytes);
-          const page = pdfDoc.addPage([img.width, img.height]);
-          page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
-        }
-        const pdfBytes = await pdfDoc.save();
-        downloadBlob(pdfBytes, `${docName}.pdf`);
-        status.style.color = "#16a34a";
-        status.textContent = "Photo PDF created and downloaded successfully!";
-      } catch (err) {
-        status.style.color = "#dc2626";
-        status.textContent = "Error converting photos: " + err.message;
-      }
-    });
-  }
-
-  if (toolKey === "text_to_pdf") {
-    document.getElementById("btnExecuteTextPdf")?.addEventListener("click", async () => {
-      const title = document.getElementById("pdfDocTitle").value.trim() || "NovaTools Document";
-      const content = document.getElementById("pdfDocContent").value.trim();
-      if (!content) {
-        status.style.color = "#dc2626";
-        status.textContent = "Please enter document content first.";
-        return;
-      }
-      status.style.color = "var(--primary)";
-      status.textContent = "Generating PDF...";
-
-      try {
-        const pdfDoc = await PDFLib.PDFDocument.create();
-        let page = pdfDoc.addPage([595.28, 841.89]);
-        const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
-        const fontBold = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
-
-        page.drawText(title, { x: 50, y: 790, size: 20, font: fontBold, color: PDFLib.rgb(0.1, 0.2, 0.5) });
-
-        const lines = content.split("\n");
-        let y = 740;
-        for (const line of lines) {
-          if (y < 60) {
-            page = pdfDoc.addPage([595.28, 841.89]);
-            y = 790;
-          }
-          page.drawText(line.slice(0, 85), { x: 50, y, size: 11, font, color: PDFLib.rgb(0.2, 0.2, 0.2) });
-          y -= 18;
-        }
-        const pdfBytes = await pdfDoc.save();
-        downloadBlob(pdfBytes, `${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}.pdf`);
-        status.style.color = "#16a34a";
-        status.textContent = "Text PDF created and downloaded!";
-      } catch (err) {
-        status.style.color = "#dc2626";
-        status.textContent = "Error: " + err.message;
-      }
-    });
-  }
-
-  if (toolKey === "merge_pdf") {
-    const input = document.getElementById("pdfMergeInput");
-    input?.addEventListener("change", () => {
-      const list = document.getElementById("mergeFileList");
-      const files = Array.from(input.files);
-      list.innerHTML = files.map((f, i) => `${i + 1}. ${f.name} (${(f.size/1024).toFixed(1)} KB)`).join("<br>");
-    });
-
-    document.getElementById("btnExecuteMergePdf")?.addEventListener("click", async () => {
-      const files = Array.from(document.getElementById("pdfMergeInput").files);
-      if (files.length < 2) {
-        status.style.color = "#dc2626";
-        status.textContent = "Please select at least 2 PDF files to merge.";
-        return;
-      }
-      status.style.color = "var(--primary)";
-      status.textContent = "Merging PDF files in browser...";
-
-      try {
-        const mergedDoc = await PDFLib.PDFDocument.create();
-        for (const file of files) {
-          const buffer = await file.arrayBuffer();
-          const doc = await PDFLib.PDFDocument.load(buffer);
-          const pages = await mergedDoc.copyPages(doc, doc.getPageIndices());
-          pages.forEach(p => mergedDoc.addPage(p));
-        }
-        const pdfBytes = await mergedDoc.save();
-        downloadBlob(pdfBytes, "merged_document.pdf");
-        status.style.color = "#16a34a";
-        status.textContent = "Merged PDF downloaded successfully!";
-      } catch (err) {
-        status.style.color = "#dc2626";
-        status.textContent = "Error merging: " + err.message;
-      }
-    });
-  }
-
-  if (toolKey === "split_pdf") {
-    document.getElementById("btnExecuteSplitPdf")?.addEventListener("click", async () => {
-      const file = document.getElementById("pdfSplitInput").files[0];
-      if (!file) {
-        status.style.color = "#dc2626";
-        status.textContent = "Please select a PDF file first.";
-        return;
-      }
-      status.style.color = "var(--primary)";
-      status.textContent = "Extracting page 1...";
-
-      try {
-        const buffer = await file.arrayBuffer();
-        const srcDoc = await PDFLib.PDFDocument.load(buffer);
-        const newDoc = await PDFLib.PDFDocument.create();
-        const [page] = await newDoc.copyPages(srcDoc, [0]);
-        newDoc.addPage(page);
-        const pdfBytes = await newDoc.save();
-        downloadBlob(pdfBytes, "split_page_1.pdf");
-        status.style.color = "#16a34a";
-        status.textContent = "Page 1 extracted and downloaded successfully!";
-      } catch (err) {
-        status.style.color = "#dc2626";
-        status.textContent = "Error: " + err.message;
-      }
-    });
-  }
-
-  if (toolKey === "extract_pdf") {
-    document.getElementById("btnExecuteExtractPdf")?.addEventListener("click", async () => {
-      const file = document.getElementById("pdfExtractInput").files[0];
-      const pageStr = document.getElementById("pdfExtractPages").value.trim();
-      if (!file || !pageStr) {
-        status.style.color = "#dc2626";
-        status.textContent = "Please select a PDF and enter page numbers (e.g. 1, 2).";
-        return;
-      }
-      status.style.color = "var(--primary)";
-      status.textContent = "Extracting pages...";
-
-      try {
-        const buffer = await file.arrayBuffer();
-        const srcDoc = await PDFLib.PDFDocument.load(buffer);
-        const newDoc = await PDFLib.PDFDocument.create();
-        const pageIndices = pageStr.split(",").map(p => parseInt(p.trim(), 10) - 1).filter(p => !isNaN(p) && p >= 0 && p < srcDoc.getPageCount());
-        
-        if (!pageIndices.length) throw new Error("No valid page numbers found for this document.");
-
-        const copied = await newDoc.copyPages(srcDoc, pageIndices);
-        copied.forEach(p => newDoc.addPage(p));
-        const pdfBytes = await newDoc.save();
-        downloadBlob(pdfBytes, "extracted_pages.pdf");
-        status.style.color = "#16a34a";
-        status.textContent = "Extracted pages downloaded successfully!";
-      } catch (err) {
-        status.style.color = "#dc2626";
-        status.textContent = "Error: " + err.message;
-      }
-    });
-  }
-
-  if (toolKey === "rotate_pdf") {
-    document.getElementById("btnExecuteRotatePdf")?.addEventListener("click", async () => {
-      const file = document.getElementById("pdfRotateInput").files[0];
-      const angle = parseInt(document.getElementById("pdfRotateAngle").value, 10);
-      if (!file) {
-        status.style.color = "#dc2626";
-        status.textContent = "Please select a PDF file.";
-        return;
-      }
-      status.style.color = "var(--primary)";
-      status.textContent = "Rotating pages...";
-
-      try {
-        const buffer = await file.arrayBuffer();
-        const doc = await PDFLib.PDFDocument.load(buffer);
-        const pages = doc.getPages();
-        pages.forEach(page => {
-          const currentRotation = page.getRotation().angle;
-          page.setRotation(PDFLib.degrees(currentRotation + angle));
-        });
-        const pdfBytes = await doc.save();
-        downloadBlob(pdfBytes, "rotated_document.pdf");
-        status.style.color = "#16a34a";
-        status.textContent = "Rotated PDF downloaded successfully!";
-      } catch (err) {
-        status.style.color = "#dc2626";
-        status.textContent = "Error: " + err.message;
-      }
-    });
-  }
-}
-
 function downloadBlob(bytes, filename) {
   const blob = new Blob([bytes], { type: "application/pdf" });
   const link = document.createElement("a");
@@ -1984,8 +2082,206 @@ function downloadBlob(bytes, filename) {
   link.click();
 }
 
-// Initialise default PDF tool
-setPdfTool("photo_to_pdf");
+// 1. Photo to PDF
+document.getElementById("btnExecutePhotoPdf")?.addEventListener("click", async () => {
+  const status = document.getElementById("status-photo_to_pdf");
+  const files = Array.from(document.getElementById("pdfPhotoInput").files);
+  const docName = document.getElementById("pdfPhotoDocTitle").value.trim() || "Photos_Archive";
+  if (!files.length) {
+    status.style.color = "#dc2626";
+    status.textContent = "Please select at least one JPG or PNG photo.";
+    return;
+  }
+  status.style.color = "var(--primary)";
+  status.textContent = "Converting photos to PDF in browser...";
+
+  try {
+    const pdfDoc = await PDFLib.PDFDocument.create();
+    for (const file of files) {
+      const bytes = await file.arrayBuffer();
+      let img = file.type === "image/png" ? await pdfDoc.embedPng(bytes) : await pdfDoc.embedJpg(bytes);
+      const page = pdfDoc.addPage([img.width, img.height]);
+      page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+    }
+    const pdfBytes = await pdfDoc.save();
+    downloadBlob(pdfBytes, `${docName}.pdf`);
+    status.style.color = "#16a34a";
+    status.textContent = "Photo PDF created and downloaded successfully!";
+  } catch (err) {
+    status.style.color = "#dc2626";
+    status.textContent = "Error converting photos: " + err.message;
+  }
+});
+
+// 2. Text to PDF
+document.getElementById("btnExecuteTextPdf")?.addEventListener("click", async () => {
+  const status = document.getElementById("status-text_to_pdf");
+  const title = document.getElementById("pdfDocTitle").value.trim() || "NovaTools Document";
+  const content = document.getElementById("pdfDocContent").value.trim();
+  if (!content) {
+    status.style.color = "#dc2626";
+    status.textContent = "Please enter document content first.";
+    return;
+  }
+  status.style.color = "var(--primary)";
+  status.textContent = "Generating PDF...";
+
+  try {
+    const pdfDoc = await PDFLib.PDFDocument.create();
+    let page = pdfDoc.addPage([595.28, 841.89]);
+    const font = await pdfDoc.embedFont(PDFLib.StandardFonts.Helvetica);
+    const fontBold = await pdfDoc.embedFont(PDFLib.StandardFonts.HelveticaBold);
+
+    page.drawText(title, { x: 50, y: 790, size: 20, font: fontBold, color: PDFLib.rgb(0.1, 0.2, 0.5) });
+
+    const lines = content.split("\n");
+    let y = 740;
+    for (const line of lines) {
+      if (y < 60) {
+        page = pdfDoc.addPage([595.28, 841.89]);
+        y = 790;
+      }
+      page.drawText(line.slice(0, 85), { x: 50, y, size: 11, font, color: PDFLib.rgb(0.2, 0.2, 0.2) });
+      y -= 18;
+    }
+    const pdfBytes = await pdfDoc.save();
+    downloadBlob(pdfBytes, `${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}.pdf`);
+    status.style.color = "#16a34a";
+    status.textContent = "Text PDF created and downloaded!";
+  } catch (err) {
+    status.style.color = "#dc2626";
+    status.textContent = "Error: " + err.message;
+  }
+});
+
+// 3. Merge PDF
+const mergeInput = document.getElementById("pdfMergeInput");
+mergeInput?.addEventListener("change", () => {
+  const list = document.getElementById("mergeFileList");
+  const files = Array.from(mergeInput.files);
+  list.innerHTML = files.map((f, i) => `${i + 1}. ${f.name} (${(f.size/1024).toFixed(1)} KB)`).join("<br>");
+});
+
+document.getElementById("btnExecuteMergePdf")?.addEventListener("click", async () => {
+  const status = document.getElementById("status-merge_pdf");
+  const files = Array.from(document.getElementById("pdfMergeInput").files);
+  if (files.length < 2) {
+    status.style.color = "#dc2626";
+    status.textContent = "Please select at least 2 PDF files to merge.";
+    return;
+  }
+  status.style.color = "var(--primary)";
+  status.textContent = "Merging PDF files in browser...";
+
+  try {
+    const mergedDoc = await PDFLib.PDFDocument.create();
+    for (const file of files) {
+      const buffer = await file.arrayBuffer();
+      const doc = await PDFLib.PDFDocument.load(buffer);
+      const pages = await mergedDoc.copyPages(doc, doc.getPageIndices());
+      pages.forEach(p => mergedDoc.addPage(p));
+    }
+    const pdfBytes = await mergedDoc.save();
+    downloadBlob(pdfBytes, "merged_document.pdf");
+    status.style.color = "#16a34a";
+    status.textContent = "Merged PDF downloaded successfully!";
+  } catch (err) {
+    status.style.color = "#dc2626";
+    status.textContent = "Error merging: " + err.message;
+  }
+});
+
+// 4. Split PDF
+document.getElementById("btnExecuteSplitPdf")?.addEventListener("click", async () => {
+  const status = document.getElementById("status-split_pdf");
+  const file = document.getElementById("pdfSplitInput").files[0];
+  if (!file) {
+    status.style.color = "#dc2626";
+    status.textContent = "Please select a PDF file first.";
+    return;
+  }
+  status.style.color = "var(--primary)";
+  status.textContent = "Extracting page 1...";
+
+  try {
+    const buffer = await file.arrayBuffer();
+    const srcDoc = await PDFLib.PDFDocument.load(buffer);
+    const newDoc = await PDFLib.PDFDocument.create();
+    const [page] = await newDoc.copyPages(srcDoc, [0]);
+    newDoc.addPage(page);
+    const pdfBytes = await newDoc.save();
+    downloadBlob(pdfBytes, "split_page_1.pdf");
+    status.style.color = "#16a34a";
+    status.textContent = "Page 1 extracted and downloaded successfully!";
+  } catch (err) {
+    status.style.color = "#dc2626";
+    status.textContent = "Error: " + err.message;
+  }
+});
+
+// 5. Extract Pages
+document.getElementById("btnExecuteExtractPdf")?.addEventListener("click", async () => {
+  const status = document.getElementById("status-extract_pdf");
+  const file = document.getElementById("pdfExtractInput").files[0];
+  const pageStr = document.getElementById("pdfExtractPages").value.trim();
+  if (!file || !pageStr) {
+    status.style.color = "#dc2626";
+    status.textContent = "Please select a PDF and enter page numbers (e.g. 1, 2).";
+    return;
+  }
+  status.style.color = "var(--primary)";
+  status.textContent = "Extracting pages...";
+
+  try {
+    const buffer = await file.arrayBuffer();
+    const srcDoc = await PDFLib.PDFDocument.load(buffer);
+    const newDoc = await PDFLib.PDFDocument.create();
+    const pageIndices = pageStr.split(",").map(p => parseInt(p.trim(), 10) - 1).filter(p => !isNaN(p) && p >= 0 && p < srcDoc.getPageCount());
+    
+    if (!pageIndices.length) throw new Error("No valid page numbers found for this document.");
+
+    const copied = await newDoc.copyPages(srcDoc, pageIndices);
+    copied.forEach(p => newDoc.addPage(p));
+    const pdfBytes = await newDoc.save();
+    downloadBlob(pdfBytes, "extracted_pages.pdf");
+    status.style.color = "#16a34a";
+    status.textContent = "Extracted pages downloaded successfully!";
+  } catch (err) {
+    status.style.color = "#dc2626";
+    status.textContent = "Error: " + err.message;
+  }
+});
+
+// 6. Rotate PDF
+document.getElementById("btnExecuteRotatePdf")?.addEventListener("click", async () => {
+  const status = document.getElementById("status-rotate_pdf");
+  const file = document.getElementById("pdfRotateInput").files[0];
+  const angle = parseInt(document.getElementById("pdfRotateAngle").value, 10);
+  if (!file) {
+    status.style.color = "#dc2626";
+    status.textContent = "Please select a PDF file.";
+    return;
+  }
+  status.style.color = "var(--primary)";
+  status.textContent = "Rotating pages...";
+
+  try {
+    const buffer = await file.arrayBuffer();
+    const doc = await PDFLib.PDFDocument.load(buffer);
+    const pages = doc.getPages();
+    pages.forEach(page => {
+      const currentRotation = page.getRotation().angle;
+      page.setRotation(PDFLib.degrees(currentRotation + angle));
+    });
+    const pdfBytes = await doc.save();
+    downloadBlob(pdfBytes, "rotated_document.pdf");
+    status.style.color = "#16a34a";
+    status.textContent = "Rotated PDF downloaded successfully!";
+  } catch (err) {
+    status.style.color = "#dc2626";
+    status.textContent = "Error: " + err.message;
+  }
+});
 
 /* =========================================================
    6. AI DIRECTORY FILTERS
@@ -2007,7 +2303,7 @@ document.querySelectorAll("[data-dir-filter]").forEach(btn => {
 });
 
 /* =========================================================
-   7. AUTHENTICATION & ONBOARDING (KEY-SAFE & RELIABLE)
+   7. AUTHENTICATION & ONBOARDING
 ========================================================= */
 const navSignInBtn = document.getElementById("navSignInBtn");
 const navGetStartedBtn = document.getElementById("navGetStartedBtn");
@@ -2060,7 +2356,6 @@ document.getElementById("authEmailForm").addEventListener("submit", async (e) =>
         const { data, error } = await supabaseClient.auth.signUp({ email, password });
         if (error) {
           if (error.message.toLowerCase().includes("api key") || error.status === 401) {
-            console.warn("API key issue on Supabase; falling back to offline user session.");
             isMockAuthMode = true;
           } else {
             throw error;
@@ -2073,7 +2368,6 @@ document.getElementById("authEmailForm").addEventListener("submit", async (e) =>
         const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) {
           if (error.message.toLowerCase().includes("api key") || error.status === 401) {
-            console.warn("API key issue on Supabase; falling back to offline user session.");
             isMockAuthMode = true;
           } else {
             throw error;
@@ -2092,8 +2386,6 @@ document.getElementById("authEmailForm").addEventListener("submit", async (e) =>
 
     status.className = "auth-status success";
     status.textContent = "Success! Loading your workspace...";
-
-    // Update Ribbon Immediately
     updateNavigation(authUser);
 
     setTimeout(() => { checkOnboarding(); }, 700);
@@ -2143,7 +2435,6 @@ document.getElementById("onboardingForm").addEventListener("submit", (e) => {
   localStorage.setItem("novaToolsOnboarded", "true");
   localStorage.setItem("novaToolsProfile", JSON.stringify(profile));
 
-  // Refresh profile display on ribbon
   if (currentUser) {
     updateNavigation(currentUser);
   }
@@ -2154,7 +2445,7 @@ document.getElementById("onboardingForm").addEventListener("submit", (e) => {
 });
 
 /* =========================================================
-   8. REAL REVIEWS ENGINE (STORAGE & INTERACTIVE 5-STAR)
+   8. REAL REVIEWS ENGINE
 ========================================================= */
 const reviewModal = document.getElementById("reviewModal");
 let selectedRating = 0;
