@@ -2,29 +2,35 @@
    IN-BROWSER PDF SUITE & MS WORD LIVE STUDIO
 ========================================================= */
 
-// Dynamically ensures PDFLib is loaded into the browser
+// Multi-CDN safe loader for PDF-Lib
 async function ensurePDFLib() {
   if (window.PDFLib) return window.PDFLib;
+  if (window.pdfLib) return window.pdfLib;
 
-  return new Promise((resolve, reject) => {
-    // Check if script element is already added
-    let existingScript = document.querySelector('script[src*="pdf-lib"]');
-    if (existingScript && window.PDFLib) {
-      return resolve(window.PDFLib);
-    }
+  const cdnUrls = [
+    "https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.9/pdf-lib.min.js",
+    "https://unpkg.com/pdf-lib@1.17.9/dist/pdf-lib.min.js",
+    "https://cdn.jsdelivr.net/npm/pdf-lib@1.17.9/dist/pdf-lib.min.js"
+  ];
 
-    const script = document.createElement("script");
-    script.src = "https://unpkg.com/pdf-lib@1.17.9/dist/pdf-lib.min.js";
-    script.onload = () => {
-      if (window.PDFLib) {
-        resolve(window.PDFLib);
-      } else {
-        reject(new Error("Failed to initialize PDFLib"));
+  for (const url of cdnUrls) {
+    try {
+      await new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = url;
+        script.onload = () => resolve();
+        script.onerror = () => reject();
+        document.head.appendChild(script);
+      });
+      if (window.PDFLib || window.pdfLib) {
+        return window.PDFLib || window.pdfLib;
       }
-    };
-    script.onerror = () => reject(new Error("Could not download PDF-Lib CDN"));
-    document.head.appendChild(script);
-  });
+    } catch (_) {
+      // Try next CDN
+    }
+  }
+
+  throw new Error("Could not load PDF-Lib from any source.");
 }
 
 // Download helper
@@ -113,14 +119,14 @@ document.getElementById("btnExecutePhotoPdf")?.addEventListener("click", async (
   if (!status) return;
 
   status.style.color = "var(--primary)";
-  status.textContent = "Loading PDF library...";
+  status.textContent = "Initializing PDF engine...";
 
   let PDFLib;
   try {
     PDFLib = await ensurePDFLib();
   } catch (err) {
     status.style.color = "#dc2626";
-    status.textContent = "Error: Unable to load PDF engine. Please refresh.";
+    status.textContent = "Error: Network blocked PDF engine. Please refresh.";
     return;
   }
 
@@ -139,7 +145,12 @@ document.getElementById("btnExecutePhotoPdf")?.addEventListener("click", async (
     const pdfDoc = await PDFLib.PDFDocument.create();
     for (const file of files) {
       const bytes = await file.arrayBuffer();
-      let img = file.type === "image/png" ? await pdfDoc.embedPng(bytes) : await pdfDoc.embedJpg(bytes);
+      let img;
+      if (file.type === "image/png" || file.name.toLowerCase().endsWith(".png")) {
+        img = await pdfDoc.embedPng(bytes);
+      } else {
+        img = await pdfDoc.embedJpg(bytes);
+      }
       const page = pdfDoc.addPage([img.width, img.height]);
       page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
     }
@@ -170,14 +181,14 @@ document.getElementById("btnExecuteTextPdf")?.addEventListener("click", async ()
   if (!status) return;
 
   status.style.color = "var(--primary)";
-  status.textContent = "Loading PDF library...";
+  status.textContent = "Initializing PDF engine...";
 
   let PDFLib;
   try {
     PDFLib = await ensurePDFLib();
   } catch (err) {
     status.style.color = "#dc2626";
-    status.textContent = "Error: Unable to load PDF engine. Please refresh.";
+    status.textContent = "Error: Network blocked PDF engine. Please refresh.";
     return;
   }
 
@@ -311,7 +322,7 @@ document.getElementById("btnExecuteMergePdf")?.addEventListener("click", async (
   if (!status) return;
 
   status.style.color = "var(--primary)";
-  status.textContent = "Loading engine...";
+  status.textContent = "Initializing PDF engine...";
 
   let PDFLib;
   try {
@@ -343,9 +354,20 @@ document.getElementById("btnExecuteMergePdf")?.addEventListener("click", async (
     downloadBlob(pdfBytes, "merged_document.pdf");
     status.style.color = "#16a34a";
     status.textContent = "Merged PDF downloaded successfully!";
+
+    if (typeof recordHistoryEvent === "function") {
+      recordHistoryEvent({
+        tool: "merge_pdf",
+        category: "PDF Suite",
+        title: "Merged PDFs",
+        content: `Successfully merged ${files.length} PDF files into 'merged_document.pdf'.`,
+        icon: "fa-layer-group",
+        colorClass: "emerald"
+      });
+    }
   } catch (err) {
     status.style.color = "#dc2626";
-    status.textContent = "Error: " + err.message;
+    status.textContent = "Error merging: " + err.message;
   }
 });
 
@@ -353,6 +375,9 @@ document.getElementById("btnExecuteMergePdf")?.addEventListener("click", async (
 document.getElementById("btnExecuteSplitPdf")?.addEventListener("click", async () => {
   const status = document.getElementById("status-split_pdf");
   if (!status) return;
+
+  status.style.color = "var(--primary)";
+  status.textContent = "Initializing PDF engine...";
 
   let PDFLib;
   try {
@@ -370,7 +395,6 @@ document.getElementById("btnExecuteSplitPdf")?.addEventListener("click", async (
     return;
   }
 
-  status.style.color = "var(--primary)";
   status.textContent = "Extracting page 1...";
 
   try {
@@ -383,6 +407,17 @@ document.getElementById("btnExecuteSplitPdf")?.addEventListener("click", async (
     downloadBlob(pdfBytes, "split_page_1.pdf");
     status.style.color = "#16a34a";
     status.textContent = "Page 1 extracted and downloaded successfully!";
+
+    if (typeof recordHistoryEvent === "function") {
+      recordHistoryEvent({
+        tool: "split_pdf",
+        category: "PDF Suite",
+        title: "Split PDF Document",
+        content: `Extracted first page from '${file.name}'.`,
+        icon: "fa-scissors",
+        colorClass: "cyan"
+      });
+    }
   } catch (err) {
     status.style.color = "#dc2626";
     status.textContent = "Error: " + err.message;
@@ -393,6 +428,9 @@ document.getElementById("btnExecuteSplitPdf")?.addEventListener("click", async (
 document.getElementById("btnExecuteExtractPdf")?.addEventListener("click", async () => {
   const status = document.getElementById("status-extract_pdf");
   if (!status) return;
+
+  status.style.color = "var(--primary)";
+  status.textContent = "Initializing PDF engine...";
 
   let PDFLib;
   try {
@@ -411,7 +449,6 @@ document.getElementById("btnExecuteExtractPdf")?.addEventListener("click", async
     return;
   }
 
-  status.style.color = "var(--primary)";
   status.textContent = "Extracting pages...";
 
   try {
@@ -428,6 +465,17 @@ document.getElementById("btnExecuteExtractPdf")?.addEventListener("click", async
     downloadBlob(pdfBytes, "extracted_pages.pdf");
     status.style.color = "#16a34a";
     status.textContent = "Extracted pages downloaded successfully!";
+
+    if (typeof recordHistoryEvent === "function") {
+      recordHistoryEvent({
+        tool: "extract_pdf",
+        category: "PDF Suite",
+        title: "Extracted PDF Pages",
+        content: `Extracted pages [${pageStr}] from '${file.name}'.`,
+        icon: "fa-file-export",
+        colorClass: "amber"
+      });
+    }
   } catch (err) {
     status.style.color = "#dc2626";
     status.textContent = "Error: " + err.message;
@@ -438,6 +486,9 @@ document.getElementById("btnExecuteExtractPdf")?.addEventListener("click", async
 document.getElementById("btnExecuteRotatePdf")?.addEventListener("click", async () => {
   const status = document.getElementById("status-rotate_pdf");
   if (!status) return;
+
+  status.style.color = "var(--primary)";
+  status.textContent = "Initializing PDF engine...";
 
   let PDFLib;
   try {
@@ -456,7 +507,6 @@ document.getElementById("btnExecuteRotatePdf")?.addEventListener("click", async 
     return;
   }
 
-  status.style.color = "var(--primary)";
   status.textContent = "Rotating pages...";
 
   try {
@@ -471,6 +521,17 @@ document.getElementById("btnExecuteRotatePdf")?.addEventListener("click", async 
     downloadBlob(pdfBytes, "rotated_document.pdf");
     status.style.color = "#16a34a";
     status.textContent = "Rotated PDF downloaded successfully!";
+
+    if (typeof recordHistoryEvent === "function") {
+      recordHistoryEvent({
+        tool: "rotate_pdf",
+        category: "PDF Suite",
+        title: "Rotated PDF Pages",
+        content: `Rotated pages by ${angle}° for '${file.name}'.`,
+        icon: "fa-rotate",
+        colorClass: "purple"
+      });
+    }
   } catch (err) {
     status.style.color = "#dc2626";
     status.textContent = "Error: " + err.message;
