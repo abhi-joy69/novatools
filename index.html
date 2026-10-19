@@ -5,7 +5,7 @@
 function getPdfEngine() {
   const engine = window.PDFLib || (typeof PDFLib !== "undefined" ? PDFLib : null) || window.pdfLib;
   if (!engine) {
-    throw new Error("PDF Engine library is loading. Please try again in a few seconds.");
+    throw new Error("PDF processing engine is still initializing. Please wait 2 seconds and try again.");
   }
   return engine;
 }
@@ -291,7 +291,7 @@ function initPdfSuite() {
     }
   });
 
-  // 5. EXTRACT PAGES
+  // 5. EXTRACT PAGES (Preserves all genuine original page content)
   bindClick(["btnExecuteExtractPdf", "executeExtractPdf"], async () => {
     const status = document.getElementById("status-extract_pdf") || document.getElementById("extractPdfStatus");
     const input = document.getElementById("pdfExtractInput") || document.getElementById("extractInput");
@@ -319,10 +319,10 @@ function initPdfSuite() {
         .filter((p) => !isNaN(p) && p >= 0 && p < totalPages);
 
       if (!pageIndices.length) {
-        throw new Error(`No valid pages found. This PDF only has ${totalPages} page(s).`);
+        throw new Error(`No matching pages found. This PDF only has ${totalPages} page(s).`);
       }
 
-      // Copies the EXACT graphics, texts, vectors, and layouts from the original PDF
+      // Copies genuine graphics, texts, images, and fonts directly from the source document
       const copied = await newDoc.copyPages(srcDoc, pageIndices);
       copied.forEach((p) => newDoc.addPage(p));
       const pdfBytes = await newDoc.save();
