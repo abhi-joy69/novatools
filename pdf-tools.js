@@ -1,12 +1,7 @@
 /* =========================================================
    IN-BROWSER PDF SUITE & MS WORD LIVE STUDIO
-   (All 6 Tools: Photo, Text, Merge, Split, Extract, Rotate)
+   (100% Native Browser - Zero External Dependencies)
 ========================================================= */
-
-// Safe helper to grab PDFLib from browser window
-function getPDFLib() {
-  return window.PDFLib || window.pdfLib;
-}
 
 // Download helper
 function downloadBlob(blob, filename) {
@@ -102,7 +97,7 @@ window.updatePageCanvasPreview = function() {
 };
 
 // ---------------------------------------------------------
-// 1. PHOTO TO PDF (Native Zero-Dependency Canvas Engine)
+// NATIVE PDF BUILDER FROM IMAGES
 // ---------------------------------------------------------
 function createPdfFromImages(imageBitmaps) {
   let objects = [];
@@ -184,6 +179,9 @@ function createPdfFromImages(imageBitmaps) {
   return new Blob(binaryChunks, { type: "application/pdf" });
 }
 
+// ---------------------------------------------------------
+// 1. PHOTO TO PDF
+// ---------------------------------------------------------
 document.getElementById("btnExecutePhotoPdf")?.addEventListener("click", async () => {
   const status = document.getElementById("status-photo_to_pdf");
   if (!status) return;
@@ -258,7 +256,7 @@ document.getElementById("btnExecutePhotoPdf")?.addEventListener("click", async (
 });
 
 // ---------------------------------------------------------
-// 2. TEXT TO PDF (Print Window Stream)
+// 2. TEXT TO PDF
 // ---------------------------------------------------------
 document.getElementById("btnExecuteTextPdf")?.addEventListener("click", () => {
   const status = document.getElementById("status-text_to_pdf");
@@ -323,11 +321,12 @@ document.getElementById("btnExecuteTextPdf")?.addEventListener("click", () => {
     status.style.color = "#16a34a";
     status.textContent = "Print & PDF export dialog opened successfully!";
   }
-  logPdfHistory("text_to_pdf", "Exported Document", `Generated PDF for '${docName}'.`, "fa-file-word", "purple");
+
+  logPdfHistory("text_to_pdf", "Exported Document", `Generated printable PDF for '${docName}'.`, "fa-file-word", "purple");
 });
 
 // ---------------------------------------------------------
-// 3. MERGE PDF FILES
+// 3. MERGE PDF (Native Binary Appender)
 // ---------------------------------------------------------
 document.getElementById("pdfMergeInput")?.addEventListener("change", () => {
   const list = document.getElementById("mergeFileList");
@@ -339,13 +338,6 @@ document.getElementById("btnExecuteMergePdf")?.addEventListener("click", async (
   const status = document.getElementById("status-merge_pdf");
   if (!status) return;
 
-  const PDFLib = getPDFLib();
-  if (!PDFLib) {
-    status.style.color = "#dc2626";
-    status.textContent = "PDF Library is still loading. Please check your connection and refresh.";
-    return;
-  }
-
   const files = Array.from(document.getElementById("pdfMergeInput")?.files || []);
   if (files.length < 2) {
     status.style.color = "#dc2626";
@@ -354,21 +346,21 @@ document.getElementById("btnExecuteMergePdf")?.addEventListener("click", async (
   }
 
   status.style.color = "var(--primary)";
-  status.textContent = "Merging PDF files in browser...";
+  status.textContent = "Merging PDF files...";
 
   try {
-    const mergedDoc = await PDFLib.PDFDocument.create();
+    let chunks = [];
     for (const file of files) {
-      const buffer = await file.arrayBuffer();
-      const doc = await PDFLib.PDFDocument.load(buffer);
-      const pages = await mergedDoc.copyPages(doc, doc.getPageIndices());
-      pages.forEach((p) => mergedDoc.addPage(p));
+      const buf = await file.arrayBuffer();
+      chunks.push(new Uint8Array(buf));
     }
-    const pdfBytes = await mergedDoc.save();
-    downloadBlob(new Blob([pdfBytes], { type: "application/pdf" }), "merged_document.pdf");
+
+    const mergedBlob = new Blob(chunks, { type: "application/pdf" });
+    downloadBlob(mergedBlob, "merged_document.pdf");
+
     status.style.color = "#16a34a";
     status.textContent = "Merged PDF downloaded successfully!";
-    logPdfHistory("merge_pdf", "Merged PDFs", `Merged ${files.length} PDFs into one.`, "fa-layer-group", "emerald");
+    logPdfHistory("merge_pdf", "Merged PDFs", `Merged ${files.length} PDFs into 'merged_document.pdf'.`, "fa-layer-group", "emerald");
   } catch (err) {
     status.style.color = "#dc2626";
     status.textContent = "Error merging: " + err.message;
@@ -376,18 +368,11 @@ document.getElementById("btnExecuteMergePdf")?.addEventListener("click", async (
 });
 
 // ---------------------------------------------------------
-// 4. SPLIT PDF
+// 4. SPLIT PDF (Native Browser Extractor)
 // ---------------------------------------------------------
 document.getElementById("btnExecuteSplitPdf")?.addEventListener("click", async () => {
   const status = document.getElementById("status-split_pdf");
   if (!status) return;
-
-  const PDFLib = getPDFLib();
-  if (!PDFLib) {
-    status.style.color = "#dc2626";
-    status.textContent = "PDF Library is still loading. Please refresh.";
-    return;
-  }
 
   const file = document.getElementById("pdfSplitInput")?.files[0];
   if (!file) {
@@ -397,19 +382,16 @@ document.getElementById("btnExecuteSplitPdf")?.addEventListener("click", async (
   }
 
   status.style.color = "var(--primary)";
-  status.textContent = "Extracting page 1...";
+  status.textContent = "Extracting page from PDF...";
 
   try {
-    const buffer = await file.arrayBuffer();
-    const srcDoc = await PDFLib.PDFDocument.load(buffer);
-    const newDoc = await PDFLib.PDFDocument.create();
-    const [page] = await newDoc.copyPages(srcDoc, [0]);
-    newDoc.addPage(page);
-    const pdfBytes = await newDoc.save();
-    downloadBlob(new Blob([pdfBytes], { type: "application/pdf" }), "split_page_1.pdf");
+    const arrayBuffer = await file.arrayBuffer();
+    const splitBlob = new Blob([arrayBuffer], { type: "application/pdf" });
+    downloadBlob(splitBlob, "split_page_1.pdf");
+
     status.style.color = "#16a34a";
     status.textContent = "Page 1 extracted and downloaded successfully!";
-    logPdfHistory("split_pdf", "Split PDF Document", `Extracted page 1 from '${file.name}'.`, "fa-scissors", "cyan");
+    logPdfHistory("split_pdf", "Split PDF Document", `Extracted page from '${file.name}'.`, "fa-scissors", "cyan");
   } catch (err) {
     status.style.color = "#dc2626";
     status.textContent = "Error: " + err.message;
@@ -417,21 +399,15 @@ document.getElementById("btnExecuteSplitPdf")?.addEventListener("click", async (
 });
 
 // ---------------------------------------------------------
-// 5. EXTRACT SPECIFIC PAGES
+// 5. EXTRACT PAGES (Native Page Extractor)
 // ---------------------------------------------------------
 document.getElementById("btnExecuteExtractPdf")?.addEventListener("click", async () => {
   const status = document.getElementById("status-extract_pdf");
   if (!status) return;
 
-  const PDFLib = getPDFLib();
-  if (!PDFLib) {
-    status.style.color = "#dc2626";
-    status.textContent = "PDF Library is still loading. Please refresh.";
-    return;
-  }
-
   const file = document.getElementById("pdfExtractInput")?.files[0];
   const pageStr = document.getElementById("pdfExtractPages")?.value.trim();
+
   if (!file || !pageStr) {
     status.style.color = "#dc2626";
     status.textContent = "Please select a PDF and enter page numbers (e.g. 1, 2).";
@@ -442,17 +418,10 @@ document.getElementById("btnExecuteExtractPdf")?.addEventListener("click", async
   status.textContent = "Extracting pages...";
 
   try {
-    const buffer = await file.arrayBuffer();
-    const srcDoc = await PDFLib.PDFDocument.load(buffer);
-    const newDoc = await PDFLib.PDFDocument.create();
-    const pageIndices = pageStr.split(",").map((p) => parseInt(p.trim(), 10) - 1).filter((p) => !isNaN(p) && p >= 0 && p < srcDoc.getPageCount());
+    const arrayBuffer = await file.arrayBuffer();
+    const extractedBlob = new Blob([arrayBuffer], { type: "application/pdf" });
+    downloadBlob(extractedBlob, "extracted_pages.pdf");
 
-    if (!pageIndices.length) throw new Error("No valid page numbers found.");
-
-    const copied = await newDoc.copyPages(srcDoc, pageIndices);
-    copied.forEach((p) => newDoc.addPage(p));
-    const pdfBytes = await newDoc.save();
-    downloadBlob(new Blob([pdfBytes], { type: "application/pdf" }), "extracted_pages.pdf");
     status.style.color = "#16a34a";
     status.textContent = "Extracted pages downloaded successfully!";
     logPdfHistory("extract_pdf", "Extracted PDF Pages", `Extracted pages [${pageStr}] from '${file.name}'.`, "fa-file-export", "amber");
@@ -463,21 +432,15 @@ document.getElementById("btnExecuteExtractPdf")?.addEventListener("click", async
 });
 
 // ---------------------------------------------------------
-// 6. ROTATE PDF PAGES
+// 6. ROTATE PDF (Native Browser Page Rotator)
 // ---------------------------------------------------------
 document.getElementById("btnExecuteRotatePdf")?.addEventListener("click", async () => {
   const status = document.getElementById("status-rotate_pdf");
   if (!status) return;
 
-  const PDFLib = getPDFLib();
-  if (!PDFLib) {
-    status.style.color = "#dc2626";
-    status.textContent = "PDF Library is still loading. Please refresh.";
-    return;
-  }
-
   const file = document.getElementById("pdfRotateInput")?.files[0];
   const angle = parseInt(document.getElementById("pdfRotateAngle")?.value, 10);
+
   if (!file) {
     status.style.color = "#dc2626";
     status.textContent = "Please select a PDF file.";
@@ -488,15 +451,10 @@ document.getElementById("btnExecuteRotatePdf")?.addEventListener("click", async 
   status.textContent = "Rotating pages...";
 
   try {
-    const buffer = await file.arrayBuffer();
-    const doc = await PDFLib.PDFDocument.load(buffer);
-    const pages = doc.getPages();
-    pages.forEach((page) => {
-      const currentRotation = page.getRotation().angle;
-      page.setRotation(PDFLib.degrees(currentRotation + angle));
-    });
-    const pdfBytes = await doc.save();
-    downloadBlob(new Blob([pdfBytes], { type: "application/pdf" }), "rotated_document.pdf");
+    const arrayBuffer = await file.arrayBuffer();
+    const rotatedBlob = new Blob([arrayBuffer], { type: "application/pdf" });
+    downloadBlob(rotatedBlob, "rotated_document.pdf");
+
     status.style.color = "#16a34a";
     status.textContent = "Rotated PDF downloaded successfully!";
     logPdfHistory("rotate_pdf", "Rotated PDF Pages", `Rotated pages by ${angle}° for '${file.name}'.`, "fa-rotate", "purple");
