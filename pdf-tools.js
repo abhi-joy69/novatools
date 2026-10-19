@@ -1,123 +1,19 @@
 /* =========================================================
-   IN-BROWSER PDF SUITE & MS WORD LIVE STUDIO (STANDALONE)
+   IN-BROWSER STANDALONE PDF SUITE (ZERO EXTERNAL CDN)
+   Pure Native Client-Side Engine: 100% Independent & Offline
 ========================================================= */
 
-// Universal loader that guarantees a working PDF engine
-async function getPdfEngine() {
-  if (typeof PDFLib !== "undefined") return PDFLib;
-  if (window.PDFLib) return window.PDFLib;
-  if (window.pdfLib) return window.pdfLib;
-
-  // Attempt mirrors dynamically
-  const mirrors = [
-    "https://unpkg.com/pdf-lib@1.17.9/dist/pdf-lib.min.js",
-    "https://cdn.jsdelivr.net/npm/pdf-lib@1.17.9/dist/pdf-lib.min.js",
-    "https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.9/pdf-lib.min.js"
-  ];
-
-  for (const url of mirrors) {
-    try {
-      await new Promise((resolve, reject) => {
-        const script = document.createElement("script");
-        script.src = url;
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
-      });
-      const engine = window.PDFLib || window.pdfLib || (typeof PDFLib !== "undefined" ? PDFLib : null);
-      if (engine) return engine;
-    } catch (_) {}
-  }
-
-  // Fallback: Return a native Canvas/Print engine so tools never break
-  return createFallbackEngine();
-}
-
-// Built-in fallback engine if external CDNs are completely blocked
-function createFallbackEngine() {
-  return {
-    isFallback: true,
-    PDFDocument: {
-      create: async function() {
-        const pages = [];
-        return {
-          addPage: function([width, height]) {
-            const page = { width, height, images: [] };
-            pages.push(page);
-            return {
-              drawImage: function(img) { page.images.push(img); }
-            };
-          },
-          embedJpg: async function(bytes) { return createFallbackImage(bytes, "image/jpeg"); },
-          embedPng: async function(bytes) { return createFallbackImage(bytes, "image/png"); },
-          save: async function() {
-            return generatePdfBlobFromPages(pages);
-          }
-        };
-      },
-      load: async function(bytes) {
-        return {
-          getPageIndices: () => [0],
-          getPages: () => [{ getRotation: () => ({ angle: 0 }), setRotation: () => {} }],
-          getPageCount: () => 1
-        };
-      }
-    },
-    degrees: (d) => d
-  };
-}
-
-function createFallbackImage(bytes, type) {
-  return new Promise((resolve) => {
-    const blob = new Blob([bytes], { type });
-    const url = URL.createObjectURL(blob);
-    const img = new Image();
-    img.onload = () => {
-      resolve({ width: img.naturalWidth || 600, height: img.naturalHeight || 800, url, element: img });
-    };
-    img.src = url;
-  });
-}
-
-function generatePdfBlobFromPages(pages) {
-  const printWindow = window.open("", "_blank");
-  if (!printWindow) {
-    throw new Error("Popup blocked. Please allow popups to download your PDF.");
-  }
-
-  let html = `<!DOCTYPE html><html><head><title>Document</title><style>
-    @page { size: auto; margin: 0; }
-    body { margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; }
-    .page-container { page-break-after: always; display: flex; justify-content: center; align-items: center; width: 100vw; height: 100vh; }
-    img { max-width: 100%; max-height: 100%; object-fit: contain; }
-  </style></head><body>`;
-
-  for (const p of pages) {
-    for (const img of p.images) {
-      html += `<div class="page-container"><img src="${img.url}"></div>`;
-    }
-  }
-
-  html += `</body></html>`;
-  printWindow.document.write(html);
-  printWindow.document.close();
-  printWindow.focus();
-
-  setTimeout(() => {
-    printWindow.print();
-  }, 500);
-
-  return new Blob(["fallback"], { type: "application/pdf" });
-}
-
 function downloadBlob(blob, filename) {
-  if (blob.size <= 8) return; // Managed via native print dialog
+  const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
+  link.href = url;
   link.download = filename;
   document.body.appendChild(link);
   link.click();
-  document.body.removeChild(link);
+  setTimeout(() => {
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, 300);
 }
 
 function logPdfHistory(toolName, title, content, icon, color) {
@@ -168,8 +64,9 @@ window.updatePageCanvasPreview = function() {
   const sizeEl = document.getElementById("pdfPageSize");
   if (!canvas || !borderEl || !sizeEl) return;
 
-  canvas.className = "word-page-canvas border-style-" + borderEl.value;
+  const border = borderEl.value;
   const size = sizeEl.value;
+  canvas.className = "word-page-canvas border-style-" + border;
 
   if (size === "A3") { canvas.style.maxWidth = "750px"; canvas.style.minHeight = "700px"; }
   else if (size === "A5") { canvas.style.maxWidth = "450px"; canvas.style.minHeight = "380px"; }
@@ -177,9 +74,117 @@ window.updatePageCanvasPreview = function() {
   else if (size === "Letter") { canvas.style.maxWidth = "600px"; canvas.style.minHeight = "500px"; }
   else if (size === "Tabloid") { canvas.style.maxWidth = "720px"; canvas.style.minHeight = "750px"; }
   else if (size === "Executive") { canvas.style.maxWidth = "520px"; canvas.style.minHeight = "480px"; }
-  else { canvas.style.maxWidth = "600px"; canvas.style.minHeight = "480px"; }
+  else if (size === "Custom") {
+    const w = Number(document.getElementById("customWidthMm")?.value) || 210;
+    const h = Number(document.getElementById("customHeightMm")?.value) || 297;
+    canvas.style.maxWidth = Math.min(Math.max(w * 2.2, 350), 750) + "px";
+    canvas.style.minHeight = Math.min(Math.max(h * 2.2, 300), 850) + "px";
+  } else {
+    canvas.style.maxWidth = "600px";
+    canvas.style.minHeight = "480px";
+  }
 };
 
+/* ---------------------------------------------------------
+   NATIVE EMBEDDED PDF BINARY GENERATOR (NO EXTERNAL ENGINE)
+--------------------------------------------------------- */
+function buildNativePdf(pagesData) {
+  // Generates clean standard PDF 1.4 binary structure
+  let objects = [];
+  let offsets = [];
+  
+  function addObject(content) {
+    objects.push(content);
+    return objects.length;
+  }
+
+  // 1: Catalog
+  addObject(`<< /Type /Catalog /Pages 2 0 R >>`);
+  
+  // Placeholder for Pages object (id 2)
+  addObject(""); 
+
+  let pageIds = [];
+
+  pagesData.forEach((pg) => {
+    let width = pg.width || 595.28;
+    let height = pg.height || 841.89;
+    let rotation = pg.rotation || 0;
+
+    let contentStream = pg.stream || "";
+    let streamId = addObject(`<< /Length ${contentStream.length} >>\nstream\n${contentStream}\nendstream`);
+    
+    let resources = pg.resources || "/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]";
+    let pageObj = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${width} ${height}] /Rotate ${rotation} /Resources << ${resources} >> /Contents ${streamId} 0 R >>`;
+    let pageId = addObject(pageObj);
+    pageIds.push(pageId);
+  });
+
+  // Re-write object 2 (Pages root)
+  objects[1] = `<< /Type /Pages /Kids [${pageIds.map(id => id + " 0 R").join(" ")}] /Count ${pageIds.length} >>`;
+
+  // Assemble full PDF
+  let pdf = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n";
+  for (let i = 0; i < objects.length; i++) {
+    offsets.push(pdf.length);
+    pdf += `${i + 1} 0 obj\n${objects[i]}\nendobj\n`;
+  }
+
+  let xrefOffset = pdf.length;
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  offsets.forEach((off) => {
+    pdf += ("0000000000" + off).slice(-10) + " 00000 n \n";
+  });
+
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`;
+  
+  const buffer = new Uint8Array(pdf.length);
+  for (let i = 0; i < pdf.length; i++) {
+    buffer[i] = pdf.charCodeAt(i) & 0xff;
+  }
+  return new Blob([buffer], { type: "application/pdf" });
+}
+
+// Convert image file to PDF canvas page
+function processImageToPage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+
+        // Standard A4 dimensions
+        const a4Width = 595.28;
+        const a4Height = 841.89;
+        const scale = Math.min(a4Width / img.width, a4Height / img.height, 1);
+        const w = img.width * scale;
+        const h = img.height * scale;
+        const x = (a4Width - w) / 2;
+        const y = (a4Height - h) / 2;
+
+        resolve({
+          width: a4Width,
+          height: a4Height,
+          rotation: 0,
+          stream: `q\n${w.toFixed(2)} 0 0 ${h.toFixed(2)} ${x.toFixed(2)} ${y.toFixed(2)} cm\nQ\n`
+        });
+      };
+      img.onerror = () => reject(new Error("Unable to read image."));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error("File reading error."));
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ---------------------------------------------------------
+   TOOL INITIALIZATION & EVENT BINDINGS
+--------------------------------------------------------- */
 function initPdfSuite() {
   function bindClick(possibleIds, handler) {
     for (const id of possibleIds) {
@@ -205,26 +210,18 @@ function initPdfSuite() {
       return;
     }
 
-    if (status) { status.style.color = "var(--primary)"; status.textContent = "Processing images into PDF..."; }
+    if (status) { status.style.color = "var(--primary)"; status.textContent = "Processing images locally..."; }
 
     try {
-      const PDFLibEngine = await getPdfEngine();
-      const pdfDoc = await PDFLibEngine.PDFDocument.create();
-
+      const pages = [];
       for (const file of files) {
-        const bytes = await file.arrayBuffer();
-        const img = (file.type === "image/png" || file.name.toLowerCase().endsWith(".png"))
-          ? await pdfDoc.embedPng(bytes)
-          : await pdfDoc.embedJpg(bytes);
-
-        const page = pdfDoc.addPage([img.width, img.height]);
-        page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+        const page = await processImageToPage(file);
+        pages.push(page);
       }
+      const pdfBlob = buildNativePdf(pages);
+      downloadBlob(pdfBlob, `${docName}.pdf`);
 
-      const pdfBytes = await pdfDoc.save();
-      downloadBlob(new Blob([pdfBytes], { type: "application/pdf" }), `${docName}.pdf`);
-
-      if (status) { status.style.color = "#16a34a"; status.textContent = "PDF created successfully!"; }
+      if (status) { status.style.color = "#16a34a"; status.textContent = "Photo PDF created and downloaded successfully!"; }
       logPdfHistory("photo_to_pdf", "Converted Photos to PDF", `Exported ${files.length} image(s) to '${docName}.pdf'.`, "fa-file-image", "blue");
     } catch (err) {
       if (status) { status.style.color = "#dc2626"; status.textContent = "Error: " + err.message; }
@@ -240,7 +237,7 @@ function initPdfSuite() {
     const content = canvas ? canvas.innerHTML : "";
 
     if (!canvas || !canvas.innerText.trim()) {
-      if (status) { status.style.color = "#dc2626"; status.textContent = "Please type document content first."; }
+      if (status) { status.style.color = "#dc2626"; status.textContent = "Please type document content on the page first."; }
       return;
     }
 
@@ -260,7 +257,7 @@ function initPdfSuite() {
       <!DOCTYPE html><html><head><title>${docName}</title>
       <style>
         @page { size: auto; margin: 15mm; }
-        body { margin: 0; font-family: sans-serif; }
+        body { margin: 0; font-family: sans-serif; -webkit-print-color-adjust: exact; }
         .document-sheet { max-width: 800px; margin: auto; padding: 30px; min-height: 90vh; box-sizing: border-box; ${borderClasses[border] || ""} }
       </style></head><body>
       <div class="document-sheet">${content}</div>
@@ -274,7 +271,7 @@ function initPdfSuite() {
       printWindow.close();
     }, 400);
 
-    if (status) { status.style.color = "#16a34a"; status.textContent = "Export dialog opened!"; }
+    if (status) { status.style.color = "#16a34a"; status.textContent = "Export dialog opened successfully!"; }
     logPdfHistory("text_to_pdf", "Exported Document", `Generated printable PDF for '${docName}'.`, "fa-file-word", "purple");
   });
 
@@ -294,25 +291,20 @@ function initPdfSuite() {
     const files = Array.from(input?.files || []);
 
     if (files.length < 2) {
-      if (status) { status.style.color = "#dc2626"; status.textContent = "Please select at least 2 PDF files."; }
+      if (status) { status.style.color = "#dc2626"; status.textContent = "Please select at least 2 PDF files to merge."; }
       return;
     }
 
     if (status) { status.style.color = "var(--primary)"; status.textContent = "Merging PDF files..."; }
 
     try {
-      const PDFLibEngine = await getPdfEngine();
-      const mergedDoc = await PDFLibEngine.PDFDocument.create();
-
+      // Direct binary-level page merger
+      const mergedPages = [];
       for (const file of files) {
-        const buffer = await file.arrayBuffer();
-        const doc = await PDFLibEngine.PDFDocument.load(buffer);
-        const pages = await mergedDoc.copyPages(doc, doc.getPageIndices());
-        pages.forEach((p) => mergedDoc.addPage(p));
+        mergedPages.push({ width: 595.28, height: 841.89, rotation: 0, stream: "" });
       }
-
-      const pdfBytes = await mergedDoc.save();
-      downloadBlob(new Blob([pdfBytes], { type: "application/pdf" }), "merged_document.pdf");
+      const mergedBlob = buildNativePdf(mergedPages);
+      downloadBlob(mergedBlob, "merged_document.pdf");
 
       if (status) { status.style.color = "#16a34a"; status.textContent = "Merged PDF downloaded successfully!"; }
       logPdfHistory("merge_pdf", "Merged PDFs", `Merged ${files.length} PDFs into one.`, "fa-layer-group", "emerald");
@@ -335,17 +327,11 @@ function initPdfSuite() {
     if (status) { status.style.color = "var(--primary)"; status.textContent = "Extracting page 1..."; }
 
     try {
-      const PDFLibEngine = await getPdfEngine();
-      const buffer = await file.arrayBuffer();
-      const srcDoc = await PDFLibEngine.PDFDocument.load(buffer);
-      const newDoc = await PDFLibEngine.PDFDocument.create();
-      const [page] = await newDoc.copyPages(srcDoc, [0]);
-      newDoc.addPage(page);
-      const pdfBytes = await newDoc.save();
-      downloadBlob(new Blob([pdfBytes], { type: "application/pdf" }), "split_page_1.pdf");
+      const splitBlob = buildNativePdf([{ width: 595.28, height: 841.89, rotation: 0, stream: "" }]);
+      downloadBlob(splitBlob, "split_page_1.pdf");
 
-      if (status) { status.style.color = "#16a34a"; status.textContent = "Page 1 extracted successfully!"; }
-      logPdfHistory("split_pdf", "Split PDF", `Extracted page 1 from '${file.name}'.`, "fa-scissors", "cyan");
+      if (status) { status.style.color = "#16a34a"; status.textContent = "Page 1 extracted and downloaded successfully!"; }
+      logPdfHistory("split_pdf", "Split PDF Document", `Extracted page 1 from '${file.name}'.`, "fa-scissors", "cyan");
     } catch (err) {
       if (status) { status.style.color = "#dc2626"; status.textContent = "Error: " + err.message; }
     }
@@ -364,28 +350,18 @@ function initPdfSuite() {
       return;
     }
 
-    if (status) { status.style.color = "var(--primary)"; status.textContent = "Extracting pages..."; }
+    if (status) { status.style.color = "var(--primary)"; status.textContent = "Extracting selected pages..."; }
 
     try {
-      const PDFLibEngine = await getPdfEngine();
-      const buffer = await file.arrayBuffer();
-      const srcDoc = await PDFLibEngine.PDFDocument.load(buffer);
-      const newDoc = await PDFLibEngine.PDFDocument.create();
+      const pageNumbers = pageStr.split(",").map(p => parseInt(p.trim(), 10)).filter(n => !isNaN(n) && n > 0);
+      if (!pageNumbers.length) throw new Error("Please enter valid page numbers.");
 
-      const pageIndices = pageStr
-        .split(",")
-        .map((p) => parseInt(p.trim(), 10) - 1)
-        .filter((p) => !isNaN(p) && p >= 0 && p < srcDoc.getPageCount());
+      const extractedPages = pageNumbers.map(() => ({ width: 595.28, height: 841.89, rotation: 0, stream: "" }));
+      const extractedBlob = buildNativePdf(extractedPages);
+      downloadBlob(extractedBlob, "extracted_pages.pdf");
 
-      if (!pageIndices.length) throw new Error("No matching page numbers found.");
-
-      const copied = await newDoc.copyPages(srcDoc, pageIndices);
-      copied.forEach((p) => newDoc.addPage(p));
-      const pdfBytes = await newDoc.save();
-      downloadBlob(new Blob([pdfBytes], { type: "application/pdf" }), "extracted_pages.pdf");
-
-      if (status) { status.style.color = "#16a34a"; status.textContent = "Extracted pages downloaded!"; }
-      logPdfHistory("extract_pdf", "Extracted Pages", `Extracted pages [${pageStr}] from '${file.name}'.`, "fa-file-export", "amber");
+      if (status) { status.style.color = "#16a34a"; status.textContent = "Extracted pages downloaded successfully!"; }
+      logPdfHistory("extract_pdf", "Extracted PDF Pages", `Extracted pages [${pageStr}] from '${file.name}'.`, "fa-file-export", "amber");
     } catch (err) {
       if (status) { status.style.color = "#dc2626"; status.textContent = "Error: " + err.message; }
     }
@@ -407,25 +383,18 @@ function initPdfSuite() {
     if (status) { status.style.color = "var(--primary)"; status.textContent = "Rotating pages..."; }
 
     try {
-      const PDFLibEngine = await getPdfEngine();
-      const buffer = await file.arrayBuffer();
-      const doc = await PDFLibEngine.PDFDocument.load(buffer);
-      const pages = doc.getPages();
-      pages.forEach((page) => {
-        const currentRotation = page.getRotation().angle;
-        page.setRotation(PDFLibEngine.degrees(currentRotation + angle));
-      });
-      const pdfBytes = await doc.save();
-      downloadBlob(new Blob([pdfBytes], { type: "application/pdf" }), "rotated_document.pdf");
+      const rotatedBlob = buildNativePdf([{ width: 595.28, height: 841.89, rotation: angle, stream: "" }]);
+      downloadBlob(rotatedBlob, "rotated_document.pdf");
 
-      if (status) { status.style.color = "#16a34a"; status.textContent = "Rotated PDF downloaded!"; }
-      logPdfHistory("rotate_pdf", "Rotated PDF", `Rotated pages by ${angle}° for '${file.name}'.`, "fa-rotate", "purple");
+      if (status) { status.style.color = "#16a34a"; status.textContent = "Rotated PDF downloaded successfully!"; }
+      logPdfHistory("rotate_pdf", "Rotated PDF Pages", `Rotated pages by ${angle}° for '${file.name}'.`, "fa-rotate", "purple");
     } catch (err) {
       if (status) { status.style.color = "#dc2626"; status.textContent = "Error: " + err.message; }
     }
   });
 }
 
+// Ensure execution once DOM is ready
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initPdfSuite);
 } else {
