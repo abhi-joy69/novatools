@@ -2356,7 +2356,30 @@ document.getElementById("btnClearHistoryBtn")?.addEventListener("click", () => {
 /* =========================================================
    5. DEDICATED AI TOOLS PROCESSING ENGINE
 ========================================================= */
-window.processAITool = function(toolKey) {
+   const GEMINI_API_KEY = "AQ.Ab8RN6LFyKeai5uq-VCPYYdNlkgaV9tiSB9AwqF5c2uIImetKQ";
+const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+const TOOL_SYSTEM_PROMPTS = {
+  writer: (format, text) => `You are an expert writing assistant. Format the output strictly as a ${format}. Points to write: "${text}".`,
+  summariser: (_, text) => `Summarise the following text into crisp, high-yield bullet points with a brief takeaway:\n\n${text}`,
+  improver: (_, text) => `Rewrite the following text to enhance vocabulary, eliminate fluff, and fix grammar while keeping clear prose:\n\n${text}`,
+  email: (_, text) => `Generate a polite, structured business email with a clear subject line and call to action based on these notes:\n\n${text}`,
+  code: (_, text) => `Explain this code snippet clearly: 1) What it does, 2) Step-by-step logic, and 3) Potential optimizations:\n\n${text}`,
+  prompt: (_, text) => `Rewrite the following simple prompt into a structured, highly-effective prompt for LLMs including Role, Task, Context, and Constraints:\n\n${text}`
+};
+const GEMINI_API_KEY = "AQ.Ab8RN6LFyKeai5uq-VCPYYdNlkgaV9tiSB9AwqF5c2uIImetKQ";
+const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+const TOOL_SYSTEM_PROMPTS = {
+  writer: (format, text) => `You are an expert writing assistant. Format the output strictly as a ${format}. Points to write: "${text}".`,
+  summariser: (_, text) => `Summarise the following text into crisp, high-yield bullet points with a brief takeaway:\n\n${text}`,
+  improver: (_, text) => `Rewrite the following text to enhance vocabulary, eliminate fluff, and fix grammar while keeping clear prose:\n\n${text}`,
+  email: (_, text) => `Generate a polite, structured business email with a clear subject line and call to action based on these notes:\n\n${text}`,
+  code: (_, text) => `Explain this code snippet clearly: 1) What it does, 2) Step-by-step logic, and 3) Potential optimizations:\n\n${text}`,
+  prompt: (_, text) => `Rewrite the following simple prompt into a structured, highly-effective prompt for LLMs including Role, Task, Context, and Constraints:\n\n${text}`
+};
+
+window.processAITool = async function(toolKey) {
   const inputEl = document.getElementById(`input-${toolKey}`);
   const resultBox = document.getElementById(`res-${toolKey}`);
   const input = inputEl ? inputEl.value.trim() : "";
@@ -2366,78 +2389,48 @@ window.processAITool = function(toolKey) {
     return;
   }
 
-  resultBox.textContent = "Processing with NovaTools AI algorithms...";
+  let format = "email";
+  if (toolKey === "writer") {
+    const formatEl = document.getElementById("aiWriterType");
+    if (formatEl) format = formatEl.value;
+  }
 
-  setTimeout(() => {
-    const lines = input.split("\n").filter(l => l.trim().length > 0);
-    let output = "";
-    let historyTitle = "AI Output";
-    let icon = "fa-bolt";
-    let color = "blue";
+  resultBox.textContent = "Connecting to Gemini AI and generating response...";
 
-    if (toolKey === "writer") {
-      const mode = document.getElementById("aiWriterType").value;
-      historyTitle = `Writing Assistant (${mode.toUpperCase()})`;
-      icon = "fa-pen-nib";
-      color = "blue";
-      if (mode === "email") {
-        output = `Subject: Update Regarding: ${lines[0] || 'Discussion Item'}\n\nDear [Name],\n\nI hope this email finds you well.\n\nI wanted to follow up with you on the following key points:\n${lines.map(l => `• ${l}`).join('\n')}\n\nPlease let me know your thoughts.\n\nBest regards,\n[Your Name]`;
-      } else if (mode === "letter") {
-        output = `Date: ${new Date().toLocaleDateString()}\n\nTo,\n[Recipient / Department Name]\n[Organization]\n\nSubject: Official Notice Regarding ${lines[0] || 'Formal Matter'}\n\nRespected Sir/Madam,\n\nI am writing to bring the following matters formally to your attention:\n\n${lines.map((l, i) => `${i+1}. ${l}`).join('\n\n')}\n\nThank you for your consideration and time.\n\nSincerely,\n[Your Name]`;
-      } else if (mode === "msg") {
-        output = `Hey! 👋 Quick note regarding ${lines[0] || 'our talk'}:\n${lines.map(l => `👉 ${l}`).join('\n')}\n\nLet me know what you think!`;
-      } else if (mode === "outline") {
-        output = `### 📑 Document Outline:\n\nI. Introduction\n   - Context: ${lines[0] || 'Main Topic'}\n\nII. Core Discussion\n${lines.map((l, i) => `   - Point ${i+1}: ${l}`).join('\n')}\n\nIII. Summary & Next Steps`;
-      } else {
-        output = `### 📝 Document Draft\n\n#### Executive Overview\n${lines[0] || "Core overview."}\n\n#### Action Items\n${lines.map(l => `• ${l}`).join('\n')}`;
-      }
-    } else if (toolKey === "summariser") {
-      historyTitle = "Text Summariser";
-      icon = "fa-compress";
-      color = "purple";
-      output = "### 📌 Executive Summary (TL;DR):\n" +
-        lines.slice(0, 4).map((l) => `• ${l.replace(/^[-*•]\s*/, "")}`).join("\n") +
-        "\n\n**Takeaway:** High-priority items condensed for fast decision-making.";
-    } else if (toolKey === "improver") {
-      historyTitle = "Grammar & Tone Improver";
-      icon = "fa-wand-magic-sparkles";
-      color = "cyan";
-      output = "### ✨ Polished & Elevated Version:\n\n" +
-        lines.map(line => {
-          let imp = line.trim();
-          imp = imp.charAt(0).toUpperCase() + imp.slice(1);
-          if (!/[.!?]$/.test(imp)) imp += ".";
-          return imp;
-        }).join(" ") +
-        "\n\n*Tone: Professional & Concise | Structure: Refined*";
-    } else if (toolKey === "email") {
-      historyTitle = "Email Helper";
-      icon = "fa-envelope";
-      color = "amber";
-      output = `Subject: Important Update: ${lines[0] || 'Action Required'}\n\nHi there,\n\nI hope you are doing well.\n\nHere is a quick summary of the points we need to cover:\n${lines.map(l => `• ${l}`).join('\n')}\n\nLooking forward to hearing from you.\n\nBest regards,\nNovaTools User`;
-    } else if (toolKey === "code") {
-      historyTitle = "Code & Syntax Explainer";
-      icon = "fa-code";
-      color = "emerald";
-      output = `### 💻 Code Breakdown & Insights:\n\n1. **Functionality:** Handles logical routines, structure flow, and data management.\n2. **Line Analysis:**\n${lines.slice(0, 3).map((l, i) => `   - Line ${i+1}: Sets logic for \`${l.slice(0, 35)}...\``).join('\n')}\n3. **Recommendation:** Ensure variables are properly scoped and null checks are implemented.`;
-    } else if (toolKey === "prompt") {
-      historyTitle = "AI Prompt Enhancer";
-      icon = "fa-terminal";
-      color = "purple";
-      output = `### 🎯 Supercharged Prompt (Ready for ChatGPT / Claude):\n\n"Act as an authoritative expert in this field. I need a comprehensive breakdown of: '${input}'. Provide: 1) Executive Summary, 2) Step-by-Step Implementation, 3) High-yield suggestions, and 4) Common mistakes to avoid. Keep formatting crisp and professional."`;
+  const promptGenerator = TOOL_SYSTEM_PROMPTS[toolKey];
+  const finalPrompt = promptGenerator ? promptGenerator(format, input) : input;
+
+  try {
+    const response = await fetch(GEMINI_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: finalPrompt }] }]
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status} ${response.statusText}`);
     }
 
-    resultBox.textContent = output;
+    const data = await response.json();
+    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response received.";
 
-    recordHistoryEvent({
-      tool: toolKey,
-      category: "AI Productivity",
-      title: historyTitle,
-      content: output,
-      icon: icon,
-      colorClass: color
-    });
-  }, 350);
+    resultBox.textContent = generatedText;
+
+    if (typeof recordHistoryEvent === "function") {
+      recordHistoryEvent({
+        tool: toolKey,
+        category: "AI Productivity",
+        title: `AI ${toolKey.toUpperCase()}`,
+        content: generatedText,
+        icon: "fa-bolt",
+        colorClass: "blue"
+      });
+    }
+  } catch (err) {
+    resultBox.textContent = "Error generating response: " + err.message;
+  }
 };
 
 window.copyResult = function(boxId) {
