@@ -1,15 +1,15 @@
 /* =========================================================
-   PDF EDITOR EXTENSION (REPLACES SPLIT PDF)
+   ANDROID APP-STYLE PDF EDITOR EXTENSION
 ========================================================= */
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. Transform the Split PDF card in the main PDF Tools directory grid
+  // 1. Transform Split PDF card to Edit PDF
   const pdfCards = document.querySelectorAll("#pdf-tools .tool-card");
   pdfCards.forEach(card => {
     const titleEl = card.querySelector("h3");
     if (titleEl && titleEl.textContent.trim() === "Split PDF") {
       titleEl.textContent = "Edit PDF";
       const descEl = card.querySelector("p");
-      if (descEl) descEl.textContent = "Add text annotations, highlight notes, and sign PDF documents.";
+      if (descEl) descEl.textContent = "Upload a PDF, add annotations, insert text watermarks, and export instantly.";
       
       const iconEl = card.querySelector(".tool-icon");
       if (iconEl) {
@@ -18,13 +18,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const btn = card.querySelector("button");
-      if (btn) {
-        btn.setAttribute("onclick", "openDedicatedTool('edit_pdf')");
-      }
+      if (btn) btn.setAttribute("onclick", "openDedicatedTool('edit_pdf')");
     }
   });
 
-  // 2. Transform the dedicated Split PDF page section into the Edit PDF workspace
+  // 2. Transform dedicated Split PDF page to App-style Edit PDF workspace
   const splitPage = document.getElementById("page-split_pdf");
   if (splitPage) {
     splitPage.id = "page-edit_pdf";
@@ -35,75 +33,121 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="dedicated-title-box">
             <div class="dedicated-icon-badge cyan"><i class="fa-solid fa-pen-to-square"></i></div>
             <div>
-              <h2>Interactive PDF Editor</h2>
-              <p>Add text notes and annotations to your documents locally.</p>
+              <h2>PDF Editor Studio</h2>
+              <p>App-style local document viewer and annotation toolkit.</p>
             </div>
           </div>
           <button class="btn btn-light" data-tab="pdf-tools" type="button"><i class="fa-solid fa-arrow-left"></i> Back to PDF Suite</button>
         </div>
-        <div class="info-feature-banner">
-          <i class="fa-solid fa-circle-info"></i>
-          <span>Type your annotations below and export them into a clean printable PDF page.</span>
-        </div>
+        
         <div class="workspace-form">
           <div class="form-group">
-            <label for="editPdfTitle">Document Title:</label>
-            <input type="text" id="editPdfTitle" value="Annotated_Document">
+            <label for="pdfEditorInput">Select PDF Document:</label>
+            <input type="file" id="pdfEditorInput" accept="application/pdf">
           </div>
-          <div class="form-group">
-            <label for="editPdfContent">Add Notes / Annotations:</label>
-            <textarea id="editPdfContent" placeholder="Type your edits, corrections, or notes here..."></textarea>
+
+          <div id="pdfEditorPanel" style="display:none; margin-top:15px; background:#f8fafc; padding:20px; border-radius:16px; border:1px solid var(--border);">
+            <div style="font-weight:800; margin-bottom:10px; color:var(--heading);" id="pdfFileInfo">Document loaded successfully.</div>
+            
+            <div class="form-group" style="margin-bottom:14px;">
+              <label for="pdfWatermarkText">Add Text Watermark / Note on Pages:</label>
+              <input type="text" id="pdfWatermarkText" placeholder="e.g., CONFIDENTIAL / Approved">
+            </div>
+
+            <div class="form-group" style="margin-bottom:14px;">
+              <label for="pdfRotateSelect">Page Orientation:</label>
+              <select id="pdfRotateSelect" class="studio-select" style="width:100%; padding:11px;">
+                <option value="0">Keep Original Rotation</option>
+                <option value="90">Rotate All Pages 90° Clockwise</option>
+                <option value="180">Flip All Pages 180°</option>
+              </select>
+            </div>
+
+            <button class="btn btn-primary" id="btnApplyPdfEdits" type="button"><i class="fa-solid fa-file-arrow-down"></i> Save &amp; Download Edited PDF</button>
           </div>
-          <button class="btn btn-primary" id="btnExecuteEditPdf" type="button"><i class="fa-solid fa-file-arrow-down"></i> Export Edited PDF</button>
+
           <div id="status-edit_pdf" style="font-size:12px;font-weight:700;margin-top:10px"></div>
         </div>
       `;
 
-      // Bind action for the new Edit PDF export button
-      document.getElementById("btnExecuteEditPdf")?.addEventListener("click", () => {
-        const title = document.getElementById("editPdfTitle")?.value || "Annotated_Document";
-        const content = document.getElementById("editPdfContent")?.value || "";
+      let loadedPdfFile = null;
+
+      document.getElementById("pdfEditorInput")?.addEventListener("change", (e) => {
+        loadedPdfFile = e.target.files[0];
+        const panel = document.getElementById("pdfEditorPanel");
+        const info = document.getElementById("pdfFileInfo");
+        if (loadedPdfFile) {
+          panel.style.display = "block";
+          info.textContent = `File Loaded: ${loadedPdfFile.name} (${(loadedPdfFile.size / 1024).toFixed(1)} KB)`;
+        } else {
+          panel.style.display = "none";
+        }
+      });
+
+      document.getElementById("btnApplyPdfEdits")?.addEventListener("click", async () => {
         const status = document.getElementById("status-edit_pdf");
+        const watermark = document.getElementById("pdfWatermarkText")?.value.trim() || "";
+        const rotationAngle = parseInt(document.getElementById("pdfRotateSelect")?.value || "0", 10);
 
-        if (!content.trim()) {
-          if (status) { status.style.color = "#dc2626"; status.textContent = "Please enter some annotation text first."; }
+        if (!loadedPdfFile) {
+          if (status) { status.style.color = "#dc2626"; status.textContent = "Please select a PDF file first."; }
           return;
         }
 
-        const printWin = window.open("", "_blank");
-        if (!printWin) {
-          if (status) { status.style.color = "#dc2626"; status.textContent = "Popup blocked! Please allow popups."; }
+        if (!window.PDFLib) {
+          if (status) { status.style.color = "#dc2626"; status.textContent = "PDF engine is loading. Please try again."; }
           return;
         }
 
-        printWin.document.write(`
-          <!DOCTYPE html><html><head><title>${title}</title>
-          <style>
-            body { font-family: sans-serif; padding: 40px; color: #1e293b; line-height: 1.6; }
-            h1 { font-size: 22px; border-bottom: 2px solid #2563eb; padding-bottom: 10px; }
-            .box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 12px; white-space: pre-wrap; margin-top: 20px; }
-          </style></head><body>
-          <h1>${title}</h1>
-          <div class="box">${content}</div>
-          </body></html>
-        `);
-        printWin.document.close();
-        printWin.focus();
-        setTimeout(() => {
-          printWin.print();
-          printWin.close();
-        }, 350);
+        if (status) { status.style.color = "var(--primary)"; status.textContent = "Applying edits to PDF..."; }
 
-        if (status) { status.style.color = "#16a34a"; status.textContent = "Export dialog opened successfully!"; }
-        if (typeof recordHistoryEvent === "function") {
-          recordHistoryEvent({
-            tool: "edit_pdf",
-            category: "PDF Suite",
-            title: "Edited & Exported PDF",
-            content: `Created edited document '${title}'.`,
-            icon: "fa-pen-to-square",
-            colorClass: "cyan"
+        try {
+          const { PDFDocument, rgb, degrees, StandardFonts } = window.PDFLib;
+          const arrayBuffer = await loadedPdfFile.arrayBuffer();
+          const pdfDoc = await PDFDocument.load(arrayBuffer);
+          const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+          const pages = pdfDoc.getPages();
+          pages.forEach(page => {
+            if (rotationAngle > 0) {
+              const current = page.getRotation().angle || 0;
+              page.setRotation(degrees((current + rotationAngle) % 360));
+            }
+            if (watermark) {
+              const { width, height } = page.getSize();
+              page.drawText(watermark, {
+                x: 50,
+                y: height - 50,
+                size: 16,
+                font: font,
+                color: rgb(0.85, 0.1, 0.1),
+                opacity: 0.6
+              });
+            }
           });
+
+          const pdfBytes = await pdfDoc.save();
+          const blob = new Blob([pdfBytes], { type: "application/pdf" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = `edited_${loadedPdfFile.name}`;
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(url), 400);
+
+          if (status) { status.style.color = "#16a34a"; status.textContent = "Edited PDF downloaded successfully!"; }
+          if (typeof recordHistoryEvent === "function") {
+            recordHistoryEvent({
+              tool: "edit_pdf",
+              category: "PDF Suite",
+              title: "Edited PDF Document",
+              content: `Applied edits to '${loadedPdfFile.name}'.`,
+              icon: "fa-pen-to-square",
+              colorClass: "cyan"
+            });
+          }
+        } catch (err) {
+          if (status) { status.style.color = "#dc2626"; status.textContent = "Error editing PDF: " + err.message; }
         }
       });
     }
