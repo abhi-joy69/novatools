@@ -452,6 +452,46 @@ button:disabled { opacity: .6; cursor: not-allowed; }
 }
 .info-feature-banner i { font-size: 18px; color: var(--primary); }
 
+/* HISTORY TIMELINE STYLES */
+.history-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: white;
+  margin-bottom: 12px;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.history-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+}
+.history-item-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.history-item-content { flex: 1; min-width: 0; }
+.history-item-title { font-weight: 800; font-size: 14px; color: var(--heading); }
+.history-item-time { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+.history-item-snippet {
+  font-size: 12px;
+  color: var(--text);
+  background: #f8fafc;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  white-space: pre-wrap;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
 /* DIRECTORY FILTERS */
 .category-filter-bar {
   display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px;
@@ -800,6 +840,7 @@ body.tab-navigation main > section#home.active-page { display: block !important;
       <a href="#ai-tools" data-tab="ai-tools"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Tools</a>
       <a href="#pdf-tools" data-tab="pdf-tools"><i class="fa-solid fa-file-pdf"></i> PDF Tools</a>
       <a href="#directory" data-tab="directory"><i class="fa-solid fa-compass"></i> AI Directory</a>
+      <a href="#history" data-tab="history"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
       <a href="#communityReviews" data-tab="home"><i class="fa-solid fa-star"></i> Review Centre</a>
     </nav>
 
@@ -837,12 +878,12 @@ body.tab-navigation main > section#home.active-page { display: block !important;
         <div class="hero-buttons">
           <button class="btn btn-white" data-tab="ai-tools"><i class="fa-solid fa-wand-magic-sparkles"></i> Explore AI Tools</button>
           <button class="btn btn-glass" data-tab="pdf-tools"><i class="fa-solid fa-file-pdf"></i> Open PDF Suite</button>
-          <button class="btn btn-white" data-tab="directory"><i class="fa-solid fa-compass"></i> AI Directory</button>
+          <button class="btn btn-white" data-tab="history"><i class="fa-solid fa-clock-rotate-left"></i> My History</button>
         </div>
 
         <div class="hero-trust">
           <span><i class="fa-solid fa-circle-check"></i> Private in-browser PDF tools</span>
-          <span><i class="fa-solid fa-circle-check"></i> Versatile writing &amp; email tools</span>
+          <span><i class="fa-solid fa-circle-check"></i> Account-linked generation history</span>
           <span><i class="fa-solid fa-circle-check"></i> Verified AI directory</span>
         </div>
       </div>
@@ -878,11 +919,11 @@ body.tab-navigation main > section#home.active-page { display: block !important;
         </div>
       </div>
 
-      <div class="quick-link-card" data-tab="directory">
-        <span class="quick-icon"><i class="fa-solid fa-compass"></i></span>
+      <div class="quick-link-card" data-tab="history">
+        <span class="quick-icon"><i class="fa-solid fa-clock-rotate-left"></i></span>
         <div>
-          <strong>AI Directory</strong>
-          <small>Discover top AI platforms</small>
+          <strong>Activity History</strong>
+          <small>View past AI drafts &amp; PDF tasks</small>
         </div>
       </div>
 
@@ -1068,6 +1109,34 @@ body.tab-navigation main > section#home.active-page { display: block !important;
           <p>Rotate incorrectly oriented PDF pages by 90°, 180°, or 270° degrees.[cite: 1]</p>
         </div>
         <button class="btn btn-primary" onclick="openDedicatedTool('rotate_pdf')">Launch Tool <i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEDICATED HISTORY SECTION -->
+<section class="section" id="history">
+  <div class="container animate-in">
+    <div class="section-heading">
+      <div>
+        <div class="section-kicker">Account Activity</div>
+        <h2>Generation &amp; Tool History</h2>
+        <p id="historySubtitle">Review your previous AI generations and PDF downloads linked to your signed-in account.</p>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-light" id="btnClearHistoryBtn" type="button"><i class="fa-solid fa-trash-can"></i> Clear History</button>
+        <button class="btn btn-light" data-tab="home"><i class="fa-solid fa-arrow-left"></i> Back to Home</button>
+      </div>
+    </div>
+
+    <div class="dedicated-card-shell" style="max-width:1000px">
+      <div id="historyAuthNotice" class="info-feature-banner" style="display:none">
+        <i class="fa-solid fa-user-lock"></i>
+        <span>You are currently in guest mode. Sign in to sync and persist your history to your user profile.</span>
+      </div>
+
+      <div id="historyListContainer" class="history-list">
+        <!-- Rendered dynamically via renderUserHistory() -->
       </div>
     </div>
   </div>
@@ -1536,7 +1605,7 @@ body.tab-navigation main > section#home.active-page { display: block !important;
           <h3 style="margin-top:10px">Canva Magic Studio</h3>
           <p>All-in-one graphic design platform with generative AI for social posts and decks.[cite: 1]</p>
         </div>
-        <a class="btn btn-light" href="https://www.canva.com" target="_blank" rel="noopener noreferrer">Visit Website <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        <a class="btn btn-light" href="https://canva.com" target="_blank" rel="noopener noreferrer">Visit Website <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
       </div>
 
       <div class="tool-card" data-category="productivity writing">
@@ -1546,7 +1615,7 @@ body.tab-navigation main > section#home.active-page { display: block !important;
           <h3 style="margin-top:10px">Notion AI</h3>
           <p>Connected workspace platform with built-in AI writing and project tracking.[cite: 1]</p>
         </div>
-        <a class="btn btn-light" href="https://www.notion.so" target="_blank" rel="noopener noreferrer">Visit Website <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        <a class="btn btn-light" href="https://notion.so" target="_blank" rel="noopener noreferrer">Visit Website <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
       </div>
 
       <div class="tool-card" data-category="writing">
@@ -1556,7 +1625,7 @@ body.tab-navigation main > section#home.active-page { display: block !important;
           <h3 style="margin-top:10px">Grammarly</h3>
           <p>Real-time grammar verification, tone adjustor, and writing refinement.[cite: 1]</p>
         </div>
-        <a class="btn btn-light" href="https://www.grammarly.com" target="_blank" rel="noopener noreferrer">Visit Website <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        <a class="btn btn-light" href="https://grammarly.com" target="_blank" rel="noopener noreferrer">Visit Website <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
       </div>
 
       <div class="tool-card" data-category="design">
@@ -1566,7 +1635,7 @@ body.tab-navigation main > section#home.active-page { display: block !important;
           <h3 style="margin-top:10px">Adobe Express</h3>
           <p>Generative imagery, font effects, and quick video edits powered by Adobe Firefly.[cite: 1]</p>
         </div>
-        <a class="btn btn-light" href="https://www.adobe.com/express/" target="_blank" rel="noopener noreferrer">Visit Website <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+        <a class="btn btn-light" href="https://adobe.com/express/" target="_blank" rel="noopener noreferrer">Visit Website <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
       </div>
     </div>
   </div>
@@ -1751,6 +1820,7 @@ body.tab-navigation main > section#home.active-page { display: block !important;
           <a href="#ai-tools" data-tab="ai-tools">AI Tools Suite</a>
           <a href="#pdf-tools" data-tab="pdf-tools">PDF Document Tools</a>
           <a href="#directory" data-tab="directory">AI Discovery Directory</a>
+          <a href="#history" data-tab="history">Activity History</a>
           <a href="#communityReviews" data-tab="home">Review Centre</a>
         </div>
       </div>
@@ -1851,7 +1921,7 @@ function updateNavigation(user) {
   currentUser = user || null;
   const navActions = document.getElementById("navActions");
   const navSignIn = document.getElementById("navSignInBtn");
-  const navGetStarted = document.getElementById("navGetStartedBtn");
+  const navGetStartedBtn = document.getElementById("navGetStartedBtn");
   const footerAuth = document.getElementById("footerAuthLink");
   const menuToggle = document.getElementById("menuToggle");
 
@@ -1860,7 +1930,7 @@ function updateNavigation(user) {
 
   if (!user) {
     if (navSignIn) navSignIn.style.display = "";
-    if (navGetStarted) navGetStarted.style.display = "";
+    if (navGetStartedBtn) navGetStartedBtn.style.display = "";
     if (profileBtn) profileBtn.remove();
     if (logoutBtn) logoutBtn.remove();
     if (footerAuth) {
@@ -1869,7 +1939,7 @@ function updateNavigation(user) {
     }
   } else {
     if (navSignIn) navSignIn.style.display = "none";
-    if (navGetStarted) navGetStarted.style.display = "none";
+    if (navGetStartedBtn) navGetStartedBtn.style.display = "none";
 
     let profileData = null;
     try {
@@ -1907,6 +1977,9 @@ function updateNavigation(user) {
       footerAuth.onclick = (e) => { e.preventDefault(); handleSignOut(); };
     }
   }
+
+  // Refresh history view when user changes
+  renderUserHistory();
 }
 
 async function handleSignOut() {
@@ -1979,6 +2052,10 @@ function activateTab(tabId) {
     homeExtras.forEach(e => e.classList.add("active-home-extra"));
   }
 
+  if (target.id === "history") {
+    renderUserHistory();
+  }
+
   document.querySelectorAll("[data-tab]").forEach(el => {
     el.classList.toggle("active-tab", el.getAttribute("data-tab") === target.id);
   });
@@ -2009,7 +2086,103 @@ window.addEventListener("popstate", () => {
 });
 
 /* =========================================================
-   4. DEDICATED AI TOOLS PROCESSING ENGINE
+   4. ACCOUNT-LINKED HISTORY MANAGER
+========================================================= */
+function getUserHistoryKey() {
+  const accountId = currentUser?.id || currentUser?.email || "guest_account";
+  return `novaToolsHistory_${accountId}`;
+}
+
+function recordHistoryEvent(item) {
+  const key = getUserHistoryKey();
+  let historyList = [];
+  try {
+    historyList = JSON.parse(localStorage.getItem(key) || "[]");
+  } catch (_) {
+    historyList = [];
+  }
+
+  const record = {
+    id: "hist_" + Date.now(),
+    tool: item.tool,
+    category: item.category || "AI",
+    icon: item.icon || "fa-bolt",
+    colorClass: item.colorClass || "blue",
+    title: item.title,
+    content: item.content,
+    timestamp: new Date().toLocaleString()
+  };
+
+  historyList.unshift(record);
+  if (historyList.length > 50) historyList.pop(); // keep last 50
+  localStorage.setItem(key, JSON.stringify(historyList));
+}
+
+function renderUserHistory() {
+  const container = document.getElementById("historyListContainer");
+  const notice = document.getElementById("historyAuthNotice");
+  const subtitle = document.getElementById("historySubtitle");
+  if (!container) return;
+
+  if (!currentUser) {
+    if (notice) notice.style.display = "flex";
+    if (subtitle) subtitle.textContent = "Viewing guest history on this browser. Sign in to link your activity permanently to your account.";
+  } else {
+    if (notice) notice.style.display = "none";
+    const userLabel = currentUser.email || "Your Account";
+    if (subtitle) subtitle.textContent = `Showing recorded activity for: ${userLabel}`;
+  }
+
+  const key = getUserHistoryKey();
+  let list = [];
+  try {
+    list = JSON.parse(localStorage.getItem(key) || "[]");
+  } catch (_) {
+    list = [];
+  }
+
+  container.innerHTML = "";
+
+  if (!list.length) {
+    container.innerHTML = `
+      <div style="text-align:center;padding:40px 20px;color:var(--muted)">
+        <i class="fa-solid fa-clock-rotate-left" style="font-size:36px;margin-bottom:14px;color:#cbd5e1"></i>
+        <h3 style="margin:0 0 6px;color:var(--heading)">No activity recorded yet</h3>
+        <p style="font-size:13px;margin:0">Use any AI Assistant or PDF Tool, and your history will be logged here automatically.</p>
+      </div>
+    `;
+    return;
+  }
+
+  list.forEach(item => {
+    const el = document.createElement("div");
+    el.className = "history-item";
+    el.innerHTML = `
+      <div class="history-item-icon dedicated-icon-badge ${item.colorClass}">
+        <i class="fa-solid ${item.icon}"></i>
+      </div>
+      <div class="history-item-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+          <div class="history-item-title">${item.title}</div>
+          <div class="history-item-time"><i class="fa-regular fa-clock"></i> ${item.timestamp}</div>
+        </div>
+        <div class="history-item-snippet">${item.content}</div>
+      </div>
+    `;
+    container.appendChild(el);
+  });
+}
+
+document.getElementById("btnClearHistoryBtn")?.addEventListener("click", () => {
+  const key = getUserHistoryKey();
+  if (confirm("Are you sure you want to clear your activity history for this account?")) {
+    localStorage.removeItem(key);
+    renderUserHistory();
+  }
+});
+
+/* =========================================================
+   5. DEDICATED AI TOOLS PROCESSING ENGINE
 ========================================================= */
 window.processAITool = function(toolKey) {
   const inputEl = document.getElementById(`input-${toolKey}`);
@@ -2026,25 +2199,37 @@ window.processAITool = function(toolKey) {
   setTimeout(() => {
     const lines = input.split("\n").filter(l => l.trim().length > 0);
     let output = "";
+    let historyTitle = "AI Output";
+    let icon = "fa-bolt";
+    let color = "blue";
 
     if (toolKey === "writer") {
       const mode = document.getElementById("aiWriterType").value;
+      historyTitle = `Writing Assistant (${mode.toUpperCase()})`;
+      icon = "fa-pen-nib";
+      color = "blue";
       if (mode === "email") {
         output = `Subject: Update Regarding: ${lines[0] || 'Discussion Item'}\n\nDear [Name],\n\nI hope this email finds you well.\n\nI wanted to follow up with you on the following key points:\n${lines.map(l => `• ${l}`).join('\n')}\n\nPlease let me know your thoughts.\n\nBest regards,\n[Your Name]`;
       } else if (mode === "letter") {
-        output = `Date: ${new Date().toLocaleDateString()}\n\nTo,\n[Recipient / Department Name]\n[Organization]\n\nSubject: Official Notice Regarding ${lines[0] || 'Formal Matter'}\n\nRespected Sir/Madam,\n\nI am writing to bring the following matters formally to your attention:\n\n${lines.map((l, i) => `${i+1}.${l}`).join('\n\n')}\n\nThank you for your consideration and time.\n\nSincerely,\n[Your Name]`;
+        output = `Date: ${new Date().toLocaleDateString()}\n\nTo,\n[Recipient / Department Name]\n[Organization]\n\nSubject: Official Notice Regarding ${lines[0] || 'Formal Matter'}\n\nRespected Sir/Madam,\n\nI am writing to bring the following matters formally to your attention:\n\n${lines.map((l, i) => `${i+1}. ${l}`).join('\n\n')}\n\nThank you for your consideration and time.\n\nSincerely,\n[Your Name]`;
       } else if (mode === "msg") {
         output = `Hey! 👋 Quick note regarding ${lines[0] || 'our talk'}:\n${lines.map(l => `👉 ${l}`).join('\n')}\n\nLet me know what you think!`;
       } else if (mode === "outline") {
-        output = `### 📑 Document Outline:\n\nI. Introduction\n   - Context: ${lines[0] || 'Main Topic'}\n\nII. Core Discussion\n${lines.map((l, i) => `   - Point ${i+1}:${l}`).join('\n')}\n\nIII. Summary & Next Steps`;
+        output = `### 📑 Document Outline:\n\nI. Introduction\n   - Context: ${lines[0] || 'Main Topic'}\n\nII. Core Discussion\n${lines.map((l, i) => `   - Point ${i+1}: ${l}`).join('\n')}\n\nIII. Summary & Next Steps`;
       } else {
         output = `### 📝 Document Draft\n\n#### Executive Overview\n${lines[0] || "Core overview."}\n\n#### Action Items\n${lines.map(l => `• ${l}`).join('\n')}`;
       }
     } else if (toolKey === "summariser") {
+      historyTitle = "Text Summariser";
+      icon = "fa-compress";
+      color = "purple";
       output = "### 📌 Executive Summary (TL;DR):\n" +
         lines.slice(0, 4).map((l) => `• ${l.replace(/^[-*•]\s*/, "")}`).join("\n") +
         "\n\n**Takeaway:** High-priority items condensed for fast decision-making.";
     } else if (toolKey === "improver") {
+      historyTitle = "Grammar & Tone Improver";
+      icon = "fa-wand-magic-sparkles";
+      color = "cyan";
       output = "### ✨ Polished & Elevated Version:\n\n" +
         lines.map(line => {
           let imp = line.trim();
@@ -2054,14 +2239,33 @@ window.processAITool = function(toolKey) {
         }).join(" ") +
         "\n\n*Tone: Professional & Concise | Structure: Refined*";
     } else if (toolKey === "email") {
+      historyTitle = "Email Helper";
+      icon = "fa-envelope";
+      color = "amber";
       output = `Subject: Important Update: ${lines[0] || 'Action Required'}\n\nHi there,\n\nI hope you are doing well.\n\nHere is a quick summary of the points we need to cover:\n${lines.map(l => `• ${l}`).join('\n')}\n\nLooking forward to hearing from you.\n\nBest regards,\nNovaTools User`;
     } else if (toolKey === "code") {
+      historyTitle = "Code & Syntax Explainer";
+      icon = "fa-code";
+      color = "emerald";
       output = `### 💻 Code Breakdown & Insights:\n\n1. **Functionality:** Handles logical routines, structure flow, and data management.\n2. **Line Analysis:**\n${lines.slice(0, 3).map((l, i) => `   - Line ${i+1}: Sets logic for \`${l.slice(0, 35)}...\``).join('\n')}\n3. **Recommendation:** Ensure variables are properly scoped and null checks are implemented.`;
     } else if (toolKey === "prompt") {
+      historyTitle = "AI Prompt Enhancer";
+      icon = "fa-terminal";
+      color = "purple";
       output = `### 🎯 Supercharged Prompt (Ready for ChatGPT / Claude):\n\n"Act as an authoritative expert in this field. I need a comprehensive breakdown of: '${input}'. Provide: 1) Executive Summary, 2) Step-by-Step Implementation, 3) High-yield suggestions, and 4) Common mistakes to avoid. Keep formatting crisp and professional."`;
     }
 
     resultBox.textContent = output;
+
+    // Record to Account History
+    recordHistoryEvent({
+      tool: toolKey,
+      category: "AI Productivity",
+      title: historyTitle,
+      content: output,
+      icon: icon,
+      colorClass: color
+    });
   }, 350);
 };
 
@@ -2072,7 +2276,7 @@ window.copyResult = function(boxId) {
 };
 
 /* =========================================================
-   5. IN-BROWSER PDF SUITE LOGIC BINDINGS
+   6. IN-BROWSER PDF SUITE LOGIC BINDINGS
 ========================================================= */
 function downloadBlob(bytes, filename) {
   const blob = new Blob([bytes], { type: "application/pdf" });
@@ -2107,6 +2311,15 @@ document.getElementById("btnExecutePhotoPdf")?.addEventListener("click", async (
     downloadBlob(pdfBytes, `${docName}.pdf`);
     status.style.color = "#16a34a";
     status.textContent = "Photo PDF created and downloaded successfully!";
+
+    recordHistoryEvent({
+      tool: "photo_to_pdf",
+      category: "PDF Suite",
+      title: "Converted Photos to PDF",
+      content: `Exported ${files.length} image(s) to '${docName}.pdf'.`,
+      icon: "fa-file-image",
+      colorClass: "blue"
+    });
   } catch (err) {
     status.style.color = "#dc2626";
     status.textContent = "Error converting photos: " + err.message;
@@ -2145,9 +2358,19 @@ document.getElementById("btnExecuteTextPdf")?.addEventListener("click", async ()
       y -= 18;
     }
     const pdfBytes = await pdfDoc.save();
-    downloadBlob(pdfBytes, `${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}.pdf`);
+    const fileName = `${title.toLowerCase().replace(/[^a-z0-9]+/g, "_")}.pdf`;
+    downloadBlob(pdfBytes, fileName);
     status.style.color = "#16a34a";
     status.textContent = "Text PDF created and downloaded!";
+
+    recordHistoryEvent({
+      tool: "text_to_pdf",
+      category: "PDF Suite",
+      title: "Generated Text to PDF",
+      content: `Exported document '${fileName}' with title: ${title}.`,
+      icon: "fa-file-circle-plus",
+      colorClass: "purple"
+    });
   } catch (err) {
     status.style.color = "#dc2626";
     status.textContent = "Error: " + err.message;
@@ -2185,6 +2408,15 @@ document.getElementById("btnExecuteMergePdf")?.addEventListener("click", async (
     downloadBlob(pdfBytes, "merged_document.pdf");
     status.style.color = "#16a34a";
     status.textContent = "Merged PDF downloaded successfully!";
+
+    recordHistoryEvent({
+      tool: "merge_pdf",
+      category: "PDF Suite",
+      title: "Merged PDFs",
+      content: `Successfully merged ${files.length} PDF files into 'merged_document.pdf'.`,
+      icon: "fa-layer-group",
+      colorClass: "emerald"
+    });
   } catch (err) {
     status.style.color = "#dc2626";
     status.textContent = "Error merging: " + err.message;
@@ -2213,6 +2445,15 @@ document.getElementById("btnExecuteSplitPdf")?.addEventListener("click", async (
     downloadBlob(pdfBytes, "split_page_1.pdf");
     status.style.color = "#16a34a";
     status.textContent = "Page 1 extracted and downloaded successfully!";
+
+    recordHistoryEvent({
+      tool: "split_pdf",
+      category: "PDF Suite",
+      title: "Split PDF Document",
+      content: `Extracted first page from '${file.name}'.`,
+      icon: "fa-scissors",
+      colorClass: "cyan"
+    });
   } catch (err) {
     status.style.color = "#dc2626";
     status.textContent = "Error: " + err.message;
@@ -2246,6 +2487,15 @@ document.getElementById("btnExecuteExtractPdf")?.addEventListener("click", async
     downloadBlob(pdfBytes, "extracted_pages.pdf");
     status.style.color = "#16a34a";
     status.textContent = "Extracted pages downloaded successfully!";
+
+    recordHistoryEvent({
+      tool: "extract_pdf",
+      category: "PDF Suite",
+      title: "Extracted PDF Pages",
+      content: `Extracted pages [${pageStr}] from '${file.name}'.`,
+      icon: "fa-file-export",
+      colorClass: "amber"
+    });
   } catch (err) {
     status.style.color = "#dc2626";
     status.textContent = "Error: " + err.message;
@@ -2277,6 +2527,15 @@ document.getElementById("btnExecuteRotatePdf")?.addEventListener("click", async 
     downloadBlob(pdfBytes, "rotated_document.pdf");
     status.style.color = "#16a34a";
     status.textContent = "Rotated PDF downloaded successfully!";
+
+    recordHistoryEvent({
+      tool: "rotate_pdf",
+      category: "PDF Suite",
+      title: "Rotated PDF Pages",
+      content: `Rotated pages by ${angle}° for '${file.name}'.`,
+      icon: "fa-rotate",
+      colorClass: "purple"
+    });
   } catch (err) {
     status.style.color = "#dc2626";
     status.textContent = "Error: " + err.message;
@@ -2284,7 +2543,7 @@ document.getElementById("btnExecuteRotatePdf")?.addEventListener("click", async 
 });
 
 /* =========================================================
-   6. AI DIRECTORY FILTERS
+   7. AI DIRECTORY FILTERS
 ========================================================= */
 document.querySelectorAll("[data-dir-filter]").forEach(btn => {
   btn.addEventListener("click", () => {
@@ -2303,7 +2562,7 @@ document.querySelectorAll("[data-dir-filter]").forEach(btn => {
 });
 
 /* =========================================================
-   7. AUTHENTICATION & ONBOARDING
+   8. AUTHENTICATION & ONBOARDING
 ========================================================= */
 const navSignInBtn = document.getElementById("navSignInBtn");
 const navGetStartedBtn = document.getElementById("navGetStartedBtn");
@@ -2445,7 +2704,7 @@ document.getElementById("onboardingForm").addEventListener("submit", (e) => {
 });
 
 /* =========================================================
-   8. REAL REVIEWS ENGINE
+   9. REAL REVIEWS ENGINE
 ========================================================= */
 const reviewModal = document.getElementById("reviewModal");
 let selectedRating = 0;
