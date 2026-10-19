@@ -22,6 +22,8 @@ window.processAITool = async function(toolKey) {
   const resultBox = document.getElementById(`res-${toolKey}`);
   const input = inputEl ? inputEl.value.trim() : "";
 
+  if (!resultBox) return;
+
   if (!input) {
     resultBox.textContent = "Please enter some text, instructions, or points above first.";
     return;
@@ -78,7 +80,34 @@ function saveToHistory(toolKey, content) {
 }
 
 window.copyResult = function(boxId) {
-  const text = document.getElementById(boxId)?.textContent;
-  if (!text) return;
-  navigator.clipboard.writeText(text).then(() => alert("Copied to clipboard!"));
+  const target = document.getElementById(boxId);
+  const text = target ? target.textContent : "";
+  if (!text || text.startsWith("Please enter") || text.startsWith("Connecting to AI")) return;
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(() => {
+      alert("Copied to clipboard!");
+    }).catch(() => {
+      fallbackCopy(text);
+    });
+  } else {
+    fallbackCopy(text);
+  }
 };
+
+function fallbackCopy(text) {
+  const tempInput = document.createElement("textarea");
+  tempInput.value = text;
+  tempInput.style.position = "fixed";
+  tempInput.style.left = "-9999px";
+  document.body.appendChild(tempInput);
+  tempInput.focus();
+  tempInput.select();
+  try {
+    document.execCommand("copy");
+    alert("Copied to clipboard!");
+  } catch (e) {
+    alert("Failed to copy text automatically.");
+  }
+  document.body.removeChild(tempInput);
+}
