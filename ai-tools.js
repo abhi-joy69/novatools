@@ -3,19 +3,28 @@
 ========================================================= */
 
 const TOOL_SYSTEM_PROMPTS = {
-  writer: (format, text) => 
+  writer: (format, text) =>
     `You are an expert writing assistant. Format the output strictly as a ${format}. Instructions/Topic: "${text}".`,
-  summariser: (_, text) => 
+  summariser: (_, text) =>
     `Summarise the following text into crisp, high-yield bullet points with an executive takeaway:\n\n${text}`,
-  improver: (_, text) => 
+  improver: (_, text) =>
     `Rewrite the following text to enhance vocabulary, eliminate fluff, and fix grammar while keeping clear prose:\n\n${text}`,
-  email: (_, text) => 
+  email: (_, text) =>
     `Generate a polite, structured business email with a clear subject line and call to action based on these notes:\n\n${text}`,
-  code: (_, text) => 
+  code: (_, text) =>
     `Explain this code snippet clearly: 1) What it does, 2) Step-by-step logic, and 3) Potential optimizations:\n\n${text}`,
-  prompt: (_, text) => 
+  prompt: (_, text) =>
     `Rewrite the following simple prompt into a structured, highly-effective prompt for LLMs including Role, Task, Context, and Constraints:\n\n${text}`
 };
+
+const DEFAULT_PLACEHOLDERS = [
+  "Your formatted result will appear here.",
+  "Your executive summary will appear here.",
+  "Your polished sentences will appear here.",
+  "Your email draft will appear here.",
+  "Code analysis will appear here.",
+  "High-performing LLM prompt will appear here."
+];
 
 window.processAITool = async function(toolKey) {
   const inputEl = document.getElementById(`input-${toolKey}`);
@@ -57,7 +66,19 @@ window.processAITool = async function(toolKey) {
       throw new Error(`Engine status: ${response.status}`);
     }
 
-    const generatedText = await response.text();
+    const rawText = await response.text();
+    let generatedText = rawText;
+
+    // Safely handle if endpoint returns an OpenAI-formatted JSON wrapper
+    try {
+      const parsed = JSON.parse(rawText);
+      if (parsed?.choices?.[0]?.message?.content) {
+        generatedText = parsed.choices[0].message.content;
+      }
+    } catch (_) {
+      // Response is already plain text
+    }
+
     resultBox.textContent = generatedText;
     saveToHistory(toolKey, generatedText);
 
@@ -81,8 +102,18 @@ function saveToHistory(toolKey, content) {
 
 window.copyResult = function(boxId) {
   const target = document.getElementById(boxId);
-  const text = target ? target.textContent : "";
-  if (!text || text.startsWith("Please enter") || text.startsWith("Connecting to AI")) return;
+  const text = target ? target.textContent.trim() : "";
+
+  if (
+    !text ||
+    text.startsWith("Please enter") ||
+    text.startsWith("Connecting to AI") ||
+    text.startsWith("Error generating response:") ||
+    DEFAULT_PLACEHOLDERS.includes(text)
+  ) {
+    alert("Nothing to copy yet! Generate an output first.");
+    return;
+  }
 
   if (navigator.clipboard && window.isSecureContext) {
     navigator.clipboard.writeText(text).then(() => {
