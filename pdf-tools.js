@@ -1,9 +1,7 @@
 /* =========================================================
    IN-BROWSER PDF SUITE & MS WORD LIVE STUDIO
-   (100% Native Browser - Zero External Dependencies)
 ========================================================= */
 
-// Download helper
 function downloadBlob(blob, filename) {
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
@@ -13,7 +11,6 @@ function downloadBlob(blob, filename) {
   document.body.removeChild(link);
 }
 
-// Helper to record history safely
 function logPdfHistory(toolName, title, content, icon, color) {
   if (typeof recordHistoryEvent === "function") {
     recordHistoryEvent({
@@ -27,7 +24,7 @@ function logPdfHistory(toolName, title, content, icon, color) {
   }
 }
 
-// WYSIWYG live controls
+// WYSIWYG editor controls
 window.applyCanvasFontFamily = function(font) {
   const canvas = document.getElementById("wordCanvas");
   if (canvas) canvas.style.fontFamily = font;
@@ -96,179 +93,68 @@ window.updatePageCanvasPreview = function() {
   }
 };
 
-// ---------------------------------------------------------
-// NATIVE PDF BUILDER FROM IMAGES
-// ---------------------------------------------------------
-function createPdfFromImages(imageBitmaps) {
-  let objects = [];
-  let xrefOffsets = [];
-
-  function addObject(content) {
-    objects.push(content);
-    return objects.length;
-  }
-
-  addObject("<< /Type /Catalog /Pages 2 0 R >>");
-  objects.push(""); // Placeholder for object 2
-
-  let pageObjIndices = [];
-
-  imageBitmaps.forEach((item) => {
-    const imgObjIndex = addObject(
-      `<< /Type /XObject /Subtype /Image /Width ${item.width} /Height ${item.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${item.bytes.length} >>\nstream\n`
-    );
-    objects[imgObjIndex - 1] = {
-      header: `<< /Type /XObject /Subtype /Image /Width ${item.width} /Height ${item.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${item.bytes.length} >>\nstream\n`,
-      binary: item.bytes,
-      footer: "\nendstream"
-    };
-
-    const contentStream = `q ${item.pageWidth} 0 0 ${item.pageHeight} 0 0 cm /Im1 Do Q`;
-    const contentObjIndex = addObject(
-      `<< /Length ${contentStream.length} >>\nstream\n${contentStream}\nendstream`
-    );
-
-    const pageObjIndex = addObject(
-      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${item.pageWidth} ${item.pageHeight}] /Contents ${contentObjIndex} 0 R /Resources << /XObject << /Im1 ${imgObjIndex} 0 R >> >> >>`
-    );
-    pageObjIndices.push(pageObjIndex);
-  });
-
-  const kidsArray = pageObjIndices.map((idx) => `${idx} 0 R`).join(" ");
-  objects[1] = `<< /Type /Pages /Kids [${kidsArray}] /Count ${pageObjIndices.length} >>`;
-
-  let binaryChunks = [];
-  let currentOffset = 0;
-
-  function writeAscii(str) {
-    const enc = new TextEncoder().encode(str);
-    binaryChunks.push(enc);
-    currentOffset += enc.length;
-  }
-
-  function writeBytes(bytes) {
-    binaryChunks.push(bytes);
-    currentOffset += bytes.length;
-  }
-
-  writeAscii("%PDF-1.4\n%âãÏÓ\n");
-
-  for (let i = 0; i < objects.length; i++) {
-    xrefOffsets.push(currentOffset);
-    const objNum = i + 1;
-    writeAscii(`${objNum} 0 obj\n`);
-
-    if (typeof objects[i] === "object" && objects[i].binary) {
-      writeAscii(objects[i].header);
-      writeBytes(objects[i].binary);
-      writeAscii(objects[i].footer + "\nendobj\n");
-    } else {
-      writeAscii(objects[i] + "\nendobj\n");
+// Helper: bind click regardless of button ID naming
+function bindClick(possibleIds, handler) {
+  for (const id of possibleIds) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("click", handler);
+      return;
     }
   }
-
-  const startXref = currentOffset;
-  writeAscii(`xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`);
-  for (let i = 0; i < xrefOffsets.length; i++) {
-    const offsetStr = String(xrefOffsets[i]).padStart(10, "0");
-    writeAscii(`${offsetStr} 00000 n \n`);
-  }
-
-  writeAscii(`trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${startXref}\n%%EOF`);
-
-  return new Blob(binaryChunks, { type: "application/pdf" });
 }
 
-// ---------------------------------------------------------
 // 1. PHOTO TO PDF
-// ---------------------------------------------------------
-document.getElementById("btnExecutePhotoPdf")?.addEventListener("click", async () => {
-  const status = document.getElementById("status-photo_to_pdf");
-  if (!status) return;
-
-  const files = Array.from(document.getElementById("pdfPhotoInput")?.files || []);
-  const docName = document.getElementById("pdfPhotoDocTitle")?.value.trim() || "Photos_Archive";
+bindClick(["btnExecutePhotoPdf", "executePhotoPdf"], async () => {
+  const status = document.getElementById("status-photo_to_pdf") || document.getElementById("photoPdfStatus");
+  const input = document.getElementById("pdfPhotoInput") || document.getElementById("photoInput");
+  const docTitleInput = document.getElementById("pdfPhotoDocTitle") || document.getElementById("photoDocTitle");
+  const files = Array.from(input?.files || []);
+  const docName = docTitleInput?.value.trim() || "Photos_Archive";
 
   if (!files.length) {
-    status.style.color = "#dc2626";
-    status.textContent = "Please select at least one JPG or PNG photo.";
+    if (status) { status.style.color = "#dc2626"; status.textContent = "Please select at least one JPG or PNG photo."; }
     return;
   }
 
-  status.style.color = "var(--primary)";
-  status.textContent = "Processing images in browser...";
+  if (status) { status.style.color = "var(--primary)"; status.textContent = "Processing images into PDF..."; }
 
   try {
-    let processedImages = [];
+    const PDFLibEngine = window.PDFLib;
+    if (!PDFLibEngine) throw new Error("PDF Engine is not ready. Please refresh the page.");
 
+    const pdfDoc = await PDFLibEngine.PDFDocument.create();
     for (const file of files) {
-      const dataUrl = await new Promise((res, rej) => {
-        const reader = new FileReader();
-        reader.onload = () => res(reader.result);
-        reader.onerror = rej;
-        reader.readAsDataURL(file);
-      });
-
-      const img = await new Promise((res, rej) => {
-        const i = new Image();
-        i.onload = () => res(i);
-        i.onerror = rej;
-        i.src = dataUrl;
-      });
-
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext("2d");
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0);
-
-      const jpegBlob = await new Promise((res) => canvas.toBlob(res, "image/jpeg", 0.92));
-      const arrayBuf = await jpegBlob.arrayBuffer();
-
-      let pWidth = 595.28;
-      let pHeight = 841.89;
-      if (img.width > img.height) {
-        pWidth = 841.89;
-        pHeight = 595.28;
+      const bytes = await file.arrayBuffer();
+      let img;
+      if (file.type === "image/png" || file.name.toLowerCase().endsWith(".png")) {
+        img = await pdfDoc.embedPng(bytes);
+      } else {
+        img = await pdfDoc.embedJpg(bytes);
       }
-
-      processedImages.push({
-        width: img.width,
-        height: img.height,
-        pageWidth: pWidth,
-        pageHeight: pHeight,
-        bytes: new Uint8Array(arrayBuf)
-      });
+      const page = pdfDoc.addPage([img.width, img.height]);
+      page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
     }
+    const pdfBytes = await pdfDoc.save();
+    downloadBlob(new Blob([pdfBytes], { type: "application/pdf" }), `${docName}.pdf`);
 
-    const pdfBlob = createPdfFromImages(processedImages);
-    downloadBlob(pdfBlob, `${docName}.pdf`);
-
-    status.style.color = "#16a34a";
-    status.textContent = "Photo PDF created and downloaded successfully!";
+    if (status) { status.style.color = "#16a34a"; status.textContent = "Photo PDF created and downloaded successfully!"; }
     logPdfHistory("photo_to_pdf", "Converted Photos to PDF", `Exported ${files.length} image(s) to '${docName}.pdf'.`, "fa-file-image", "blue");
   } catch (err) {
-    status.style.color = "#dc2626";
-    status.textContent = "Error processing photos: " + err.message;
+    if (status) { status.style.color = "#dc2626"; status.textContent = "Error: " + err.message; }
   }
 });
 
-// ---------------------------------------------------------
 // 2. TEXT TO PDF
-// ---------------------------------------------------------
-document.getElementById("btnExecuteTextPdf")?.addEventListener("click", () => {
-  const status = document.getElementById("status-text_to_pdf");
+bindClick(["btnExecuteTextPdf", "executeTextPdf"], () => {
+  const status = document.getElementById("status-text_to_pdf") || document.getElementById("textPdfStatus");
   const canvas = document.getElementById("wordCanvas");
-  const docName = document.getElementById("pdfDocTitle")?.value.trim() || "My_Document";
+  const docTitleInput = document.getElementById("pdfDocTitle") || document.getElementById("textDocTitle");
+  const docName = docTitleInput?.value.trim() || "My_Document";
   const content = canvas ? canvas.innerHTML : "";
 
   if (!canvas || !canvas.innerText.trim()) {
-    if (status) {
-      status.style.color = "#dc2626";
-      status.textContent = "Please type document content on the page first.";
-    }
+    if (status) { status.style.color = "#dc2626"; status.textContent = "Please type document content on the page first."; }
     return;
   }
 
@@ -303,9 +189,7 @@ document.getElementById("btnExecuteTextPdf")?.addEventListener("click", () => {
         </style>
       </head>
       <body>
-        <div class="document-sheet">
-          ${content}
-        </div>
+        <div class="document-sheet">${content}</div>
       </body>
     </html>
   `);
@@ -317,149 +201,159 @@ document.getElementById("btnExecuteTextPdf")?.addEventListener("click", () => {
     printWindow.close();
   }, 400);
 
-  if (status) {
-    status.style.color = "#16a34a";
-    status.textContent = "Print & PDF export dialog opened successfully!";
-  }
-
+  if (status) { status.style.color = "#16a34a"; status.textContent = "Print & PDF export dialog opened successfully!"; }
   logPdfHistory("text_to_pdf", "Exported Document", `Generated printable PDF for '${docName}'.`, "fa-file-word", "purple");
 });
 
-// ---------------------------------------------------------
-// 3. MERGE PDF (Native Binary Appender)
-// ---------------------------------------------------------
-document.getElementById("pdfMergeInput")?.addEventListener("change", () => {
-  const list = document.getElementById("mergeFileList");
-  const files = Array.from(document.getElementById("pdfMergeInput")?.files || []);
-  if (list) list.innerHTML = files.map((f, i) => `${i + 1}. ${f.name} (${(f.size / 1024).toFixed(1)} KB)`).join("<br>");
-});
+// 3. MERGE PDF FILES
+const mergeInput = document.getElementById("pdfMergeInput") || document.getElementById("mergeInput");
+if (mergeInput) {
+  mergeInput.addEventListener("change", () => {
+    const list = document.getElementById("mergeFileList") || document.getElementById("mergeList");
+    const files = Array.from(mergeInput.files || []);
+    if (list) list.innerHTML = files.map((f, i) => `${i + 1}. ${f.name} (${(f.size / 1024).toFixed(1)} KB)`).join("<br>");
+  });
+}
 
-document.getElementById("btnExecuteMergePdf")?.addEventListener("click", async () => {
-  const status = document.getElementById("status-merge_pdf");
-  if (!status) return;
+bindClick(["btnExecuteMergePdf", "executeMergePdf"], async () => {
+  const status = document.getElementById("status-merge_pdf") || document.getElementById("mergePdfStatus");
+  const input = document.getElementById("pdfMergeInput") || document.getElementById("mergeInput");
+  const files = Array.from(input?.files || []);
 
-  const files = Array.from(document.getElementById("pdfMergeInput")?.files || []);
   if (files.length < 2) {
-    status.style.color = "#dc2626";
-    status.textContent = "Please select at least 2 PDF files to merge.";
+    if (status) { status.style.color = "#dc2626"; status.textContent = "Please select at least 2 PDF files to merge."; }
     return;
   }
 
-  status.style.color = "var(--primary)";
-  status.textContent = "Merging PDF files...";
+  if (status) { status.style.color = "var(--primary)"; status.textContent = "Merging PDF files..."; }
 
   try {
-    let chunks = [];
+    const PDFLibEngine = window.PDFLib;
+    if (!PDFLibEngine) throw new Error("PDF Engine is not ready. Please refresh the page.");
+
+    const mergedDoc = await PDFLibEngine.PDFDocument.create();
     for (const file of files) {
-      const buf = await file.arrayBuffer();
-      chunks.push(new Uint8Array(buf));
+      const buffer = await file.arrayBuffer();
+      const doc = await PDFLibEngine.PDFDocument.load(buffer);
+      const pages = await mergedDoc.copyPages(doc, doc.getPageIndices());
+      pages.forEach((p) => mergedDoc.addPage(p));
     }
+    const pdfBytes = await mergedDoc.save();
+    downloadBlob(new Blob([pdfBytes], { type: "application/pdf" }), "merged_document.pdf");
 
-    const mergedBlob = new Blob(chunks, { type: "application/pdf" });
-    downloadBlob(mergedBlob, "merged_document.pdf");
-
-    status.style.color = "#16a34a";
-    status.textContent = "Merged PDF downloaded successfully!";
-    logPdfHistory("merge_pdf", "Merged PDFs", `Merged ${files.length} PDFs into 'merged_document.pdf'.`, "fa-layer-group", "emerald");
+    if (status) { status.style.color = "#16a34a"; status.textContent = "Merged PDF downloaded successfully!"; }
+    logPdfHistory("merge_pdf", "Merged PDFs", `Merged ${files.length} PDFs into one.`, "fa-layer-group", "emerald");
   } catch (err) {
-    status.style.color = "#dc2626";
-    status.textContent = "Error merging: " + err.message;
+    if (status) { status.style.color = "#dc2626"; status.textContent = "Error: " + err.message; }
   }
 });
 
-// ---------------------------------------------------------
-// 4. SPLIT PDF (Native Browser Extractor)
-// ---------------------------------------------------------
-document.getElementById("btnExecuteSplitPdf")?.addEventListener("click", async () => {
-  const status = document.getElementById("status-split_pdf");
-  if (!status) return;
+// 4. SPLIT PDF
+bindClick(["btnExecuteSplitPdf", "executeSplitPdf"], async () => {
+  const status = document.getElementById("status-split_pdf") || document.getElementById("splitPdfStatus");
+  const input = document.getElementById("pdfSplitInput") || document.getElementById("splitInput");
+  const file = input?.files[0];
 
-  const file = document.getElementById("pdfSplitInput")?.files[0];
   if (!file) {
-    status.style.color = "#dc2626";
-    status.textContent = "Please select a PDF file first.";
+    if (status) { status.style.color = "#dc2626"; status.textContent = "Please select a PDF file first."; }
     return;
   }
 
-  status.style.color = "var(--primary)";
-  status.textContent = "Extracting page from PDF...";
+  if (status) { status.style.color = "var(--primary)"; status.textContent = "Extracting page 1..."; }
 
   try {
-    const arrayBuffer = await file.arrayBuffer();
-    const splitBlob = new Blob([arrayBuffer], { type: "application/pdf" });
-    downloadBlob(splitBlob, "split_page_1.pdf");
+    const PDFLibEngine = window.PDFLib;
+    if (!PDFLibEngine) throw new Error("PDF Engine is not ready. Please refresh the page.");
 
-    status.style.color = "#16a34a";
-    status.textContent = "Page 1 extracted and downloaded successfully!";
-    logPdfHistory("split_pdf", "Split PDF Document", `Extracted page from '${file.name}'.`, "fa-scissors", "cyan");
+    const buffer = await file.arrayBuffer();
+    const srcDoc = await PDFLibEngine.PDFDocument.load(buffer);
+    const newDoc = await PDFLibEngine.PDFDocument.create();
+    const [page] = await newDoc.copyPages(srcDoc, [0]);
+    newDoc.addPage(page);
+    const pdfBytes = await newDoc.save();
+    downloadBlob(new Blob([pdfBytes], { type: "application/pdf" }), "split_page_1.pdf");
+
+    if (status) { status.style.color = "#16a34a"; status.textContent = "Page 1 extracted and downloaded successfully!"; }
+    logPdfHistory("split_pdf", "Split PDF Document", `Extracted page 1 from '${file.name}'.`, "fa-scissors", "cyan");
   } catch (err) {
-    status.style.color = "#dc2626";
-    status.textContent = "Error: " + err.message;
+    if (status) { status.style.color = "#dc2626"; status.textContent = "Error: " + err.message; }
   }
 });
 
-// ---------------------------------------------------------
-// 5. EXTRACT PAGES (Native Page Extractor)
-// ---------------------------------------------------------
-document.getElementById("btnExecuteExtractPdf")?.addEventListener("click", async () => {
-  const status = document.getElementById("status-extract_pdf");
-  if (!status) return;
-
-  const file = document.getElementById("pdfExtractInput")?.files[0];
-  const pageStr = document.getElementById("pdfExtractPages")?.value.trim();
+// 5. EXTRACT PAGES
+bindClick(["btnExecuteExtractPdf", "executeExtractPdf"], async () => {
+  const status = document.getElementById("status-extract_pdf") || document.getElementById("extractPdfStatus");
+  const input = document.getElementById("pdfExtractInput") || document.getElementById("extractInput");
+  const pageInput = document.getElementById("pdfExtractPages") || document.getElementById("extractPages");
+  const file = input?.files[0];
+  const pageStr = pageInput?.value.trim();
 
   if (!file || !pageStr) {
-    status.style.color = "#dc2626";
-    status.textContent = "Please select a PDF and enter page numbers (e.g. 1, 2).";
+    if (status) { status.style.color = "#dc2626"; status.textContent = "Please select a PDF and enter page numbers (e.g. 1, 2)."; }
     return;
   }
 
-  status.style.color = "var(--primary)";
-  status.textContent = "Extracting pages...";
+  if (status) { status.style.color = "var(--primary)"; status.textContent = "Extracting selected pages..."; }
 
   try {
-    const arrayBuffer = await file.arrayBuffer();
-    const extractedBlob = new Blob([arrayBuffer], { type: "application/pdf" });
-    downloadBlob(extractedBlob, "extracted_pages.pdf");
+    const PDFLibEngine = window.PDFLib;
+    if (!PDFLibEngine) throw new Error("PDF Engine is not ready. Please refresh the page.");
 
-    status.style.color = "#16a34a";
-    status.textContent = "Extracted pages downloaded successfully!";
+    const buffer = await file.arrayBuffer();
+    const srcDoc = await PDFLibEngine.PDFDocument.load(buffer);
+    const newDoc = await PDFLibEngine.PDFDocument.create();
+
+    const pageIndices = pageStr
+      .split(",")
+      .map((p) => parseInt(p.trim(), 10) - 1)
+      .filter((p) => !isNaN(p) && p >= 0 && p < srcDoc.getPageCount());
+
+    if (!pageIndices.length) throw new Error("No matching page numbers found in this PDF.");
+
+    const copied = await newDoc.copyPages(srcDoc, pageIndices);
+    copied.forEach((p) => newDoc.addPage(p));
+    const pdfBytes = await newDoc.save();
+    downloadBlob(new Blob([pdfBytes], { type: "application/pdf" }), "extracted_pages.pdf");
+
+    if (status) { status.style.color = "#16a34a"; status.textContent = "Extracted pages downloaded successfully!"; }
     logPdfHistory("extract_pdf", "Extracted PDF Pages", `Extracted pages [${pageStr}] from '${file.name}'.`, "fa-file-export", "amber");
   } catch (err) {
-    status.style.color = "#dc2626";
-    status.textContent = "Error: " + err.message;
+    if (status) { status.style.color = "#dc2626"; status.textContent = "Error: " + err.message; }
   }
 });
 
-// ---------------------------------------------------------
-// 6. ROTATE PDF (Native Browser Page Rotator)
-// ---------------------------------------------------------
-document.getElementById("btnExecuteRotatePdf")?.addEventListener("click", async () => {
-  const status = document.getElementById("status-rotate_pdf");
-  if (!status) return;
-
-  const file = document.getElementById("pdfRotateInput")?.files[0];
-  const angle = parseInt(document.getElementById("pdfRotateAngle")?.value, 10);
+// 6. ROTATE PDF
+bindClick(["btnExecuteRotatePdf", "executeRotatePdf"], async () => {
+  const status = document.getElementById("status-rotate_pdf") || document.getElementById("rotatePdfStatus");
+  const input = document.getElementById("pdfRotateInput") || document.getElementById("rotateInput");
+  const angleInput = document.getElementById("pdfRotateAngle") || document.getElementById("rotateAngle");
+  const file = input?.files[0];
+  const angle = parseInt(angleInput?.value || "90", 10);
 
   if (!file) {
-    status.style.color = "#dc2626";
-    status.textContent = "Please select a PDF file.";
+    if (status) { status.style.color = "#dc2626"; status.textContent = "Please select a PDF file."; }
     return;
   }
 
-  status.style.color = "var(--primary)";
-  status.textContent = "Rotating pages...";
+  if (status) { status.style.color = "var(--primary)"; status.textContent = "Rotating pages..."; }
 
   try {
-    const arrayBuffer = await file.arrayBuffer();
-    const rotatedBlob = new Blob([arrayBuffer], { type: "application/pdf" });
-    downloadBlob(rotatedBlob, "rotated_document.pdf");
+    const PDFLibEngine = window.PDFLib;
+    if (!PDFLibEngine) throw new Error("PDF Engine is not ready. Please refresh the page.");
 
-    status.style.color = "#16a34a";
-    status.textContent = "Rotated PDF downloaded successfully!";
+    const buffer = await file.arrayBuffer();
+    const doc = await PDFLibEngine.PDFDocument.load(buffer);
+    const pages = doc.getPages();
+    pages.forEach((page) => {
+      const currentRotation = page.getRotation().angle;
+      page.setRotation(PDFLibEngine.degrees(currentRotation + angle));
+    });
+    const pdfBytes = await doc.save();
+    downloadBlob(new Blob([pdfBytes], { type: "application/pdf" }), "rotated_document.pdf");
+
+    if (status) { status.style.color = "#16a34a"; status.textContent = "Rotated PDF downloaded successfully!"; }
     logPdfHistory("rotate_pdf", "Rotated PDF Pages", `Rotated pages by ${angle}° for '${file.name}'.`, "fa-rotate", "purple");
   } catch (err) {
-    status.style.color = "#dc2626";
-    status.textContent = "Error: " + err.message;
+    if (status) { status.style.color = "#dc2626"; status.textContent = "Error: " + err.message; }
   }
 });
