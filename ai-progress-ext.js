@@ -1,5 +1,5 @@
 /* =========================================================
-   AI COLORFUL BUTTON PROGRESS & ICON ANIMATION EXTENSION
+   AI SLEEK ICON ANIMATION, UNIQUE RESPONSES & CLEAN UI
 ========================================================= */
 (function() {
   window.processAITool = async function(toolKey) {
@@ -14,10 +14,22 @@
       return;
     }
 
-    // Find the generate button inside this tool's workspace
+    // Clean up any stray copy buttons near the action row
     const workspace = resultBox.closest(".workspace-form");
+    if (workspace) {
+      const strayButtons = workspace.querySelectorAll("button");
+      strayButtons.forEach(b => {
+        if (b.textContent.includes("Copy Output") && b !== generateBtn && !b.closest(".result-box")) {
+          // Remove rogue copy buttons near top
+          const parentGroup = b.closest("div");
+          if (parentGroup && parentGroup.children.length === 2) {
+            b.style.display = "none";
+          }
+        }
+      });
+    }
+
     const generateBtn = workspace ? workspace.querySelector("button.btn-primary") : null;
-    
     const originalBtnHTML = generateBtn ? generateBtn.innerHTML : "";
     if (generateBtn) {
       generateBtn.disabled = true;
@@ -39,32 +51,34 @@
     };
 
     const promptGen = promptGenerators[toolKey] || ((_, txt) => txt);
-    const finalPrompt = promptGen(format, input);
+    // Append a random micro-seed so the AI model generates a fresh, unique response every time
+    const uniqueSeed = ` [Variation ID: ${Math.random().toString(36.substring(7))}]`;
+    const finalPrompt = promptGen(format, input) + uniqueSeed;
 
-    // Colorful step-by-step icon messages while button acts as a progress bar
-    const steps = [
-      { pct: 20, icon: "fa-solid fa-brain", color: "#3b82f6", text: "Connecting & Analyzing..." },
-      { pct: 50, icon: "fa-solid fa-wand-magic-sparkles", color: "#8b5cf6", text: "Drafting & Structuring..." },
-      { pct: 80, icon: "fa-solid fa-paintbrush", color: "#ec4899", text: "Polishing & Refining Tone..." },
-      { pct: 95, icon: "fa-solid fa-circle-check", color: "#10b981", text: "Final Touches..." }
+    // Slick, interactive, icon-based loading states
+    const iconSteps = [
+      { icon: "fa-solid fa-brain fa-beat", text: "Neural Sync..." },
+      { icon: "fa-solid fa-wand-magic-sparkles fa-spin", text: "Crafting Draft..." },
+      { icon: "fa-solid fa-bolt fa-bounce", text: "Polishing Prose..." },
+      { icon: "fa-solid fa-circle-notch fa-spin", text: "Finalizing..." }
     ];
 
     resultBox.innerHTML = `
-      <div style="font-weight:700;color:var(--primary);margin-bottom:8px;">
-        <i class="fa-solid fa-spinner fa-spin"></i> Generating intelligent response...
+      <div style="font-weight:700;color:var(--primary);margin-bottom:8px; display:flex; align-items:center; gap:8px;">
+        <i class="fa-solid fa-circle-notch fa-spin"></i> Synthesizing fresh response...
       </div>
-      <div style="font-size:12px;color:var(--muted);">Your AI assistant is working on your request.</div>
+      <div style="font-size:12px;color:var(--muted);">Building a unique variation tailored to your notes.</div>
     `;
 
-    let currentStepIndex = 0;
-    const progressInterval = setInterval(() => {
-      if (currentStepIndex < steps.length && generateBtn) {
-        const s = steps[currentStepIndex];
-        generateBtn.style.background = `linear-gradient(90deg, ${s.color} ${s.pct}%, #cbd5e1 ${s.pct}%)`;
-        generateBtn.innerHTML = `<i class="${s.icon}" style="color:white; margin-right:6px;"></i> ${s.text} (${s.pct}%)`;
-        currentStepIndex++;
+    let stepIdx = 0;
+    const iconInterval = setInterval(() => {
+      if (generateBtn && stepIdx < iconSteps.length) {
+        const s = iconSteps[stepIdx];
+        generateBtn.style.background = "linear-gradient(135deg, #2563eb, #7c3aed)";
+        generateBtn.innerHTML = `<i class="${s.icon}" style="margin-right:8px;"></i> ${s.text}`;
+        stepIdx = (stepIdx + 1) % iconSteps.length;
       }
-    }, 450);
+    }, 500);
 
     try {
       const response = await fetch("https://text.pollinations.ai/", {
@@ -72,22 +86,23 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: [
-            { role: "system", content: "You are a helpful, direct, and articulate AI productivity assistant." },
+            { role: "system", content: "You are a helpful, direct, and articulate AI productivity assistant. Always provide fresh, varied phrasing." },
             { role: "user", content: finalPrompt }
           ],
           model: "openai"
         })
       });
 
-      clearInterval(progressInterval);
+      clearInterval(iconInterval);
 
       if (generateBtn) {
-        generateBtn.style.background = "";
-        generateBtn.innerHTML = `<i class="fa-solid fa-check"></i> Completed!`;
+        generateBtn.style.background = "linear-gradient(135deg, #10b981, #059669)";
+        generateBtn.innerHTML = `<i class="fa-solid fa-check-circle" style="margin-right:6px;"></i> Ready!`;
         setTimeout(() => {
+          generateBtn.style.background = "";
           generateBtn.innerHTML = originalBtnHTML;
           generateBtn.disabled = false;
-        }, 1500);
+        }, 1200);
       }
 
       if (!response.ok) throw new Error(`Engine status: ${response.status}`);
@@ -101,7 +116,12 @@
         }
       } catch (_) {}
 
+      // Clean up seed tag if visible in text
+      generatedText = generatedText.replace(/\[Variation ID:.*?\]/g, "").trim();
+
       const safeText = typeof escapeHTML === "function" ? escapeHTML(generatedText) : generatedText;
+      
+      // Render output with ONLY bottom buttons (Copy & Download PDF)
       resultBox.innerHTML = `
         <div style="white-space: pre-wrap; font-size: 13px; line-height: 1.7; margin-bottom: 16px;" id="ai-output-text-${toolKey}">${safeText}</div>
         <div style="display:flex; gap:10px; flex-wrap:wrap; border-top:1px solid var(--border); padding-top:14px;">
@@ -122,7 +142,7 @@
       }
 
     } catch (err) {
-      clearInterval(progressInterval);
+      clearInterval(iconInterval);
       if (generateBtn) {
         generateBtn.style.background = "";
         generateBtn.innerHTML = originalBtnHTML;
