@@ -1,17 +1,19 @@
 /**
  * ai-progress-ext.js
  * Self-contained extension for:
- * 1. Real-time percentage loader (25%, 50%, 75%, 100%) & step-by-step messages
- * 2. Active website logo animation during AI generation
- * 3. Strict visibility control for "Copy Output" & "Download PDF" buttons
- * 4. Fixed PDF export word-spacing, margins, and typography via pdf-lib
- * 5. Micro-seeded unique responses & natural everyday/professional prose
+ * 1. Universal real-time proportional progress counter (smoothly ticking 1% -> 99% -> 100%)
+ *    across all AI tool cards (Writing Assistant, Text Summariser, Grammar & Tone Improver,
+ *    Dedicated Email Helper, Code & Syntax Explainer, and AI Prompt Enhancer).
+ * 2. Dynamic step-by-step status messages & active logo pulse animation.
+ * 3. Strict visibility control hiding "Copy Output" & "Download PDF" during generation.
+ * 4. Glued-word fix & clean typography when exporting AI outputs via pdf-lib.
+ * 5. Micro-seeded unique responses & natural everyday/professional prose.
  */
 
 (function () {
   'use strict';
 
-  // 1. Ensure pdf-lib is available for clean PDF generation
+  // 1. Ensure pdf-lib is loaded for clean PDF exports
   const ensurePdfLib = () => {
     return new Promise((resolve, reject) => {
       if (window.PDFLib && window.PDFLib.PDFDocument) {
@@ -31,13 +33,12 @@
     });
   };
 
-  // 2. Inject CSS for Percentage Progress Button, Logo Animation & Action Bar
+  // 2. Inject CSS for Real-Time Proportional Progress Bar & Action Buttons
   const injectStyles = () => {
     if (document.getElementById('ai-progress-ext-styles')) return;
     const style = document.createElement('style');
     style.id = 'ai-progress-ext-styles';
     style.textContent = `
-      /* Sleek Percentage Loader Button */
       .ai-ext-btn-loading {
         position: relative !important;
         pointer-events: none !important;
@@ -46,7 +47,7 @@
         align-items: center !important;
         justify-content: center !important;
         gap: 10px !important;
-        transition: all 0.3s ease !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
         z-index: 1 !important;
       }
       .ai-ext-btn-progress-fill {
@@ -55,26 +56,28 @@
         left: 0 !important;
         bottom: 0 !important;
         width: 0%;
-        background: rgba(255, 255, 255, 0.22) !important;
-        transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        background: linear-gradient(90deg, rgba(255,255,255,0.18), rgba(255,255,255,0.34)) !important;
+        transition: width 0.08s linear !important;
         z-index: -1 !important;
         pointer-events: none !important;
       }
       .ai-ext-pct-badge {
-        background: rgba(0, 0, 0, 0.28) !important;
+        background: rgba(0, 0, 0, 0.32) !important;
         color: #ffffff !important;
-        padding: 2px 8px !important;
+        padding: 2px 9px !important;
         border-radius: 999px !important;
-        font-size: 0.8rem !important;
+        font-size: 0.82rem !important;
         font-weight: 700 !important;
         letter-spacing: 0.3px !important;
         font-variant-numeric: tabular-nums !important;
+        min-width: 46px !important;
+        text-align: center !important;
       }
 
-      /* Website Logo Animation inside Active Tool Card / Header */
+      /* Active Tool Card & Website Logo Pulse */
       @keyframes aiExtLogoPulseSpin {
         0% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 0px rgba(56, 189, 248, 0)); }
-        50% { transform: scale(1.14) rotate(8deg); filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.75)); }
+        50% { transform: scale(1.14) rotate(8deg); filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.8)); }
         100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 0px rgba(56, 189, 248, 0)); }
       }
       .ai-ext-logo-animating {
@@ -82,7 +85,7 @@
         transform-origin: center center !important;
       }
 
-      /* Bottom Action Bar - Strictly hidden during generation */
+      /* Strictly hide bottom actions while generating */
       .ai-ext-bottom-actions {
         display: flex !important;
         align-items: center !important;
@@ -116,7 +119,7 @@
       }
       .ai-ext-action-btn:hover {
         transform: translateY(-1px) !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
       }
       .ai-ext-btn-copy {
         background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
@@ -151,7 +154,6 @@
   const mutateRequestPayload = (payload) => {
     if (!payload || typeof payload !== 'object') return payload;
 
-    // OpenAI / Groq / DeepSeek chat messages format
     if (Array.isArray(payload.messages)) {
       for (let i = payload.messages.length - 1; i >= 0; i--) {
         if (payload.messages[i].role === 'user' && typeof payload.messages[i].content === 'string') {
@@ -161,7 +163,6 @@
       }
     }
 
-    // Gemini API contents format
     if (Array.isArray(payload.contents)) {
       const last = payload.contents[payload.contents.length - 1];
       if (last && Array.isArray(last.parts)) {
@@ -174,8 +175,7 @@
       }
     }
 
-    // Generic prompt fields
-    ['prompt', 'input', 'text', 'query', 'message'].forEach((key) => {
+    ['prompt', 'input', 'text', 'query', 'message', 'content', 'code'].forEach((key) => {
       if (typeof payload[key] === 'string') {
         payload[key] = buildEnhancedPrompt(payload[key]);
       }
@@ -184,7 +184,7 @@
     return payload;
   };
 
-  // 4. State Tracking & Network Interceptors
+  // 4. Network Request Interception & State Management
   let activeRequests = 0;
   let isGeneratingState = false;
   const activeButtons = new Map();
@@ -220,10 +220,10 @@
         const parsed = JSON.parse(init.body);
         init.body = JSON.stringify(mutateRequestPayload(parsed));
       } catch (e) {
-        // Non-JSON body
+        // Ignore non-JSON body
       }
     } else if (typeof url === 'string' && (url.includes('pollinations') || url.includes('prompt='))) {
-      const seed = `${Date.now().toString(36)}${Math.random().toString(36).substring(2, 5)}`;
+      const seed = `${Date.now().toString(36)}${Math.random().toString(36).substring(2, 6)}`;
       const sep = url.includes('?') ? '&' : '?';
       input = `${url}${sep}seed=${seed}`;
     }
@@ -251,7 +251,7 @@
     return originalXHRSend.call(this, body);
   };
 
-  // 5. Animate Website Logo inside Active Tool Card or Header
+  // 5. Logo Animation Controller
   const toggleLogoAnimation = (btn, shouldAnimate) => {
     const scope =
       (btn && btn.closest('.tool-card, .card, .workspace, .tool-workspace, .tool-container, section, main')) ||
@@ -283,21 +283,46 @@
     });
   };
 
-  // 6. Step-by-Step Percentage Loader (25%, 50%, 75%, 100%)
-  const progressSteps = [
-    { pct: 25, text: 'Generating speech...', icon: 'fa-solid fa-brain fa-beat-fade' },
-    { pct: 50, text: 'Adding tone...', icon: 'fa-solid fa-wand-magic-sparkles fa-beat-fade' },
-    { pct: 75, text: 'Checking...', icon: 'fa-solid fa-magnifying-glass-chart fa-beat-fade' },
-    { pct: 100, text: 'Giving final touch...', icon: 'fa-solid fa-circle-notch fa-spin' }
-  ];
+  // 6. True Proportional Real-Time Progress Engine (Smooth 1% -> 99% -> 100%)
+  const getStageForPercentage = (pct) => {
+    if (pct < 30) {
+      return { text: 'Generating speech...', icon: 'fa-solid fa-brain fa-beat-fade' };
+    }
+    if (pct < 60) {
+      return { text: 'Adding tone...', icon: 'fa-solid fa-wand-magic-sparkles fa-beat-fade' };
+    }
+    if (pct < 88) {
+      return { text: 'Checking...', icon: 'fa-solid fa-magnifying-glass-chart fa-beat-fade' };
+    }
+    return { text: 'Giving final touch...', icon: 'fa-solid fa-circle-notch fa-spin' };
+  };
 
-  const renderButtonStep = (btn, stepObj) => {
-    btn.innerHTML = `
-      <span class="ai-ext-btn-progress-fill" style="width: ${stepObj.pct}%;"></span>
-      <i class="${stepObj.icon}"></i>
-      <span>${stepObj.text}</span>
-      <span class="ai-ext-pct-badge">${stepObj.pct}%</span>
-    `;
+  const updateButtonDOM = (btn, pct) => {
+    const rounded = Math.min(100, Math.max(1, Math.floor(pct)));
+    const stage = getStageForPercentage(rounded);
+
+    let fillEl = btn.querySelector('.ai-ext-btn-progress-fill');
+    let iconEl = btn.querySelector('.ai-ext-stage-icon');
+    let textEl = btn.querySelector('.ai-ext-stage-text');
+    let badgeEl = btn.querySelector('.ai-ext-pct-badge');
+
+    if (!fillEl || !iconEl || !textEl || !badgeEl) {
+      btn.innerHTML = `
+        <span class="ai-ext-btn-progress-fill" style="width: ${rounded}%;"></span>
+        <i class="ai-ext-stage-icon ${stage.icon}"></i>
+        <span class="ai-ext-stage-text">${stage.text}</span>
+        <span class="ai-ext-pct-badge">${rounded}%</span>
+      `;
+    } else {
+      fillEl.style.width = `${rounded}%`;
+      if (iconEl.className !== `ai-ext-stage-icon ${stage.icon}`) {
+        iconEl.className = `ai-ext-stage-icon ${stage.icon}`;
+      }
+      if (textEl.textContent !== stage.text) {
+        textEl.textContent = stage.text;
+      }
+      badgeEl.textContent = `${rounded}%`;
+    }
   };
 
   const startButtonAnimation = (btn) => {
@@ -310,35 +335,47 @@
 
     const originalHTML = btn.innerHTML;
     const originalDisabled = btn.disabled;
-    let currentStep = 0;
 
     btn.classList.add('ai-ext-btn-loading');
     btn.disabled = true;
 
-    // Immediately show 25% ("Generating speech...")
-    renderButtonStep(btn, progressSteps[0]);
+    let currentPct = 1;
+    const startTime = performance.now();
+    updateButtonDOM(btn, currentPct);
 
-    // Advance through 50% and 75%, holding at 75% until completion triggers 100%
-    const intervalId = setInterval(() => {
-      if (currentStep < 2) {
-        currentStep++;
-        renderButtonStep(btn, progressSteps[currentStep]);
+    const state = {
+      originalHTML,
+      originalDisabled,
+      rafId: null,
+      fallbackTimer: null,
+      completing: false,
+      currentPct: 1
+    };
+
+    // Smooth real-time proportional curve: moves steadily early on and asymptotically approaches 99%
+    const tick = (now) => {
+      if (state.completing) return;
+      const elapsedSeconds = (now - startTime) / 1000;
+
+      // Asymptotic formula: 99 * (1 - e^(-t / 3.2)) gives natural continuous 1% increments
+      const targetPct = Math.min(99, 1 + 98 * (1 - Math.exp(-elapsedSeconds / 3.2)));
+      if (targetPct > state.currentPct) {
+        state.currentPct = targetPct;
+        updateButtonDOM(btn, state.currentPct);
       }
-    }, 1100);
+      state.rafId = requestAnimationFrame(tick);
+    };
 
-    // Fallback safety timer in case a tool runs purely client-side without fetch/XHR
-    const fallbackTimer = setTimeout(() => {
+    state.rafId = requestAnimationFrame(tick);
+
+    // Fallback safety timer in case a tool runs locally without network calls
+    state.fallbackTimer = setTimeout(() => {
       if (activeRequests === 0) {
         completeButtonAnimation(btn);
       }
     }, 10000);
 
-    activeButtons.set(btn, {
-      originalHTML,
-      originalDisabled,
-      intervalId,
-      fallbackTimer
-    });
+    activeButtons.set(btn, state);
   };
 
   const completeButtonAnimation = (btn) => {
@@ -346,25 +383,39 @@
     if (!state || state.completing) return;
     state.completing = true;
 
-    clearInterval(state.intervalId);
-    clearTimeout(state.fallbackTimer);
+    if (state.rafId) cancelAnimationFrame(state.rafId);
+    if (state.fallbackTimer) clearTimeout(state.fallbackTimer);
 
-    // Show 100% "Giving final touch..." briefly before revealing output actions
-    renderButtonStep(btn, progressSteps[3]);
+    // Smoothly ramp from currentPct to 100% over 260ms
+    const startPct = state.currentPct || 90;
+    const rampStart = performance.now();
+    const rampDuration = 260;
 
-    setTimeout(() => {
-      btn.classList.remove('ai-ext-btn-loading');
-      btn.innerHTML = state.originalHTML;
-      btn.disabled = state.originalDisabled;
-      toggleLogoAnimation(btn, false);
-      activeButtons.delete(btn);
+    const finishRamp = (now) => {
+      const progress = Math.min(1, (now - rampStart) / rampDuration);
+      const interpolated = startPct + (100 - startPct) * progress;
+      updateButtonDOM(btn, interpolated);
 
-      if (activeButtons.size === 0) {
-        setGeneratingFlag(false);
-        removeStrayCopyButtons();
-        enhanceAllResultBoxes();
+      if (progress < 1) {
+        requestAnimationFrame(finishRamp);
+      } else {
+        setTimeout(() => {
+          btn.classList.remove('ai-ext-btn-loading');
+          btn.innerHTML = state.originalHTML;
+          btn.disabled = state.originalDisabled;
+          toggleLogoAnimation(btn, false);
+          activeButtons.delete(btn);
+
+          if (activeButtons.size === 0) {
+            setGeneratingFlag(false);
+            removeStrayCopyButtons();
+            enhanceAllResultBoxes();
+          }
+        }, 220);
       }
-    }, 550);
+    };
+
+    requestAnimationFrame(finishRamp);
   };
 
   const completeAllButtonAnimations = () => {
@@ -398,15 +449,13 @@
     });
   };
 
-  // 8. Clean Text Extractor (Fixes Glued Words Bug like "Quickreminder Homeworkduethis")
+  // 8. Clean Spaced Text Extractor (Prevents Glued Words in PDF Export)
   const extractSpacedCleanText = (container) => {
     if (!container) return '';
     const clone = container.cloneNode(true);
 
-    // Remove our bottom action buttons from the cloned node
     clone.querySelectorAll('.ai-ext-bottom-actions, script, style').forEach((el) => el.remove());
 
-    // Insert explicit spaces/newlines around block and inline elements so textContent never glues words
     const blockTags = new Set([
       'P', 'DIV', 'LI', 'UL', 'OL', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
       'TR', 'BLOCKQUOTE', 'SECTION', 'ARTICLE', 'HEADER', 'FOOTER', 'PRE'
@@ -419,7 +468,6 @@
           node.replaceWith(document.createTextNode('\n'));
           return;
         }
-        // Add space after inline elements (spans, strong, em, a, td) so adjacent tags don't concatenate
         if (!blockTags.has(tag)) {
           node.insertAdjacentText('beforebegin', ' ');
           node.insertAdjacentText('afterend', ' ');
@@ -434,31 +482,25 @@
     Array.from(clone.childNodes).forEach(walk);
 
     let raw = clone.textContent || '';
-
-    // Normalize non-breaking spaces and tabs into standard ASCII spaces
     raw = raw.replace(/[\u00A0\u1680\u180E\u2000-\u200B\u202F\u205F\u3000\t]+/g, ' ');
-
-    // Fix camelCase / punctuation glued boundaries if the AI model omitted a space after punctuation
     raw = raw
       .replace(/([.!?:;])([A-Za-z])/g, '$1 $2')
       .replace(/([a-z])([A-Z])/g, '$1 $2');
 
-    // Collapse multiple spaces on the same line while preserving paragraph newlines
     const lines = raw
       .split(/\r?\n/)
       .map((line) => line.replace(/\s+/g, ' ').trim());
 
-    // Keep clean single blank lines between paragraphs
     return lines
       .join('\n')
       .replace(/\n{3,}/g, '\n\n')
       .trim();
   };
 
-  // 9. Fixed PDF Export via pdf-lib with Proper Word Spacing, Margins & Typography
+  // 9. Clean PDF Export via pdf-lib
   const downloadCleanPDF = async (cleanText) => {
     if (!cleanText) return;
-    const filename = `AI-Document-${Date.now().toString(36).toUpperCase()}.pdf`;
+    const filename = `AI-Output-${Date.now().toString(36).toUpperCase()}.pdf`;
 
     try {
       const PDFLib = await ensurePdfLib();
@@ -468,9 +510,9 @@
       const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
       const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-      const pageWidth = 595.28; // A4 width in pt
-      const pageHeight = 841.89; // A4 height in pt
-      const margin = 54; // Clean 0.75 inch margin on all sides
+      const pageWidth = 595.28;
+      const pageHeight = 841.89;
+      const margin = 54;
       const usableWidth = pageWidth - margin * 2;
       const fontSize = 11.5;
       const lineHeight = 18;
@@ -479,8 +521,7 @@
       let page = pdfDoc.addPage([pageWidth, pageHeight]);
       let cursorY = pageHeight - margin;
 
-      // Draw subtle document header on page 1
-      page.drawText('AI Generated Response', {
+      page.drawText('AI Generated Document', {
         x: margin,
         y: cursorY,
         size: 14,
@@ -496,7 +537,6 @@
       });
       cursorY -= 24;
 
-      // Normalize smart quotes/dashes to clean WinAnsi characters so pdf-lib never drops characters
       const normalizedText = cleanText
         .replace(/[\u2018\u2019]/g, "'")
         .replace(/[\u201C\u201D]/g, '"')
@@ -509,7 +549,6 @@
       for (const rawPara of paragraphs) {
         const para = rawPara.replace(/\s+/g, ' ').trim();
 
-        // Preserve blank lines as paragraph spacing
         if (!para) {
           cursorY -= lineHeight * 0.65;
           if (cursorY < margin + lineHeight) {
@@ -519,7 +558,6 @@
           continue;
         }
 
-        // Split into individual words and measure with explicit spaceWidth
         const words = para.split(' ').filter(Boolean);
         let lineWords = [];
         let currentLineWidth = 0;
@@ -559,11 +597,9 @@
           flushLine(lineWords);
         }
 
-        // Extra breathing room after each paragraph
         cursorY -= 6;
       }
 
-      // Add page numbers at the footer of every page
       const allPages = pdfDoc.getPages();
       allPages.forEach((p, idx) => {
         const footerText = `Page ${idx + 1} of${allPages.length}`;
@@ -613,7 +649,6 @@
   const enhanceResultBox = (box) => {
     if (!box) return;
 
-    // Strictly hide action buttons while generation is active
     if (isGeneratingState || activeButtons.size > 0 || activeRequests > 0) {
       const existingBar = box.querySelector('.ai-ext-bottom-actions');
       if (existingBar) existingBar.classList.add('ai-ext-hidden');
@@ -624,7 +659,9 @@
     const isPlaceholder =
       !cleanText ||
       cleanText.length < 12 ||
-      /^(generating|loading|thinking|please wait|adding tone|checking|giving final touch|your .* will appear)/i.test(cleanText);
+      /^(generating|loading|thinking|please wait|adding tone|checking|giving final touch|your .* will appear|output will appear)/i.test(
+        cleanText
+      );
 
     let actionBar = box.querySelector('.ai-ext-bottom-actions');
 
@@ -691,32 +728,92 @@
   const enhanceAllResultBoxes = () => {
     const boxes = document.querySelectorAll(
       '[id*="output" i], [id*="result" i], [id*="response" i], ' +
-      '[class*="output" i], [class*="result" i], [class*="response" i]'
+        '[class*="output" i], [class*="result" i], [class*="response" i]'
     );
     boxes.forEach((box) => {
       if (isResultContainer(box)) enhanceResultBox(box);
     });
   };
 
-  // 11. Detect Generate Button Clicks & Observe DOM
-  const isGenerateButton = (btn) => {
+  // 11. Universal AI Tool Generate Button Detection (Covers all 6 AI Tools)
+  const isUniversalAIGenerateButton = (btn) => {
     if (!btn || btn.classList.contains('ai-ext-action-btn')) return false;
+    // Ignore buttons inside the PDF editor studio
+    if (btn.closest('.nova-pdf-studio')) return false;
+
     const text = (btn.textContent || '').trim().toLowerCase();
     const id = (btn.id || '').toLowerCase();
     const cls = (typeof btn.className === 'string' ? btn.className : '').toLowerCase();
+    const onclick = (btn.getAttribute('onclick') || '').toLowerCase();
 
+    // Exclude navigation, close, reset, or clear buttons
+    if (/^(back|close|cancel|reset|clear|copy|download|upload|browse|choose)/i.test(text)) {
+      return false;
+    }
+
+    // Match explicit keywords across Writing Assistant, Text Summariser, Grammar & Tone Improver,
+    // Dedicated Email Helper, Code & Syntax Explainer, and AI Prompt Enhancer
     const triggerWords = [
-      'generate', 'create', 'write', 'summarize', 'paraphrase',
-      'analyze', 'solve', 'explain', 'humanize', 'enhance',
-      'translate', 'check', 'submit', 'run ai', 'ask ai'
+      'generate',
+      'write',
+      'assist',
+      'summar', // summarise / summarize
+      'grammar',
+      'tone',
+      'improve',
+      'email',
+      'draft',
+      'reply',
+      'compose',
+      'code',
+      'syntax',
+      'explain',
+      'debug',
+      'prompt',
+      'enhance',
+      'optimize',
+      'refine',
+      'paraphrase',
+      'rewrite',
+      'humanize',
+      'analyze',
+      'create',
+      'run ai',
+      'ask ai',
+      'submit',
+      'process',
+      'transform',
+      'convert',
+      'polished',
+      'check'
     ];
 
-    return (
+    const matchesKeyword =
       triggerWords.some((w) => text.includes(w)) ||
-      id.includes('generate') ||
+      triggerWords.some((w) => id.includes(w)) ||
+      triggerWords.some((w) => onclick.includes(w)) ||
       cls.includes('generate') ||
-      (btn.getAttribute('onclick') || '').toLowerCase().includes('generate')
+      cls.includes('ai-btn');
+
+    if (matchesKeyword) return true;
+
+    // Contextual check: Primary action button inside any card/workspace containing a textarea or AI tool heading
+    const container = btn.closest(
+      '.tool-card, .card, .workspace, .tool-workspace, .tool-container, .ai-tool, form, section'
     );
+    if (container) {
+      const hasPromptInput = container.querySelector('textarea, input[type="text"]');
+      const heading = container.querySelector('h1, h2, h3, h4, .card-title, .tool-title');
+      const headingText = heading ? heading.textContent.toLowerCase() : '';
+      const isKnownAITool =
+        /writing|summar|grammar|tone|email|code|syntax|prompt|ai\s/i.test(headingText);
+
+      if ((hasPromptInput || isKnownAITool) && (btn.type === 'submit' || btn.tagName === 'BUTTON')) {
+        return true;
+      }
+    }
+
+    return false;
   };
 
   const init = () => {
@@ -728,8 +825,8 @@
     document.addEventListener(
       'click',
       (e) => {
-        const btn = e.target.closest('button, a.btn, .btn, [role="button"]');
-        if (btn && isGenerateButton(btn)) {
+        const btn = e.target.closest('button, a.btn, .btn, [role="button"], input[type="submit"]');
+        if (btn && isUniversalAIGenerateButton(btn)) {
           startButtonAnimation(btn);
         }
       },
@@ -744,6 +841,24 @@
         removeStrayCopyButtons();
         if (!isGeneratingState && activeButtons.size === 0) {
           enhanceAllResultBoxes();
+        } else {
+          // If an output box just finished populating in the DOM while no network calls remain, finish smoothly
+          const populatedBoxes = document.querySelectorAll(
+            '[id*="output" i], [id*="result" i], [class*="output" i], [class*="result" i]'
+          );
+          populatedBoxes.forEach((box) => {
+            if (isResultContainer(box)) {
+              const txt = extractSpacedCleanText(box);
+              if (
+                txt.length > 25 &&
+                !/^(generating|loading|thinking|please wait)/i.test(txt) &&
+                activeRequests === 0 &&
+                activeButtons.size > 0
+              ) {
+                completeAllButtonAnimations();
+              }
+            }
+          });
         }
         break;
       }
