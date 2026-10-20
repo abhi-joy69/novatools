@@ -1,6 +1,7 @@
 /**
  * ai-progress-ext.js
- * Universal real-time proportional progress loader and strict button visibility control.
+ * Universal real-time proportional progress loader with aggressive DOM hiding/removal
+ * ensuring action buttons are physically absent during generation and only render after completion.
  */
 
 (function () {
@@ -72,10 +73,6 @@
         border-top: 1px solid rgba(150, 150, 150, 0.2) !important;
         width: 100% !important;
       }
-      body.ai-ext-is-generating .ai-ext-bottom-actions,
-      .ai-ext-bottom-actions.ai-ext-hidden {
-        display: none !important;
-      }
       .ai-ext-action-btn {
         display: inline-flex !important;
         align-items: center !important;
@@ -90,7 +87,6 @@
       }
       .ai-ext-btn-copy { background: #2563eb !important; }
       .ai-ext-btn-pdf { background: #059669 !important; }
-      .ai-ext-hidden-stray { display: none !important; }
     `;
     document.head.appendChild(style);
   };
@@ -99,11 +95,29 @@
   let isGenerating = false;
   const activeButtons = new Map();
 
+  // Aggressively remove all action buttons from the DOM during generation
+  const purgeAllActionButtons = () => {
+    document.querySelectorAll('.ai-ext-bottom-actions').forEach((el) => el.remove());
+    // Also remove any stray pre-existing copy/download buttons in output cards
+    const allBtns = document.querySelectorAll('button, a.btn, .btn');
+    allBtns.forEach((b) => {
+      const txt = (b.textContent || '').trim().toLowerCase();
+      if (
+        txt.includes('copy output') ||
+        txt.includes('download pdf') ||
+        txt.includes('export pdf') ||
+        (txt === 'copy' && b.closest('[id*="output" i], [id*="result" i]'))
+      ) {
+        b.remove();
+      }
+    });
+  };
+
   const setGeneratingState = (val) => {
     isGenerating = val;
     if (val) {
       document.body.classList.add('ai-ext-is-generating');
-      document.querySelectorAll('.ai-ext-bottom-actions').forEach((b) => b.classList.add('ai-ext-hidden'));
+      purgeAllActionButtons();
     } else {
       document.body.classList.remove('ai-ext-is-generating');
     }
@@ -290,6 +304,7 @@
       const text = extractCleanText(box);
       if (!text || text.length < 15 || /^(generating|loading|thinking)/i.test(text)) return;
 
+      // Ensure no duplicate action bars
       let bar = box.querySelector('.ai-ext-bottom-actions');
       if (!bar) {
         bar = document.createElement('div');
@@ -318,23 +333,27 @@
         bar.appendChild(copyBtn);
         bar.appendChild(pdfBtn);
         box.appendChild(bar);
-      } else {
-        bar.classList.remove('ai-ext-hidden');
       }
     });
   };
 
   const init = () => {
     injectStyles();
-    document.addEventListener('click', (e) => {
-      const btn = e.target.closest('button, a.btn, .btn, [role="button"]');
-      if (btn && isGenerateBtn(btn)) {
-        startAnimation(btn);
-      }
-    }, true);
+    document.addEventListener(
+      'click',
+      (e) => {
+        const btn = e.target.closest('button, a.btn, .btn, [role="button"]');
+        if (btn && isGenerateBtn(btn)) {
+          startAnimation(btn);
+        }
+      },
+      true
+    );
 
     const observer = new MutationObserver(() => {
-      if (!isGenerating && activeButtons.size === 0) {
+      if (isGenerating || activeButtons.size > 0) {
+        purgeAllActionButtons();
+      } else {
         enhanceResultBoxes();
       }
     });
